@@ -3,15 +3,20 @@
 ## Commit Message Structure
 - 기본적인 커밋 메시지 구조(각 파트는 빈줄로 구분)
 > 제목 (Type: Subject)
+> 
 > (한줄 띄어 분리)
+> 
 > 본문 (Body)
+> 
 > (한줄 띄어 분리)
+> 
 > 꼬리말 (Footer)
 
 ## Commit Type
 - 커밋의 타입 구성
 
 > 태그: 제목
+> 
 > :(space)제목 으로 :뒤에만 space를 넣는다.
 
 | Tag Name          | Description                                    |
@@ -42,7 +47,9 @@
 
 > ex)
 > Fixed --> Fix
+> 
 > Added --> Add
+> 
 > Modified --> Modify
 
 ## Body
@@ -61,6 +68,7 @@
   Ref: 참고할 이슈가 있을 때 사용
   Related to: 해당 커밋에 관련된 이슈번호 (아직 해결되지 않은 경우)
 > ex)
+> 
 > Fixes: #45 Related to: #34, #23
 
 ## Example
