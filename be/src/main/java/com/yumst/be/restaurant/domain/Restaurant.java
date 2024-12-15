@@ -27,7 +27,6 @@ public class Restaurant {
     @Embedded
     private OpenDataInformation openDataInformation;
 
-    // TODO: 테스트 정보로 모두 추가후 필요없는 정보는 삭제 *네이버 구글 attribute 이름 겹칠시 에러 주의*
     // https://developers.google.com/maps/documentation/places/web-service/data-fields?hl=en&_gl=1*k1h049*_up*MQ..*_ga*MTY3NDEyMzU2NC4xNzMxODMzNTEx*_ga_NRWSTWS78N*MTczMTgzMzUxMS4xLjEuMTczMTgzMzUzOC4wLjAuMA
     @Embedded
     private GoogleInformation googleInformation;
