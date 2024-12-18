@@ -3,8 +3,24 @@ plugins {
 	id 'org.springframework.boot' version '3.4.0'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id "org.sonarqube" version "6.0.1.5171"
+	id 'jacoco'
 }
 
+jacoco {
+	toolVersion = "0.8.11"  // 최신 버전 사용
+}
+
+test {
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = true
+		csv.required = false
+		html.required = true
+	}
+}
 
 sonar {
 	properties {
@@ -13,7 +29,7 @@ sonar {
 		property "sonar.host.url", "https://sonarcloud.io"
 
 		// 자코코 결과 리포트 주소
-		property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/index.xml'
+		property 'sonar.coverage.jacoco.xmlReportPaths', '/be/build/reports/jacoco/test/jacocoTestReport.xml'
 		property 'sonar.sources', 'src'
 		property 'sonar.language', 'java'
 		property 'sonar.sourceEncoding', 'UTF-8'
