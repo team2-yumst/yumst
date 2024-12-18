@@ -1,5 +1,6 @@
 package com.yumst.be.restaurant.domain;
 
+import com.yumst.be.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 
 
@@ -8,7 +9,7 @@ import static jakarta.persistence.GenerationType.*;
 
 @Entity
 @Table(name = "restaurant")
-public class Restaurant {
+public class Restaurant extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;
