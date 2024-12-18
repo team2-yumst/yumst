@@ -12,12 +12,14 @@ subprojects {
 
 	sonar {
 		properties {
-			property 'sonar.java.binaries', "${buildDir}/classes"
+			property 'sonar.java.binaries', "${layout.buildDirectory}/classes"
 			// jacoco-aggregation을 사용하지 않은 경우 각 프로젝트의 buildDir마다 따로 적용
-			property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco.xml"
+			property 'sonar.coverage.jacoco.xmlReportPaths', "${layout.buildDirectory}/reports/jacoco.xml"
 		}
 	}
 }
+
+
 
 sonar {
 	properties {
