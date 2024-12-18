@@ -3,22 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.4.0'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id "org.sonarqube" version "6.0.1.5171"
-	id 'jacoco'
 }
-
-
-subprojects {
-	apply plugin: 'org.sonarqube'
-
-	sonar {
-		properties {
-			property 'sonar.java.binaries', "${layout.buildDirectory}/classes"
-			// jacoco-aggregation을 사용하지 않은 경우 각 프로젝트의 buildDir마다 따로 적용
-			property 'sonar.coverage.jacoco.xmlReportPaths', "${layout.buildDirectory}/reports/jacoco.xml"
-		}
-	}
-}
-
 
 
 sonar {
@@ -26,13 +11,6 @@ sonar {
 		property "sonar.projectKey", "team2-yumst_yumst"
 		property "sonar.organization", "yumst-sonarcloud"
 		property "sonar.host.url", "https://sonarcloud.io"
-		property 'sonar.sources', 'src'
-		property 'sonar.language', 'java'
-		property 'sonar.sourceEncoding', 'UTF-8'
-		property "sonar.profile", "Sonar way"
-		property 'sonar.test.inclusions', '**/*Test.java'
-		property 'sonar.exclusions', '**/Q*.java, **/config/**'
-		property 'sonar.java.coveragePlugin', 'jacoco'
 	}
 }
 
