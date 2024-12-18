@@ -5,12 +5,32 @@ plugins {
 	id "org.sonarqube" version "6.0.1.5171"
 }
 
+subprojects {
+	apply plugin: 'org.sonarqube'
+
+	sonarqube {
+		properties {
+			// 각 프로젝트마다 적용해야하는부분.
+			property 'sonar.java.binaries', "${buildDir}/classes"
+			property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco.xml"
+		}
+	}
+}
+
 
 sonar {
 	properties {
 		property "sonar.projectKey", "team2-yumst_yumst"
 		property "sonar.organization", "yumst-sonarcloud"
 		property "sonar.host.url", "https://sonarcloud.io"
+
+		property 'sonar.sources', 'src'
+		property 'sonar.language', 'java'
+		property 'sonar.sourceEncoding', 'UTF-8'
+		property 'sonar.test.inclusions', '**/*Test.java'
+		property 'sonar.exclusions', '**/test/**, **/Q*.java, **/*Doc*.java, **/resources/** ,**/*Application*.java , **/*Config*.java,' +
+				'**/*Dto*.java, **/*Request*.java, **/*Response*.java ,**/*Exception*.java ,**/*ErrorCode*.java'
+		property 'sonar.java.coveragePlugin', 'jacoco'
 	}
 }
 
