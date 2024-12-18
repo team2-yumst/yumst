@@ -21,7 +21,6 @@ jobs:
         with:
           java-version: 21
           distribution: 'zulu' # Alternative distribution options are available
-
       - name: Grant execute permissions for Gradle wrapper
         run: chmod +x ./be/gradlew  # 실행 권한 추가
 
