@@ -18,8 +18,8 @@ jacocoTestReport {
 
 sonar {
 	properties {
-		property "sonar.projectKey", "Gothax_sonar-cloud-CI-test"
-		property "sonar.organization", "junhyungkim"
+		property "sonar.projectKey", "team2-yumst_yumst"
+		property "sonar.organization", "yumst-ci"
 		property "sonar.host.url", "https://sonarcloud.io"
 
 		// 자코코 결과 리포트 주소
