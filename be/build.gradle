@@ -2,6 +2,38 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.0'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id "org.sonarqube" version "6.0.1.5171"
+	id 'jacoco'
+}
+
+jacoco {
+	toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = true
+	}
+}
+
+sonar {
+	properties {
+		property "sonar.projectKey", "Gothax_sonar-cloud-CI-test"
+		property "sonar.organization", "junhyungkim"
+		property "sonar.host.url", "https://sonarcloud.io"
+
+		// 자코코 결과 리포트 주소
+		property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/index.xml'
+
+		property 'sonar.sources', 'src'
+		property 'sonar.language', 'java'
+		property 'sonar.sourceEncoding', 'UTF-8'
+		// 테스트 커버리지에서 제외할 클래스
+		property 'sonar.exclusions', '**/test/**, **/resources/**, **/*Application*.java, **/*Controller*.java, **/*Config.java' +
+				'**/*Response.java, **/*Exception.java, **/security/**, **/support/**, **/Q*.java'
+		property 'sonar.test.inclusions', '**/*Test.java'
+		property 'sonar.java.coveragePlugin', 'jacoco'
+	}
 }
 
 group = 'com.yumst'
