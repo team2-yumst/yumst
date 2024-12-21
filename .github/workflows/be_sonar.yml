@@ -8,6 +8,13 @@ on:
       - production
     paths:
       - 'be/**'
+  push:
+    branches:
+      - main
+      - develop
+      - production
+    paths:
+      - 'be/**'
 
 jobs:
   test:
