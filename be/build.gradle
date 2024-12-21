@@ -23,7 +23,6 @@ sonar {
 		property 'sonar.sources', 'src/main'
 		property 'sonar.language', 'java'
 		property 'sonar.sourceEncoding', 'UTF-8'
-		property 'sonar.java.binaries', 'build/classes'
 
 		// 테스트 커버리지에서 제외할 클래스
 		property 'sonar.exclusions', '**/test/**, **/resources/**, **/*Application*.java, **/*Controller*.java, **/*Config.java' +

@@ -35,6 +35,9 @@ jobs:
           java-version: 21
           distribution: 'zulu' # Alternative distribution options are available
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
@@ -49,10 +52,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build
 
-      - name: Build and analyze
+      - name: Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
