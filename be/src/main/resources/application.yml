@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    include: local
   datasource:
     url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE}
     username: ${POSTGRESQL_USERNAME}
