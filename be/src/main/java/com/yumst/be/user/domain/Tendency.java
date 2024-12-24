@@ -7,9 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum Tendency {
 
-    VERY_STABLE(0),
-    STABLE(1),
-    NORMAL(2),
+    VERY_STABLE(1),
+    STABLE(2),
     ADVENTUROUS(3),
     VERY_ADVENTUROUS(4);
 
