@@ -3,9 +3,8 @@ package com.yumst.be.restaurant.domain;
 import com.yumst.be.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 
-
-import static jakarta.persistence.FetchType.*;
-import static jakarta.persistence.GenerationType.*;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "restaurant")

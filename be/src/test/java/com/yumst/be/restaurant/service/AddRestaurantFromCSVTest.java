@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Arrays;
 
 @SpringBootTest
@@ -87,6 +84,48 @@ class AddRestaurantFromCSVTest {
                 System.out.println(o);
             }
         }
+    }
+
+    @Test
+    @DisplayName("일반음식점 컬럼")
+    void testTest() {
+        // given
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(CSV_D), "EUC-KR"))) {
+            String headerLine = br.readLine(); // 헤더 읽기
+            System.out.println(headerLine);
+
+            String ex = br.readLine();
+            System.out.println(ex);
+            // header와 함께 예시를 출력, 마지막에 index도 함게 출력
+            for (String s : headerLine.split(",")) {
+                System.out.println(s + " : " + ex.split(",")[Arrays.stream(headerLine.split(",")).toList().indexOf(s)]
+                                           + "  인덱스 : " + Arrays.stream(headerLine.split(",")).toList().indexOf(s));
+            }
+
+
+            int i = 0;
+            while (i < 10) {
+                String line = br.readLine();
+                String[] split = line.split(",");
+
+                if (split[8].equals("\"폐업\"")) {
+                    continue;
+                }
+
+                System.out.println(line);
+                i++;
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        // when
+
+        // then
+
     }
 
 
