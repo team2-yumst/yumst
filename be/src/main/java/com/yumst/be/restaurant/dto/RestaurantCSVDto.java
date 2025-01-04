@@ -5,8 +5,6 @@ import lombok.Data;
 @Data
 public class RestaurantCSVDto {
 
-    private String restaurantId; // yumst에서 사용하는 음식점식별번호
-
     // 공통 필드
     private String id; // 번호
     private String serviceName; // 개방서비스명

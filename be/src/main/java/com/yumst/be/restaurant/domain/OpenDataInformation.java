@@ -1,8 +1,10 @@
 package com.yumst.be.restaurant.domain;
 
 import jakarta.persistence.Embeddable;
+import lombok.Data;
 
 @Embeddable
+@Data
 public class OpenDataInformation {
 
     private String serviceName; // 개방서비스명

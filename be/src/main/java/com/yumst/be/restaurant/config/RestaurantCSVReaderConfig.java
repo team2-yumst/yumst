@@ -21,7 +21,7 @@ public class RestaurantCSVReaderConfig {
                 .encoding("EUC-KR")
                 .resource(new ClassPathResource("일반음식점.csv"))
 
-                //test
+                //test : 데이터베이스 생성시 제거
                 .maxItemCount(2000)
 
                 .lineMapper(getMapper())
