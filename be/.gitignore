@@ -5,6 +5,13 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+/src/main/resources/**.csv
+/src/main/resources/관광식당.csv
+/src/main/resources/관광유흥음식점업.csv
+/src/main/resources/외국인전용유흥음식점업.csv
+/src/main/resources/일반음식점.csv
+/src/main/resources/휴게음식점.csv
+
 ### STS ###
 .apt_generated
 .classpath

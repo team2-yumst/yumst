@@ -2,13 +2,18 @@ package com.yumst.be.restaurant.domain;
 
 import com.yumst.be.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+import java.util.UUID;
 
-import static jakarta.persistence.FetchType.*;
-import static jakarta.persistence.GenerationType.*;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Table(name = "restaurant")
+@NoArgsConstructor(access = PROTECTED)
 public class Restaurant extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)
@@ -32,4 +37,13 @@ public class Restaurant extends BaseTimeEntity {
     @Embedded
     private GoogleInformation googleInformation;
 
+    @Builder
+    public Restaurant(Category category, Address address, OpenDataInformation openDataInformation, GoogleInformation googleInformation) {
+        this.restaurantId = UUID.randomUUID().toString();
+
+        this.category = category;
+        this.address = address;
+        this.openDataInformation = openDataInformation;
+        this.googleInformation = googleInformation;
+    }
 }
