@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: local
+    include: local, jwt, oauth
 
   datasource:
     url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE}
@@ -9,11 +9,11 @@ spring:
 
   batch:
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -35,6 +35,8 @@ spring:
 logging.level:
   org.hibernate.SQL: debug
   org.springframework.batch: debug
+  org.springframework.security: debug
+  org.springframework.web: debug
 
 jwt:
   expiration: ${JWT_EXPIRATION}

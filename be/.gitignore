@@ -12,6 +12,9 @@ build/
 /src/main/resources/일반음식점.csv
 /src/main/resources/휴게음식점.csv
 
+/src/main/resources/application-oauth.yml
+/src/main/resources/application-jwt.yml
+
 ### STS ###
 .apt_generated
 .classpath
