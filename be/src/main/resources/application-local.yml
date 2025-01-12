@@ -5,3 +5,8 @@ POSTGRESQL_HOST: localhost
 POSTGRESQL_PORT: 5432
 POSTGRESQL_DATABASE: yumst
 
+# 연결정보 - 로컬
+BASE_URL: http://localhost:8080
+FRONT_URL: http://localhost:8080
+#FRONT_URL: http://localhost:3000
+
