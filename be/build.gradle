@@ -85,6 +85,8 @@ dependencies {
 	// production 환경에서 삭제
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
 	runtimeOnly 'com.h2database:h2'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
 }
 
 tasks.named('test') {
