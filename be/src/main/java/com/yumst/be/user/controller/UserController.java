@@ -7,10 +7,7 @@ import com.yumst.be.user.vo.ResponseUser;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -31,7 +28,35 @@ public class UserController {
         ResponseUser responseUser = modelMapper.map(registeredUser, ResponseUser.class);
 
         return ResponseEntity.status(OK).body(responseUser);
-
     }
+
+    @GetMapping("/v1/{userId}")
+    public ResponseEntity<ResponseUser> getUser (@PathVariable String userId) {
+
+        UserDto userDto = userService.getUser(userId);
+        ResponseUser responseUser = modelMapper.map(userDto, ResponseUser.class);
+
+        return ResponseEntity.status(OK).body(responseUser);
+    }
+
+
+    @DeleteMapping("/v1/{userId}")
+    public ResponseEntity<ResponseUser> deleteUser (@PathVariable String userId) {
+
+        UserDto userDto = userService.deleteUser(userId);
+        ResponseUser responseUser = modelMapper.map(userDto, ResponseUser.class);
+
+        return ResponseEntity.status(OK).body(responseUser);
+    }
+
+//    @PostMapping("/v1/scrap/{userId}/{restaurantId}")
+//    public ResponseEntity<ResponseScrap> scrap (@PathVariable String userId, @PathVariable String restaurantId) {
+//
+//        userService.scrap(userId, restaurantId);
+//
+//        return ResponseEntity.status(OK).body();
+//    }
+
+
 
 }

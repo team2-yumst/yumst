@@ -41,11 +41,16 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Column(nullable = false)
+    private boolean isDeleted;
+
     // OAuth 회원가입
     @Builder
     public UserEntity(String email, String name) {
         this.userId = UUID.randomUUID().toString();
         this.role = Role.USER;
+        this.isDeleted = false;
+
         this.name = name;
         this.email = email;
     }

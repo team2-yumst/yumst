@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum UserErrorCode implements ErrorCode {
 
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     SOCIAL_LOGIN_FAILED(HttpStatus.BAD_REQUEST, "소셜로그인에 실패했습니다."),
     SOCIAL_REGISTER_FAILED(HttpStatus.BAD_REQUEST, "소셜회원가입에 실패했습니다."),
     ILLEGAL_REGISTRATION_ID(HttpStatus.BAD_REQUEST, "허용되지 않는 소셜로그인입니다."),
