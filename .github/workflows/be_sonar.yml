@@ -50,6 +50,14 @@ jobs:
           java-version: 21
           distribution: 'zulu' # Alternative distribution options are available
       
+        # setup yml
+      - uses: actions/checkout@v4
+      - run: touch ./src/main/resources/application-jwt.yml
+      - run: echo "${{ secrets.APPLICATION_JWT }}" > ./src/main/resources/application-jwt.yml
+      - run: touch ./src/main/resources/application-oauth.yml
+      - run: echo "${{ secrets.APPLICATION_OAUTH }}" > ./src/main/resources/application-oauth.yml
+      
+      
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 

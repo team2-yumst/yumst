@@ -4,7 +4,7 @@ import com.yumst.be.global.exception.CustomException;
 
 public class AuthException extends CustomException {
 
-    public AuthException(AuthExceptionCode errorCode) {
+    public AuthException(UserErrorCode errorCode) {
         super(errorCode);
     }
 }

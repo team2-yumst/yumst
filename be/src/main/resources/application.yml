@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: local
+    include: local, jwt, oauth
 
   datasource:
     url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE}
@@ -9,11 +9,11 @@ spring:
 
   batch:
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -26,7 +26,7 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT}
             client-secret: ${GOOGLE_SECRET}
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: ${BASE_URL}/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope:
               - profile
@@ -35,7 +35,17 @@ spring:
 logging.level:
   org.hibernate.SQL: debug
   org.springframework.batch: debug
+  org.springframework.security: debug
+  org.springframework.web: debug
 
 jwt:
-  expiration: ${JWT_EXPIRATION}
+  expiration:
+    access: ${ACCESS_EXPIRATION}
+    refresh: ${REFRESH_EXPIRATION}
   secret: ${JWT_SECRET}
+
+etc:
+  base-url: ${BASE_URL}
+  front-url: ${FRONT_URL}
+  front-auth-success: ${FRONT_URL}/auth/success
+

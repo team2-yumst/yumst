@@ -14,8 +14,3 @@ spring:
         web-allow-others: true
       path: /h2-console
 
-
-#token:
-#  expiration-time: 86400000
-#  secret: sdflkjsdafjlkdsfalfewnelkncvixojliasejlsajfjfsefklafdjdsfkjsdfajkdfljfsdasdjnekejwmxwef12ccdisioioi353wwweeedxsllwefnewndon64332nsdjnlnasnl
-

@@ -1,6 +1,9 @@
 package com.yumst.be.global.exception;
 
-public class CustomException extends RuntimeException {
+import lombok.Getter;
+
+@Getter
+public abstract class CustomException extends RuntimeException {
 
     private final ErrorCode errorCode;
     private final String message;

@@ -5,15 +5,8 @@ POSTGRESQL_HOST: localhost
 POSTGRESQL_PORT: 5432
 POSTGRESQL_DATABASE: yumst
 
-# JWT
-JWT_EXPIRATION: 432_000_000
-JWT_SECRET: "werqwqrwereq secret- 보안에 종요"
+# 연결정보 - 로컬
+BASE_URL: http://localhost:8080
+FRONT_URL: http://localhost:8080
+#FRONT_URL: http://localhost:3000
 
-
-# OAuth2
-# Google
-GOOGLE_CLIENT: "자신의 클라이언트 id"
-GOOGLE_SECRET: "클라이언트 secret"
-
-
-# Apple
