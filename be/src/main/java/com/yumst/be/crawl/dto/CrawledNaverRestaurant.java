@@ -11,15 +11,15 @@ public class CrawledNaverRestaurant {
     private String category;
     private String latitude;
     private String longitude;
-    private String monday_hours;
-    private String tuesday_hours;
-    private String wednesday_hours;
-    private String thursday_hours;
-    private String friday_hours;
-    private String saturday_hours;
-    private String sunday_hours;
-    private String phone_number;
-    private String thumbnail_url;
+    private String mondayHours;
+    private String tuesdayHours;
+    private String wednesdayHours;
+    private String thursdayHours;
+    private String fridayHours;
+    private String saturdayHours;
+    private String sundayHours;
+    private String phoneNumber;
+    private String thumbnailUrl;
     private String feature1;
     private String feature2;
     private String feature3;
@@ -30,8 +30,8 @@ public class CrawledNaverRestaurant {
     private String feature8;
     private String feature9;
     private String feature10;
-    private String visitor_reviews;
-    private String blog_reviews;
+    private String visitorReviewCount;
+    private String blogReviewCount;
     private String rating;
 
 
