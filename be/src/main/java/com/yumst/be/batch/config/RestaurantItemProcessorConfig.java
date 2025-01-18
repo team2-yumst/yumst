@@ -1,9 +1,9 @@
-package com.yumst.be.restaurant.config;
+package com.yumst.be.batch.config;
 
 
-import com.yumst.be.restaurant.domain.OpenDataInformation;
+import com.yumst.be.restaurant.domain.embed.OpenDataInformation;
 import com.yumst.be.restaurant.domain.Restaurant;
-import com.yumst.be.restaurant.dto.RestaurantCSVDto;
+import com.yumst.be.batch.dto.RestaurantCSVDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.batch.item.ItemProcessor;

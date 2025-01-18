@@ -37,6 +37,7 @@ logging.level:
   org.springframework.batch: debug
   org.springframework.security: debug
   org.springframework.web: debug
+  com.yumst.be.crawl: debug
 
 jwt:
   expiration:
@@ -49,3 +50,6 @@ etc:
   front-url: ${FRONT_URL}
   front-auth-success: ${FRONT_URL}/auth/success
 
+chrome:
+  driver:
+    path: "/Users/leo/chromedriver-mac-arm64/chromedriver"

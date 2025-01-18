@@ -1,6 +1,6 @@
-package com.yumst.be.restaurant.config;
+package com.yumst.be.batch.config;
 
-import com.yumst.be.restaurant.dto.RestaurantCSVDto;
+import com.yumst.be.batch.dto.RestaurantCSVDto;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;

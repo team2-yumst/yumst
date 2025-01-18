@@ -1,4 +1,4 @@
-package com.yumst.be.restaurant.dto;
+package com.yumst.be.batch.dto;
 
 import lombok.Data;
 

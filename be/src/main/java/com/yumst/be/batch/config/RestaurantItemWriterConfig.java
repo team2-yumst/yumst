@@ -1,4 +1,4 @@
-package com.yumst.be.restaurant.config;
+package com.yumst.be.batch.config;
 
 import com.yumst.be.restaurant.domain.Restaurant;
 import jakarta.persistence.EntityManagerFactory;
