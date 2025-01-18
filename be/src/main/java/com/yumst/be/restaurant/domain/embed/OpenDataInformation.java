@@ -1,4 +1,4 @@
-package com.yumst.be.restaurant.domain;
+package com.yumst.be.restaurant.domain.embed;
 
 import jakarta.persistence.Embeddable;
 import lombok.Data;
