@@ -24,9 +24,6 @@ public class Restaurant extends BaseTimeEntity {
     @Column(unique = true, nullable = false)
     private String restaurantId;
 
-    @Column(nullable = false)
-    private String name;
-
     @Embedded
     private Address address;
 
@@ -37,11 +34,10 @@ public class Restaurant extends BaseTimeEntity {
     private NaverInformation naverInformation;
 
     @Builder
-    public Restaurant(Address address, String name, OpenDataInformation openDataInformation, NaverInformation naverInformation) {
+    public Restaurant(Address address, OpenDataInformation openDataInformation, NaverInformation naverInformation) {
         this.restaurantId = UUID.randomUUID().toString();
 
         this.address = address;
-        this.name = name;
         this.openDataInformation = openDataInformation;
         this.naverInformation = naverInformation;
     }
