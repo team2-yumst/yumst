@@ -6,7 +6,6 @@ import com.yumst.be.restaurant.domain.embed.NaverInformation;
 import com.yumst.be.restaurant.domain.embed.OpenDataInformation;
 import jakarta.persistence.*;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
@@ -17,11 +16,9 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Table(name = "restaurant")
 @NoArgsConstructor(access = PROTECTED)
-@Getter
 public class Restaurant extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -42,6 +39,7 @@ public class Restaurant extends BaseTimeEntity {
     @Builder
     public Restaurant(Address address, String name, OpenDataInformation openDataInformation, NaverInformation naverInformation) {
         this.restaurantId = UUID.randomUUID().toString();
+
         this.address = address;
         this.name = name;
         this.openDataInformation = openDataInformation;
