@@ -1,6 +1,6 @@
 package com.yumst.be.crawl.service;
 
-import com.yumst.be.restaurant.repository.RestaurantRepository;
+import com.yumst.be.crawl.dto.CrawledNaverRestaurant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,11 +33,11 @@ public class SeleniumService {
     public static final String SEARCH_BOX_TAG = "div.input_box>input.input_search";
     // 검색 결과 frame 이름
     public static final String SEARCH_IFRAME = "iframe#searchIframe";
+    public static final String ENTRY_IFRAME = "iframe#entryIframe";
     // 검색 결과에서 링크 a tag
     public static final String HREF_A_TAG = "a.P7gyV";
+    public static final String HREF_A_TAG2 = "a.tzwk0";
 
-
-    private final RestaurantRepository restaurantRepository;
 
     @Value("${chrome.driver.path}")
     private String chromeDriverPath;
@@ -42,10 +45,9 @@ public class SeleniumService {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    public void crawl(String keyword, String location) {
+    public CrawledNaverRestaurant crawl(String keyword, String location) {
 
         try {
-
             initDriver();
             search(keyword, location);
             switchIFrameAndClickRestaurant();
@@ -54,25 +56,49 @@ public class SeleniumService {
             validateCorrect();
 
             // 정보 추출
-            NameAndCategory();
-            OpenHour();
-            Location();
-            PhoneNumber();
-            ThumbNail();
-            ReviewAndRating();
+            String name = name();
+            String category = category();
+            Map<String, String> openHours = OpenHour();
+            List<String> latitudeLongtitude = location();
+            String phoneNumber = phoneNumber();
+            String thumbNail = thumbNail();
+            List<String> starsVisitorReviewCountBlogReviewCount = reviewAndRating();
 
             // 메뉴 상세
 
             // 리뷰 상세
             clickReviewTab();
-            ReviewDetail();
+            Map<String, String> featureAndCount = ReviewDetail();
+
+            CrawledNaverRestaurant crawlResult = CrawledNaverRestaurant.builder()
+                    .name(name)
+                    .category(category)
+                    .latitude(latitudeLongtitude.get(0))
+                    .longitude(latitudeLongtitude.get(1))
+                    .phoneNumber(phoneNumber)
+                    .thumbnailUrl(thumbNail)
+                    .mondayHours(openHours.get("월"))
+                    .tuesdayHours(openHours.get("화"))
+                    .wednesdayHours(openHours.get("수"))
+                    .thursdayHours(openHours.get("목"))
+                    .fridayHours(openHours.get("금"))
+                    .saturdayHours(openHours.get("토"))
+                    .sundayHours(openHours.get("일"))
+                    .rating(starsVisitorReviewCountBlogReviewCount.get(0))
+                    .visitorReviewCount(starsVisitorReviewCountBlogReviewCount.get(1))
+                    .blogReviewCount(starsVisitorReviewCountBlogReviewCount.get(2))
+                    .reviewFeatureMap(featureAndCount)
+                    .build();
+
 
             log.debug("검색 완료");
+            return crawlResult;
 
         } catch (Exception e) {
             log.error("error", e);
+            return null;
         } finally {
-//            driver.quit();
+            driver.quit();
         }
     }
 
@@ -91,10 +117,12 @@ public class SeleniumService {
         // 더보기 클릭
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.dP0sq"))).click();
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.dP0sq"))).click();
-        driver.findElement(By.cssSelector("a.dP0sq")).click();
     }
 
-    private void ReviewDetail() {
+    private Map<String, String> ReviewDetail() {
+
+        Map<String, String> reviewDetail = new HashMap<>();
+
         List<WebElement> features = driver.findElements(By.cssSelector("span.t3JSf"));
         List<WebElement> featureCounts = driver.findElements(By.cssSelector("span.CUoLy"));
 
@@ -107,12 +135,20 @@ public class SeleniumService {
 
             String count = featureCounts.get(i).getText().split("\n")[1];
             log.debug("리뷰 특징: {}, 개수: {}", feature, count);
+            reviewDetail.put(feature, count);
         }
+        return reviewDetail;
     }
 
-    private void ReviewAndRating() {
+    private List<String> reviewAndRating() {
+
+        List<String> result = new ArrayList<>();
 
         List<WebElement> reviews = driver.findElements(By.cssSelector(".dAsGb > span"));
+
+        if (reviews.size() == 2) {
+            result.add(null);
+        }
 
         for (WebElement review : reviews) {
             String text = review.getText();
@@ -120,39 +156,52 @@ public class SeleniumService {
             if (text.startsWith("별점")) {
                 String rating = text.split("\n")[1];
                 log.debug("별점: {}", rating);
+                result.add(rating);
             }
 
             if (text.startsWith("방문자")) {
                 String reviewCount = text.split(" ")[2];
                 log.debug("방문자 리뷰: {}", reviewCount);
+                result.add(reviewCount);
             }
 
             if (text.startsWith("블로그")) {
                 String reviewCount = text.split(" ")[2];
                 log.debug("블로그 리뷰: {}", reviewCount);
+                result.add(reviewCount);
             }
         }
+        return result;
     }
 
-    private void ThumbNail() {
+    private String thumbNail() {
         String thumbnailUrl = driver.findElement(By.cssSelector("div.CEX4u > div.fNygA > a.place_thumb > img")).getAttribute("src");
         log.debug("thumbnail url: {}", thumbnailUrl);
+        return thumbnailUrl;
     }
 
-    private void PhoneNumber() {
+    private String phoneNumber() {
         String phoneNumber = driver.findElement(By.cssSelector("div.vV_z_ > span.xlx7Q")).getText();
         log.debug("phone number: {}", phoneNumber);
+        return phoneNumber;
     }
 
 
-    private void NameAndCategory() {
+    private String name() {
         String name = driver.findElement(By.xpath("/html/body/div[3]/div/div/div/div[2]/div[1]/div[1]/div/span[1]")).getText();
+
+        log.debug("이름: {}", name);
+        return name;
+    }
+
+    private String category() {
         String category = driver.findElement(By.xpath("/html/body/div[3]/div/div/div/div[2]/div[1]/div[1]/div/span[2]")).getText();
 
-        log.debug("이름: {}, 카테고리: {}", name, category);
+        log.debug("카테고리: {}", category);
+        return category;
     }
 
-    private void Location() {
+    private List<String> location() {
         WebElement scriptElement = driver.findElement(By.xpath("/html/body/script[6]"));
         String script = scriptElement.getAttribute("innerHTML");
 
@@ -163,12 +212,17 @@ public class SeleniumService {
             String longitude = matcher.group(1);
             String latitude = matcher.group(2);
             log.debug("위도: {}, 경도: {}", latitude, longitude);
+
+            return List.of(latitude, longitude);
         } else {
             log.debug("좌표를 찾을 수 없습니다.");
+            return null;
         }
     }
 
-    private void OpenHour() {
+    private Map<String, String> OpenHour() {
+
+        Map<String, String> openHours = new HashMap<>();
 
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.gKP9i.RMgN0"))).click();
 
@@ -177,6 +231,14 @@ public class SeleniumService {
         if (elements.size() == 1) {
             String text = elements.getFirst().getText();
             log.debug("영업시간: {}", text);
+
+            openHours.put("월", text);
+            openHours.put("화", text);
+            openHours.put("수", text);
+            openHours.put("목", text);
+            openHours.put("금", text);
+            openHours.put("토", text);
+            openHours.put("일", text);
         }
 
         if (elements.size() == 7) {
@@ -185,9 +247,13 @@ public class SeleniumService {
                 String day = days.get(i).getText();
                 String hour = elements.get(i).getText();
                 log.debug("요일: {}, 시간: {}", day, hour);
+
+                openHours.put(day, hour);
             }
+
         }
 
+        return openHours;
     }
 
     private void validateCorrect() {
@@ -196,9 +262,20 @@ public class SeleniumService {
 
     private void switchIFrameAndClickRestaurant() throws InterruptedException {
 
+        if (!driver.findElements(By.cssSelector(ENTRY_IFRAME)).isEmpty()) {
+            driver.switchTo().defaultContent();
+            driver.switchTo().frame(driver.findElement(By.cssSelector("iframe#entryIframe")));
+            return;
+        }
+
         driver.switchTo().frame(driver.findElement(By.cssSelector(SEARCH_IFRAME)));
 
+
         List<WebElement> elements = driver.findElements(By.cssSelector(HREF_A_TAG));
+        if (elements.isEmpty()) {
+            elements = driver.findElements(By.cssSelector(HREF_A_TAG2));
+        }
+
         log.debug("elements size: {}", elements.size());
 
         WebElement first = elements.getFirst();
@@ -229,9 +306,9 @@ public class SeleniumService {
         driver.get(BASE_URL);
         driver.manage().window().maximize();
 
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait = new WebDriverWait(driver, Duration.ofSeconds(3));
 
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
     }
 
 

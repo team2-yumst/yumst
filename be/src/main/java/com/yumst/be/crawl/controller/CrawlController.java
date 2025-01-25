@@ -13,6 +13,7 @@ public class CrawlController {
 
     @GetMapping("/crawl")
     public String crawl() {
+        seleniumService.crawl("후라토 식당 ", "서울");
         seleniumService.crawl("하카타분코", "서울");
 
         return "crawl";

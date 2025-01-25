@@ -1,6 +1,10 @@
-package com.yumst.be.batch.config;
+package com.yumst.be.batch.config.item;
 
 import com.yumst.be.batch.dto.RestaurantCSVDto;
+import com.yumst.be.restaurant.domain.Restaurant;
+import jakarta.persistence.EntityManagerFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -11,8 +15,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
+import java.util.Map;
+
 @Configuration
-public class RestaurantCSVReaderConfig {
+@RequiredArgsConstructor
+public class RestaurantReaderConfig {
+
+    private final EntityManagerFactory entityManagerFactory;
 
     @Bean
     public FlatFileItemReader<RestaurantCSVDto> csvReader() {
@@ -21,13 +30,56 @@ public class RestaurantCSVReaderConfig {
                 .encoding("EUC-KR")
                 .resource(new ClassPathResource("일반음식점.csv"))
 
-                //test : 데이터베이스 생성시 제거
-                .maxItemCount(2000)
+                .lineMapper(getMapper())
+                .linesToSkip(1)
+                .build();
+    }
+
+    @Bean
+    public FlatFileItemReader<RestaurantCSVDto> csvReader2() {
+        return new FlatFileItemReaderBuilder<RestaurantCSVDto>()
+                .name("restaurantCSVReader")
+                .encoding("EUC-KR")
+                .resource(new ClassPathResource("휴게음식점.csv"))
 
                 .lineMapper(getMapper())
                 .linesToSkip(1)
                 .build();
     }
+
+    // 현재는 서울만 읽는 reader
+    @Bean
+    public JpaPagingItemReader<Restaurant> dbRestaurantReader() {
+
+        JpaPagingItemReader<Restaurant> reader = new JpaPagingItemReader<>();
+        reader.setEntityManagerFactory(entityManagerFactory);
+        reader.setPageSize(5);
+
+        reader.setMaxItemCount(10);
+
+
+        reader.setQueryString("SELECT r FROM Restaurant r " +
+                                      "WHERE r.openDataInformation.fullAddress LIKE :address AND r.crawlComplete = false");
+        reader.setParameterValues(Map.of("address", "%서울%"));
+
+        return reader;
+    }
+
+
+    // 전국 데이터를 읽는 reader : 나중에 사용
+    @Bean
+    public JpaPagingItemReader<Restaurant> dbRestaurantReaderEntireData() {
+        JpaPagingItemReader<Restaurant> reader = new JpaPagingItemReader<>();
+        reader.setEntityManagerFactory(entityManagerFactory);
+        reader.setPageSize(10);
+
+        reader.setQueryString("SELECT r FROM Restaurant r " +
+                             "WHERE r.crawlComplete = false");
+
+        return reader;
+    }
+
+
 
     private LineMapper<RestaurantCSVDto> getMapper() {
         DelimitedLineTokenizer tokenizer = getLineTokenizer();
