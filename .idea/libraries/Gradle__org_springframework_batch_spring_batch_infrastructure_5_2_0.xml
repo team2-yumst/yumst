@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: org.springframework.batch:spring-batch-infrastructure:5.2.0" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="org.springframework.batch" artifactId="spring-batch-infrastructure" version="5.2.0" baseVersion="5.2.0" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.batch/spring-batch-infrastructure/5.2.0/a384d18caa0ae81473d5456bf744c2fdc77d900/spring-batch-infrastructure-5.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
