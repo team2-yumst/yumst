@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.ItemWriteListener;
 import org.springframework.batch.item.Chunk;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 @Component
 @RequiredArgsConstructor
@@ -15,6 +18,7 @@ public class RestaurantWriteListener implements ItemWriteListener<Restaurant> {
     private final FailedRecordRepository failedRecordRepository;
 
 
+    @Transactional(propagation = REQUIRES_NEW)
     @Override
     public void onWriteError(Exception exception, Chunk<? extends Restaurant> items) {
 

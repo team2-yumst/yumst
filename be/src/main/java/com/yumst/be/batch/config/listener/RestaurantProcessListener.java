@@ -6,6 +6,9 @@ import com.yumst.be.restaurant.domain.Restaurant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 @Component
 @RequiredArgsConstructor
@@ -14,6 +17,7 @@ public class RestaurantProcessListener implements ItemProcessListener<Restaurant
     private final FailedRecordRepository failedRecordRepository;
 
 
+    @Transactional(propagation = REQUIRES_NEW)
     @Override
     public void onProcessError(Restaurant item, Exception e) {
 
