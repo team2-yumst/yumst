@@ -1,8 +1,47 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 
 class GoogleLoginButton extends StatelessWidget {
   const GoogleLoginButton({super.key});
+
+  void signinWithGoogle() async {
+
+
+    try {
+      final GoogleSignInAccount? user = await GoogleSignIn().signIn();
+
+      if (user == null) {
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await user.authentication;
+
+      final response = await http.post(
+        Uri.parse('http://localhost:8080/api/user/v1/login/google'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'accessToken' : googleAuth.accessToken,
+          'idToken' : googleAuth.idToken,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+
+
+      } else {
+      }
+    } catch (e) {
+      print(e);
+    }
+
+
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +56,7 @@ class GoogleLoginButton extends StatelessWidget {
         return Center(
           child: InkWell(
             onTap: () async {
-              final GoogleSignInAccount? user = await GoogleSignIn().signIn();
-              if (user != null) {
-                print(user.displayName);
-                print(user.email);
-                print(user.photoUrl);
-              }
+              signinWithGoogle();
             },
             child: Container(
               width: buttonWidth,
