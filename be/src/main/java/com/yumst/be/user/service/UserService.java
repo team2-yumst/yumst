@@ -10,7 +10,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.yumst.be.user.exception.UserErrorCode.SOCIAL_REGISTER_FAILED;
 import static com.yumst.be.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 @Service
@@ -22,19 +21,6 @@ public class UserService {
     private final ModelMapper modelMapper;
     private final UserRestaurantScrapRepository userRestaurantScrapRepository;
 
-    // OAuth 회원가입만 허용, 이미 추가된 회원을 대상으로 추가 정보를 물어보고 추가함
-    @Transactional
-    public UserDto register(UserDto user) {
-
-        UserEntity findUser = userRepository.findByEmail(user.getEmail())
-                                            .orElseThrow(() -> new AuthException(SOCIAL_REGISTER_FAILED));
-
-        UserEntity updated = findUser.updateRegister(user.getGender(),
-                                                        user.getAgeRange(),
-                                                        user.getTendency());
-
-        return modelMapper.map(updated, UserDto.class);
-    }
 
     public UserDto getUser(String userId) {
         UserEntity user = userRepository.findByUserId(userId)
