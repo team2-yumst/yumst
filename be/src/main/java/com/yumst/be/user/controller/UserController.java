@@ -1,36 +1,48 @@
 package com.yumst.be.user.controller;
 
+import com.yumst.be.user.domain.UserEntity;
 import com.yumst.be.user.dto.UserDto;
+import com.yumst.be.user.jwt.JwtProvider;
+import com.yumst.be.user.service.OAuthClient;
 import com.yumst.be.user.service.UserService;
-import com.yumst.be.user.vo.RequestUser;
-import com.yumst.be.user.vo.ResponseUser;
+import com.yumst.be.user.vo.request.RequestToken;
+import com.yumst.be.user.vo.response.ResponseToken;
+import com.yumst.be.user.vo.response.ResponseUser;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
+@RequestMapping("/api/user/v1")
 public class UserController {
 
     private final ModelMapper modelMapper;
     private final UserService userService;
+    private final OAuthClient oAuthClient;
+    private final JwtProvider jwtProvider;
 
-    @PostMapping("/v1")
-    public ResponseEntity<ResponseUser> register (@RequestBody RequestUser user) {
+    @PostMapping("/login/google")
+    public ResponseEntity<ResponseToken> googleLogin (@RequestBody RequestToken requestToken) {
 
-        UserDto userDto = modelMapper.map(user, UserDto.class);
+        UserEntity user = oAuthClient.loadUserByAccess(requestToken.getAccessToken());
+        UsernamePasswordAuthenticationToken authentication = oAuthClient.getAuthentication(user.getName());
 
-        UserDto registeredUser = userService.register(userDto);
-        ResponseUser responseUser = modelMapper.map(registeredUser, ResponseUser.class);
+        String accessToken = jwtProvider.generateAccessToken(authentication);
+        String refreshToken = jwtProvider.generateRefreshToken(authentication);
 
-        return ResponseEntity.status(OK).body(responseUser);
+        ResponseToken responseToken = new ResponseToken(accessToken, refreshToken);
+
+        return ResponseEntity.status(OK).body(responseToken);
     }
 
-    @GetMapping("/v1/{userId}")
+
+
+    @GetMapping("/{userId}")
     public ResponseEntity<ResponseUser> getUser (@PathVariable String userId) {
 
         UserDto userDto = userService.getUser(userId);
@@ -40,7 +52,7 @@ public class UserController {
     }
 
 
-    @DeleteMapping("/v1/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<ResponseUser> deleteUser (@PathVariable String userId) {
 
         UserDto userDto = userService.deleteUser(userId);
