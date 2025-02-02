@@ -1,4 +1,4 @@
-package com.yumst.be.user.vo;
+package com.yumst.be.user.vo.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.yumst.be.restaurant.domain.Restaurant;

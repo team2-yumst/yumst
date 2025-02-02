@@ -30,12 +30,8 @@ public class UserEntity extends BaseTimeEntity {
     @Column(unique = true, nullable = false, length = 50)
     private String email;
 
-    @Enumerated(STRING)
-    private Gender gender;
-    @Enumerated(STRING)
-    private AgeRange ageRange;
-    @Enumerated(STRING)
-    private Tendency tendency;
+    @Column(length = 1024)
+    private String imageUrl;
 
     @Enumerated(STRING)
     @Column(nullable = false)
@@ -46,21 +42,16 @@ public class UserEntity extends BaseTimeEntity {
 
     // OAuth 회원가입
     @Builder
-    public UserEntity(String email, String name) {
+    public UserEntity(String email, String name, String imageUrl) {
         this.userId = UUID.randomUUID().toString();
         this.role = Role.USER;
         this.isDeleted = false;
 
         this.name = name;
         this.email = email;
+        this.imageUrl = imageUrl;
     }
 
-    // 회원가입 추가로직
-    public UserEntity updateRegister(Gender gender, AgeRange ageRange, Tendency tendency) {
-        this.gender = gender;
-        this.ageRange = ageRange;
-        this.tendency = tendency;
-        return this;
-    }
+
 
 }

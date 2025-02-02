@@ -47,7 +47,7 @@ public class OAuth2UserInfo {
         return UserEntity.builder()
                 .name(name)
                 .email(email)
-//                .imageUrl(imageUrl)
+                .imageUrl(imageUrl)
                 .build();
     }
 }

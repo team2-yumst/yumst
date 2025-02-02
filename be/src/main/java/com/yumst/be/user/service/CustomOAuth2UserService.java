@@ -30,8 +30,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfo.of(registrationId, attributes);
         UserEntity userEntity = getOrSave(oAuth2UserInfo);
 
-        log.info("load userId: {}", userEntity.getUserId());
-
         return new PrincipalUserDetails(userEntity, attributes);
     }
 
