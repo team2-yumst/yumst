@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 class GoogleLoginButton extends StatelessWidget {
   const GoogleLoginButton({super.key});
 
-  void signinWithGoogle() async {
+  void signInWithGoogle() async {
 
 
     try {
@@ -34,6 +34,7 @@ class GoogleLoginButton extends StatelessWidget {
 
 
       } else {
+
       }
     } catch (e) {
       print(e);
@@ -56,7 +57,7 @@ class GoogleLoginButton extends StatelessWidget {
         return Center(
           child: InkWell(
             onTap: () async {
-              signinWithGoogle();
+              signInWithGoogle();
             },
             child: Container(
               width: buttonWidth,
