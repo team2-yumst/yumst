@@ -1,8 +1,11 @@
 package com.yumst.be.restaurant.domain.embed;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.Data;
 
 @Embeddable
+@Data
 public class NaverInformation {
 
     private String name;
@@ -21,6 +24,7 @@ public class NaverInformation {
 
     private String phoneNumber;
 
+    @Column(length = 1024)
     private String thumbnailUrl;
 
     private long visitorReviewCount;

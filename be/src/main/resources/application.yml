@@ -8,8 +8,10 @@ spring:
     password: ${POSTGRESQL_PASSWORD}
 
   batch:
+    job:
+      enabled: false
     jdbc:
-      initialize-schema: never
+      initialize-schema: always
 
   jpa:
     hibernate:
@@ -34,10 +36,10 @@ spring:
 
 logging.level:
   org.hibernate.SQL: debug
-  org.springframework.batch: debug
-  org.springframework.security: debug
-  org.springframework.web: debug
-  com.yumst.be.crawl: debug
+#  org.springframework.batch: debug
+  #  org.springframework.security: debug
+  #  org.springframework.web: debug
+#  com.yumst.be.crawl: debug
 
 jwt:
   expiration:
@@ -53,5 +55,4 @@ etc:
 
 chrome:
   driver:
-    path: "/Users/leo/chromedriver-mac-arm64/chromedriver"
-
+    path: "C:\\Users\\Leo\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe"

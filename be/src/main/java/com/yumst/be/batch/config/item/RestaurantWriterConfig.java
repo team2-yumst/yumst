@@ -1,4 +1,4 @@
-package com.yumst.be.batch.config;
+package com.yumst.be.batch.config.item;
 
 import com.yumst.be.restaurant.domain.Restaurant;
 import jakarta.persistence.EntityManagerFactory;
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-public class RestaurantItemWriterConfig {
+public class RestaurantWriterConfig {
 
     private final EntityManagerFactory entityManagerFactory;
 
