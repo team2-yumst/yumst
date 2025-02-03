@@ -1,5 +1,6 @@
 package com.yumst.be.user.jwt;
 
+import com.yumst.be.redis.service.RefreshTokenRedisService;
 import com.yumst.be.user.exception.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -41,6 +42,8 @@ public class JwtProvider {
     private Long REFRESH_TOKEN_EXPIRE_TIME;
     private SecretKey secretKey;
 
+    private final RefreshTokenRedisService refreshTokenRedisService;
+
 
     @PostConstruct
     protected void initSecretKey() {
@@ -49,24 +52,26 @@ public class JwtProvider {
     }
 
 
-    public String generateAccessToken(Authentication authentication) {
-        return generateToken(authentication, ACCESS_TOKEN_EXPIRE_TIME, "access");
+    public String generateAccessToken(Authentication authentication, String userId) {
+
+        String refreshToken = generateRefreshToken(authentication, userId);
+        refreshTokenRedisService.saveRefreshToken(userId, refreshToken, REFRESH_TOKEN_EXPIRE_TIME);
+
+        return generateToken(authentication, ACCESS_TOKEN_EXPIRE_TIME, "access", userId);
     }
 
-    public String generateRefreshToken(Authentication authentication) {
-        return generateToken(authentication, REFRESH_TOKEN_EXPIRE_TIME, "refresh");
+    private String generateRefreshToken(Authentication authentication, String userId) {
+        return generateToken(authentication, REFRESH_TOKEN_EXPIRE_TIME, "refresh", userId);
     }
 
-    private String generateToken(Authentication authentication, Long expirationMs, String category) {
+    private String generateToken(Authentication authentication, Long expirationMs, String category, String userId) {
 
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining());
 
-        log.debug("Generating access token for user: {}", authentication.getName());
-
         return Jwts.builder()
-                .subject(authentication.getName())
+                .subject(userId)
                 .claim("category", category)
                 .claim("authorities", authorities)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -92,7 +97,6 @@ public class JwtProvider {
         }
     }
 
-
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
         List<GrantedAuthority> authorities = Stream.of(claims.get("authorities", String.class).split(","))
@@ -104,16 +108,21 @@ public class JwtProvider {
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
-
     public String reissueWithRefresh(String refreshToken) {
         Authentication authentication = getAuthentication(refreshToken);
-        return generateAccessToken(authentication);
+        String userId = getSubject(refreshToken);
+        return generateAccessToken(authentication, userId);
     }
 
     private Claims parseClaims(String refreshToken) {
         return Jwts.parser().verifyWith(secretKey).build()
                 .parseSignedClaims(refreshToken)
                 .getPayload();
+    }
+
+    // Subject - userId : userId 반환
+    public String getSubject(String token) {
+        return parseClaims(token).getSubject();
     }
 
 }

@@ -6,7 +6,6 @@ import com.yumst.be.user.jwt.JwtProvider;
 import com.yumst.be.user.service.OAuthClient;
 import com.yumst.be.user.service.UserService;
 import com.yumst.be.user.vo.request.RequestToken;
-import com.yumst.be.user.vo.response.ResponseToken;
 import com.yumst.be.user.vo.response.ResponseUser;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -27,19 +26,26 @@ public class UserController {
     private final JwtProvider jwtProvider;
 
     @PostMapping("/login/google")
-    public ResponseEntity<ResponseToken> googleLogin (@RequestBody RequestToken requestToken) {
+    public ResponseEntity<ResponseUser> googleLogin (@RequestBody RequestToken requestToken) {
 
+        // google(resource server)로 요청
+        // yumst db에 존재하면 반환, 없으면 추가
         UserEntity user = oAuthClient.loadUserByAccess(requestToken.getAccessToken());
-        UsernamePasswordAuthenticationToken authentication = oAuthClient.getAuthentication(user.getName());
 
-        String accessToken = jwtProvider.generateAccessToken(authentication);
-        String refreshToken = jwtProvider.generateRefreshToken(authentication);
+        // yumst server jwt 발급
+        UsernamePasswordAuthenticationToken authentication = oAuthClient.getAuthentication(user.getEmail());
+        String accessToken = jwtProvider.generateAccessToken(authentication, user.getUserId());
 
-        ResponseToken responseToken = new ResponseToken(accessToken, refreshToken);
+        ResponseUser responseUser = ResponseUser.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .build();
 
-        return ResponseEntity.status(OK).body(responseToken);
+        return ResponseEntity.status(OK)
+                .header("access", accessToken)
+                .body(responseUser);
     }
-
 
 
     @GetMapping("/{userId}")
