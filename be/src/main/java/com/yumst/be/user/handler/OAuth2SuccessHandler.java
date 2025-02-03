@@ -1,5 +1,6 @@
 package com.yumst.be.user.handler;
 
+import com.yumst.be.user.dto.PrincipalUserDetails;
 import com.yumst.be.user.jwt.JwtProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,12 +28,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
-        String access = jwtProvider.generateAccessToken(authentication);
-        String refresh = jwtProvider.generateRefreshToken(authentication);
+        PrincipalUserDetails principal = (PrincipalUserDetails) authentication.getPrincipal();
+        String userId = principal.getUserEntity().getUserId();
 
-        // TODO: 앱 개발후 경로 수정, 헤더->쿼리 파라미터로 수정
+        String access = jwtProvider.generateAccessToken(authentication, userId);
+
+
+        // TODO: 웹 사용시 경로 수정, 헤더->쿼리 파라미터로 수정
         response.setHeader("access", access);
-        response.setHeader("refresh", refresh);
 
         response.sendRedirect(authSuccessUrl);
     }
