@@ -1,10 +1,13 @@
 package com.yumst.be.user.controller;
 
-import com.yumst.be.user.domain.UserRestaurantScrap;
 import com.yumst.be.user.service.UserRestaurantScrapService;
+import com.yumst.be.user.vo.response.ResponseScrap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -16,11 +19,12 @@ public class UserRestaurantScrapController {
     private final UserRestaurantScrapService scrapService;
 
     @PostMapping("/{userId}/{restaurantId}")
-    public ResponseEntity<UserRestaurantScrap> scrap(
+    public ResponseEntity<ResponseScrap> scrap(
             @PathVariable String userId,
             @PathVariable String restaurantId) {
 
-        UserRestaurantScrap result = scrapService.toggleScrap(userId, restaurantId);
-        return ResponseEntity.status(OK).body(result);
+        ResponseScrap responseScrap = scrapService.toggleScrap(userId, restaurantId);
+
+        return ResponseEntity.status(OK).body(responseScrap);
     }
 }

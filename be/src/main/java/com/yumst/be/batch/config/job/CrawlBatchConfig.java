@@ -50,7 +50,7 @@ public class CrawlBatchConfig {
 
                 .faultTolerant()
                 .skip(Exception.class)
-                .skipLimit(10)
+                .skipLimit(100)
 
                 // 실패 레코드 기록
                 .listener(restaurantProcessListener)
