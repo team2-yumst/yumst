@@ -1,15 +1,17 @@
 package com.yumst.be.user.vo.response;
 
-import com.yumst.be.restaurant.domain.Restaurant;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 public class ResponseScrap {
 
     private String userId;
     private String restaurantId;
+    private boolean scrapped;
 
-    private List<Restaurant> scrap;
+    public ResponseScrap(String userId, String restaurantId, boolean scrapped) {
+        this.userId = userId;
+        this.restaurantId = restaurantId;
+        this.scrapped = scrapped;
+    }
 }
