@@ -1,5 +1,6 @@
 package com.yumst.be.crawl.controller;
 
+import com.yumst.be.crawl.dto.CrawledNaverRestaurant;
 import com.yumst.be.crawl.service.SeleniumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +14,9 @@ public class CrawlController {
 
     @GetMapping("/crawl")
     public String crawl() {
-        seleniumService.crawl("후라토 식당 ", "서울");
-        seleniumService.crawl("하카타분코", "서울");
+        CrawledNaverRestaurant crawl = seleniumService.crawl("광순네식당 ", "서울");
+//        seleniumService.crawl("하카타분코", "서울");
 
-        return "crawl";
+        return crawl.toString();
     }
 }

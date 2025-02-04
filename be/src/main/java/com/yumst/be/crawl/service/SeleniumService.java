@@ -181,9 +181,14 @@ public class SeleniumService {
     }
 
     private String phoneNumber() {
-        String phoneNumber = driver.findElement(By.cssSelector("div.vV_z_ > span.xlx7Q")).getText();
-        log.debug("phone number: {}", phoneNumber);
-        return phoneNumber;
+        try {
+            String phoneNumber = driver.findElement(By.cssSelector("div.vV_z_ > span.xlx7Q")).getText();
+            log.debug("phone number: {}", phoneNumber);
+            return phoneNumber;
+        } catch (Exception e) {
+            // 전화번호는 중요하지 않아서 무시
+            return null;
+        }
     }
 
 

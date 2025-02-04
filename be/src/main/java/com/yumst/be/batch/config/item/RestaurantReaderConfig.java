@@ -55,12 +55,14 @@ public class RestaurantReaderConfig {
         reader.setEntityManagerFactory(entityManagerFactory);
         reader.setPageSize(5);
 
-        reader.setMaxItemCount(10);
+        reader.setMaxItemCount(100);
 
 
         reader.setQueryString("SELECT r FROM Restaurant r " +
-                                      "WHERE r.openDataInformation.fullAddress LIKE :address AND r.crawlComplete = false");
-        reader.setParameterValues(Map.of("address", "%서울%"));
+                                      "WHERE r.openDataInformation.fullAddress LIKE :address" +
+                                      " AND r.crawlComplete = false" +
+                                      " AND r.restaurantId NOT IN (SELECT f.recordDataId FROM FailedRecord f)");
+        reader.setParameterValues(Map.of("address", "%마포구%"));
 
         return reader;
     }
