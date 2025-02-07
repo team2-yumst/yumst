@@ -6,7 +6,6 @@ import 'package:fe/data/token_interceptor.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:http/http.dart' as http;
 
 part 'auth_repository.g.dart';
 
@@ -38,15 +37,12 @@ class AuthRepository {
 
       final GoogleSignInAuthentication googleAuth = await user.authentication;
 
-      final response = await http.post(
-        Uri.parse('http://localhost:8080/api/user/v1/login/google'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await dio.post(
+        'http://localhost:8080/api/user/v1/login/google',
+        data: {
           'accessToken' : googleAuth.accessToken,
           'idToken' : googleAuth.idToken,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
@@ -61,39 +57,34 @@ class AuthRepository {
 
   void signInWithGuest() async {
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:8080/api/user/v1/login/guest'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-        }),
+
+      final response = await dio.post(
+        'http://localhost:8080/api/user/v1/login/guest',
       );
 
       if (response.statusCode == 200) {
         addToStorage(response);
       } else {
-        print(response.body);
+        print(response.statusCode);
+        print(response.statusMessage);
       }
     } catch (e) {
       print(e);
     }
   }
 
-  void addToStorage(http.Response response) {
-    var responseBody = jsonDecode(utf8.decode(response.bodyBytes));
-    print(responseBody);
-    String? accessToken = response.headers['access'];
-    print(accessToken);
-    storage.saveAccessToken(accessToken!);
+  void addToStorage(Response response) {
 
-    String userId = responseBody['userId'];
+    var accessToken = response.headers['access'];
+    storage.saveAccessToken(accessToken!.first);
+
+    String userId = response.data['userId'];
     storage.saveUserId(userId);
 
-    String email = responseBody['email'];
+    String email = response.data['email'];
     storage.saveEmail(email);
 
-    String name = responseBody['name'];
+    String name = response.data['name'];
     storage.saveUserName(name);
   }
 
