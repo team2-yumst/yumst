@@ -62,7 +62,7 @@ class RecommendationPage extends ConsumerWidget {
                 ),
               ),
               Container(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
               ),
               Positioned(
                 bottom: 40,

@@ -1,9 +1,9 @@
-import 'package:fe/widgets/apple_login_button.dart';
-import 'package:fe/widgets/google_login_button.dart';
-import 'package:fe/widgets/guest_login_button.dart';
+import 'package:fe/view/widget/apple_login_button.dart';
+import 'package:fe/view/widget/google_login_button.dart';
+
 import 'package:flutter/material.dart';
 
-import '../data/login_platform.dart';
+import '../widget/guest_login_button.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,7 +13,6 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  LoginPlatform _loginPlatform = LoginPlatform.none;
 
   @override
   Widget build(BuildContext context) {

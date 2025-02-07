@@ -1,51 +1,16 @@
-import 'dart:convert';
 
+import 'package:fe/repository/auth_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class GoogleLoginButton extends StatelessWidget {
+class GoogleLoginButton extends ConsumerWidget {
   const GoogleLoginButton({super.key});
 
-  void signInWithGoogle() async {
-
-
-    try {
-      final GoogleSignInAccount? user = await GoogleSignIn().signIn();
-
-      if (user == null) {
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await user.authentication;
-
-      final response = await http.post(
-        Uri.parse('http://localhost:8080/api/user/v1/login/google'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'accessToken' : googleAuth.accessToken,
-          'idToken' : googleAuth.idToken,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-
-
-      } else {
-
-      }
-    } catch (e) {
-      print(e);
-    }
-
-
-
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final authRepository = ref.watch(authRepositoryProvider);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate responsive dimensions
@@ -57,7 +22,7 @@ class GoogleLoginButton extends StatelessWidget {
         return Center(
           child: InkWell(
             onTap: () async {
-              signInWithGoogle();
+              authRepository.signInWithGoogle();
             },
             child: Container(
               width: buttonWidth,
