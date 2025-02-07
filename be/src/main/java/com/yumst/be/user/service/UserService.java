@@ -22,6 +22,16 @@ public class UserService {
     private final UserRestaurantScrapRepository userRestaurantScrapRepository;
 
 
+    @Transactional
+    public UserDto registerGuest() {
+        UserEntity user = UserEntity.builder()
+                                    .build()
+                                    .registerGuest();
+
+        userRepository.save(user);
+        return modelMapper.map(user, UserDto.class);
+    }
+
     public UserDto getUser(String userId) {
         UserEntity user = userRepository.findByUserId(userId)
                                         .orElseThrow(() -> new AuthException(USER_NOT_FOUND));

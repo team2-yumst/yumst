@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.UUID;
 
@@ -33,6 +34,9 @@ public class UserEntity extends BaseTimeEntity {
     @Column(length = 1024)
     private String imageUrl;
 
+    @ColumnDefault("false")
+    private boolean isGuest;
+
     @Enumerated(STRING)
     @Column(nullable = false)
     private Role role;
@@ -52,6 +56,17 @@ public class UserEntity extends BaseTimeEntity {
         this.imageUrl = imageUrl;
     }
 
+    public UserEntity registerGuest() {
+        this.userId = UUID.randomUUID().toString();
+        this.name = "guest";
+        this.email = userId + "@guest.com";
+        this.imageUrl = "https://img.icons8.com/fluency-systems-filled/96/guest-male.png";
+        this.role = Role.USER;
+        this.isDeleted = false;
+        this.isGuest = true;
+
+        return this;
+    }
 
 
 }
