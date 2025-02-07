@@ -50,21 +50,7 @@ class AuthRepository {
       );
 
       if (response.statusCode == 200) {
-        var responseBody = jsonDecode(utf8.decode(response.bodyBytes));
-        print(responseBody);
-        String? accessToken = response.headers['access'];
-        print(accessToken);
-        storage.saveAccessToken(accessToken!);
-
-        String userId = responseBody['userId'];
-        storage.saveUserId(userId);
-
-        String email = responseBody['email'];
-        storage.saveEmail(email);
-
-        String name = responseBody['name'];
-        storage.saveUserName(name);
-
+        addToStorage(response);
       } else {
 
       }
@@ -72,5 +58,44 @@ class AuthRepository {
       print(e);
     }
   }
+
+  void signInWithGuest() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:8080/api/user/v1/login/guest'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        addToStorage(response);
+      } else {
+        print(response.body);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void addToStorage(http.Response response) {
+    var responseBody = jsonDecode(utf8.decode(response.bodyBytes));
+    print(responseBody);
+    String? accessToken = response.headers['access'];
+    print(accessToken);
+    storage.saveAccessToken(accessToken!);
+
+    String userId = responseBody['userId'];
+    storage.saveUserId(userId);
+
+    String email = responseBody['email'];
+    storage.saveEmail(email);
+
+    String name = responseBody['name'];
+    storage.saveUserName(name);
+  }
+
 
 }
