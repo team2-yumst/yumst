@@ -2,20 +2,15 @@ import 'package:fe/view/widget/apple_login_button.dart';
 import 'package:fe/view/widget/google_login_button.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widget/guest_login_button.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
         body: Container(
           color: Color(0xFFE86111),
@@ -29,10 +24,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Text(
                     "Yumst",
                     style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Inter',
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontFamily: 'Inter',
+                      fontSize: 35,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -55,3 +50,4 @@ class _RegisterPageState extends State<RegisterPage> {
         ));
   }
 }
+
