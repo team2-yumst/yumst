@@ -1,18 +1,21 @@
 package com.yumst.be.user.domain;
 
+import com.yumst.be.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.*;
 
 @Entity
-@RequiredArgsConstructor(access = PROTECTED)
-public class UserRestaurantScrap {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class UserRestaurantScrap extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)
     private Long id;
