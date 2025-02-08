@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.*;
 
 @Entity
 @Getter
