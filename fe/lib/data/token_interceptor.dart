@@ -34,23 +34,20 @@ class TokenInterceptor extends Interceptor {
     if (kDebugMode) {
       print('[REQ] [${options.method}] ${options.uri}');
     }
-    if (options.headers['accessToken'] == 'true') {
-      // 헤더 삭제
-      options.headers.remove('accessToken');
-      final token = await storage.readAccessToken();
-      if (kDebugMode) {
-        print('[BEFORE_REQ_HEADER] ${options.headers}');
-      }
-      // 실제 토큰으로 대체
-      options.headers.addAll({
-        'access': token,
-      });
-      if (kDebugMode) {
-        print('[REQ_HEADER] ${options.headers}');
-      }
-      if (kDebugMode) {
-        print('[REQ_DATA] ${options.data}');
-      }
+    final token = await storage.readAccessToken();
+    final userId = await storage.readUserId();
+    if (kDebugMode) {
+      print('[BEFORE_REQ_HEADER] ${options.headers}');
+    }
+    options.headers.addAll({
+      'access': token,
+      'userId': userId,
+    });
+    if (kDebugMode) {
+      print('[REQ_HEADER] ${options.headers}');
+    }
+    if (kDebugMode) {
+      print('[REQ_DATA] ${options.data}');
     }
 
     return super.onRequest(options, handler);
@@ -60,9 +57,17 @@ class TokenInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (kDebugMode) {
+      print('[RES_STATUS] ${response.statusCode}');
+      print('[RES_HEADER] ${response.headers}');
+      print('[RES_DATA] ${response.data}');
       print(
-        '[RES] [${response.requestOptions.method}] ${response.requestOptions.uri}');
+          '[RES] [${response.requestOptions.method}] ${response.requestOptions.uri}');
     }
+
+    if (response.headers['access'] != null) {
+      storage.saveAccessToken(response.headers['access']!.first);
+    }
+
     return super.onResponse(response, handler);
   }
 

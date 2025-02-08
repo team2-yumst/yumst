@@ -2,10 +2,12 @@ package com.yumst.be.user.service;
 
 import com.yumst.be.user.domain.UserEntity;
 import com.yumst.be.user.dto.OAuth2UserInfo;
+import com.yumst.be.user.dto.UserDto;
 import com.yumst.be.user.repository.UserRepository;
 import com.yumst.be.user.vo.request.RequestGoogleAccess;
 import com.yumst.be.user.vo.response.ResponseGoogleAccess;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +32,9 @@ public class OAuthClient {
 
     private final UserRepository userRepository;
 
-    public UserEntity loadUserByAccess(String accessToken) {
+    private final ModelMapper modelMapper;
+
+    public UserDto loadUserByAccess(String accessToken) {
 
         ResponseGoogleAccess body = requestToGoogle(accessToken);
 
@@ -40,11 +44,11 @@ public class OAuthClient {
                 .imageUrl(body.getPicture())
                 .build();
 
-        return getOrSave(oAuth2UserInfo);
+        UserEntity userEntity = getOrSave(oAuth2UserInfo);
+        return modelMapper.map(userEntity, UserDto.class);
     }
 
     public UsernamePasswordAuthenticationToken getAuthentication(String name) {
-
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
         User principal = new User(name, "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);

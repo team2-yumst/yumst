@@ -1,6 +1,5 @@
 package com.yumst.be.user.controller;
 
-import com.yumst.be.user.domain.UserEntity;
 import com.yumst.be.user.dto.UserDto;
 import com.yumst.be.user.jwt.JwtProvider;
 import com.yumst.be.user.service.OAuthClient;
@@ -30,17 +29,25 @@ public class UserController {
 
         // google(resource server)로 요청
         // yumst db에 존재하면 반환, 없으면 추가
-        UserEntity user = oAuthClient.loadUserByAccess(requestToken.getAccessToken());
+        UserDto user = oAuthClient.loadUserByAccess(requestToken.getAccessToken());
 
         // yumst server jwt 발급
-        UsernamePasswordAuthenticationToken authentication = oAuthClient.getAuthentication(user.getEmail());
-        String accessToken = jwtProvider.generateAccessToken(authentication, user.getUserId());
+        String accessToken = getAccessToken(user);
 
-        ResponseUser responseUser = ResponseUser.builder()
-                .userId(user.getUserId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .build();
+        ResponseUser responseUser = modelMapper.map(user, ResponseUser.class);
+
+        return ResponseEntity.status(OK)
+                .header("access", accessToken)
+                .body(responseUser);
+    }
+
+
+    @PostMapping("/login/guest")
+    public ResponseEntity<ResponseUser> guestLogin() {
+        UserDto userDto = userService.registerGuest();
+        ResponseUser responseUser = modelMapper.map(userDto, ResponseUser.class);
+
+        String accessToken = getAccessToken(userDto);
 
         return ResponseEntity.status(OK)
                 .header("access", accessToken)
@@ -67,14 +74,9 @@ public class UserController {
         return ResponseEntity.status(OK).body(responseUser);
     }
 
-//    @PostMapping("/v1/scrap/{userId}/{restaurantId}")
-//    public ResponseEntity<ResponseScrap> scrap (@PathVariable String userId, @PathVariable String restaurantId) {
-//
-//        userService.scrap(userId, restaurantId);
-//
-//        return ResponseEntity.status(OK).body();
-//    }
-
-
+    private String getAccessToken(UserDto user) {
+        UsernamePasswordAuthenticationToken authentication = oAuthClient.getAuthentication(user.getEmail());
+        return jwtProvider.generateAccessToken(authentication, user.getUserId());
+    }
 
 }

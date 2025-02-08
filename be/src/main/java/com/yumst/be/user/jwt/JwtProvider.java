@@ -114,10 +114,14 @@ public class JwtProvider {
         return generateAccessToken(authentication, userId);
     }
 
-    private Claims parseClaims(String refreshToken) {
-        return Jwts.parser().verifyWith(secretKey).build()
-                .parseSignedClaims(refreshToken)
-                .getPayload();
+    private Claims parseClaims(String token) {
+        try {
+            return Jwts.parser().verifyWith(secretKey).build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 
     // Subject - userId : userId 반환
