@@ -29,7 +29,7 @@ class GuestLoginButton extends ConsumerWidget {
               decoration: ShapeDecoration(
                 color: Colors.white30,
                 shape: RoundedRectangleBorder(
-                  side: BorderSide(width: 1, color: Colors.white),
+                  // side: BorderSide(width: 1, color: Colors.white),
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),

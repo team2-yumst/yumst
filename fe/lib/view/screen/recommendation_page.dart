@@ -2,31 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:card_swiper/card_swiper.dart';
 
-class Restaurant {
+class MockRestaurant {
   final String name;
   final String address;
   final String imageUrl;
 
-  Restaurant({
+  MockRestaurant({
     required this.name,
     required this.address,
     required this.imageUrl,
   });
 }
 
-final restaurantProvider = Provider<List<Restaurant>>((ref) {
+final mockRestaurantProvider = Provider<List<MockRestaurant>>((ref) {
   return [
-    Restaurant(
+    MockRestaurant(
       name: "Sunshine Diner",
       address: "123 Main St, Cityville",
       imageUrl: "https://source.unsplash.com/random/800x600/?restaurant",
     ),
-    Restaurant(
+    MockRestaurant(
       name: "Ocean Breeze Cafe",
       address: "456 Beach Rd, Seaside",
       imageUrl: "https://source.unsplash.com/random/800x600/?cafe",
     ),
-    Restaurant(
+    MockRestaurant(
       name: "Mountain View Grill",
       address: "789 Hilltop Ave, Mountainview",
       imageUrl: "https://source.unsplash.com/random/800x600/?grill",
@@ -39,7 +39,7 @@ class RecommendationPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final restaurants = ref.watch(restaurantProvider);
+    final restaurants = ref.watch(mockRestaurantProvider);
 
     return Scaffold(
       body: Swiper(
