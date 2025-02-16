@@ -36,7 +36,9 @@ public class SeleniumService {
     public static final String ENTRY_IFRAME = "iframe#entryIframe";
     // 검색 결과에서 링크 a tag
     public static final String HREF_A_TAG = "a.P7gyV";
-    public static final String HREF_A_TAG2 = "a.tzwk0";
+    public static final String HREF_A_TAG2 = "a.Gvf9B";
+    public static final String HREF_A_TAG3 = "a.tzwk0";
+
 
 
     @Value("${chrome.driver.path}")
@@ -279,6 +281,10 @@ public class SeleniumService {
         List<WebElement> elements = driver.findElements(By.cssSelector(HREF_A_TAG));
         if (elements.isEmpty()) {
             elements = driver.findElements(By.cssSelector(HREF_A_TAG2));
+        }
+
+        if (elements.isEmpty()) {
+            elements = driver.findElements(By.cssSelector(HREF_A_TAG3));
         }
 
         log.debug("elements size: {}", elements.size());
