@@ -32,4 +32,15 @@ public class NaverInformation {
 
     private double rating;
 
+    public String getTodayOperatingHours() {
+        return switch (java.time.LocalDate.now().getDayOfWeek()) {
+            case MONDAY -> mondayHours;
+            case TUESDAY -> tuesdayHours;
+            case WEDNESDAY -> wednesdayHours;
+            case THURSDAY -> thursdayHours;
+            case FRIDAY -> fridayHours;
+            case SATURDAY -> saturdayHours;
+            case SUNDAY -> sundayHours;
+        };
+    }
 }
