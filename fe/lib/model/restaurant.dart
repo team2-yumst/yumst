@@ -1,19 +1,41 @@
 class Restaurant {
-  Restaurant(this.name, this.category, this.latitude, this.longitude,
-      this.thumbnailUrl, this.fullAddress, this.roadNameFullAddress);
+  Restaurant({
+    required this.restaurantId,
+    required this.name,
+    required this.category,
+    required this.latitude,
+    required this.longitude,
+    required this.thumbnailUrl,
+    required this.fullAddress,
+    required this.roadNameFullAddress,
+    required this.phoneNumber,
+    required this.todayOpening,
+    required this.top2Features,
+    required this.isScrapped,
+    required this.likeCount,
+    required this.dislikeCount,
+  });
 
+  String? restaurantId;
   String? name;
   String? category;
-
   String? latitude;
   String? longitude;
-
   String? thumbnailUrl;
 
   String? fullAddress;
   String? roadNameFullAddress;
 
+  String? phoneNumber;
+
+  String? todayOpening;
+  List<String>? top2Features;
+  bool? isScrapped;
+  int? likeCount;
+  int? dislikeCount;
+
   Restaurant.fromJson(Map<String, dynamic> json) {
+    restaurantId = json['restaurantId'];
     name = json['name'];
     category = json['category'];
     latitude = json['latitude'];
@@ -21,6 +43,12 @@ class Restaurant {
     thumbnailUrl = json['thumbnailUrl'];
     fullAddress = json['fullAddress'];
     roadNameFullAddress = json['roadNameFullAddress'];
+    phoneNumber = json['phoneNumber'];
+    todayOpening = json['todayOpening'];
+    top2Features = json['top2Features'].cast<String>();
+    isScrapped = json['isScrapped'];
+    likeCount = json['likeCount'];
+    dislikeCount = json['dislikeCount'];
   }
 
   Map<String, dynamic> toJson() {
