@@ -133,7 +133,7 @@ class _ReelsStyleCardState extends State<_ReelsStyleCard> with SingleTickerProvi
                 FadeTransition(
                   opacity: _infoAnimation,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
+                    padding: const EdgeInsets.only(top: 50, left: 16, right: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -154,7 +154,7 @@ class _ReelsStyleCardState extends State<_ReelsStyleCard> with SingleTickerProvi
                 SlideTransition(
                   position: _titleAnimation,
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(15),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -164,28 +164,34 @@ class _ReelsStyleCardState extends State<_ReelsStyleCard> with SingleTickerProvi
                             Text(
                               restaurant.name ?? '',
                               style: const TextStyle(
-                                fontSize: 20,
+                                fontSize: 24,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              restaurant.category ?? '',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.white70,
-                              ),
+
+                            Row(
+                              children: [
+                                Text(
+                                  restaurant.category ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    _isExpanded
+                                        ? Icons.keyboard_arrow_down
+                                        : Icons.more_horiz,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: _togglePanel,
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            _isExpanded
-                                ? Icons.keyboard_arrow_down
-                                : Icons.more_horiz,
-                            color: Colors.white,
-                          ),
-                          onPressed: _togglePanel,
                         ),
                       ],
                     ),
