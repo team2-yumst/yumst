@@ -45,7 +45,6 @@ class _MainScreenState extends State<MainScreen> {
         index: _selectedIndex,
         children: _pages,
       ),
-      // 인스타그램 스타일 커스텀 내비게이션바
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: _selectedIndex == 0 ? Colors.black : Colors.white,
@@ -56,14 +55,20 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(Icons.local_dining, 0),
-            _buildNavItem(Icons.how_to_vote, 1),
-            _buildNavItem(Icons.person, 2),
-          ],
+        // 필요시 margin이나 padding 값을 조정하여 위치 미세 조정 가능
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(Icons.local_dining, 0),
+                _buildNavItem(Icons.how_to_vote, 1),
+                _buildNavItem(Icons.person, 2),
+              ],
+            ),
+          ),
         ),
       ),
     );
