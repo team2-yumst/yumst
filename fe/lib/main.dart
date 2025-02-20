@@ -1,5 +1,7 @@
+import 'package:fe/view/screen/main_page.dart';
 import 'package:fe/view/screen/recommendation_page.dart';
 import 'package:fe/view/screen/register_first_selection_page.dart';
+import 'package:fe/view/screen/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,9 +27,9 @@ class MyApp extends StatelessWidget {
     //   ),
     // );
 
-    //
+
     return MaterialApp(
-      home: RecommendationPage(),
+      home: const MainScreen(),
       // debugShowCheckedModeBanner: false,
     );
   }
