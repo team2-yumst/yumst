@@ -1,5 +1,6 @@
 package com.yumst.be.batch.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -23,6 +24,7 @@ public class FailedRecord {
 
     private String recordDataId;
 
+    @Column(length = 1024)
     private String errorMessage;
 
     private LocalDateTime failedAt;
