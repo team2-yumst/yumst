@@ -14,7 +14,8 @@ public class CrawlController {
 
     @GetMapping("/crawl")
     public String crawl() {
-        CrawledNaverRestaurant crawl = seleniumService.crawl("이호커피", "서울특별시 마포구 망원동");
+//        CrawledNaverRestaurant crawl = seleniumService.crawl("7번방", "서울특별시 마포구");
+        CrawledNaverRestaurant crawl = seleniumService.crawl("판초", "서울특별시 마포구");
 //        CrawledNaverRestaurant crawl = seleniumService.crawl("하카타분코", "서울");
 
         return crawl.toString();
