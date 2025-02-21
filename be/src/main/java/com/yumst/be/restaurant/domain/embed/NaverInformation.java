@@ -46,6 +46,7 @@ public class NaverInformation {
             case SATURDAY -> saturdayHours;
             case SUNDAY -> sundayHours;
         };
+    }
 
     @Builder
     public NaverInformation(String name, String category, String latitude, String longitude, String mondayHours, String tuesdayHours, String wednesdayHours, String thursdayHours, String fridayHours, String saturdayHours, String sundayHours, String phoneNumber, String thumbnailUrl, long visitorReviewCount, long blogReviewCount, double rating) {
