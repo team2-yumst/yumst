@@ -21,6 +21,10 @@ public class RestaurantProcessListener implements ItemProcessListener<Restaurant
     @Override
     public void onProcessError(Restaurant item, Exception e) {
 
+        if (e.getMessage().length() > 1024) {
+            e = new Exception(e.getMessage().substring(0, 1024));
+        }
+
         FailedRecord failedRecord = FailedRecord.builder()
                 .recordType("PROCESS")
                 .recordDataId(item.getRestaurantId())

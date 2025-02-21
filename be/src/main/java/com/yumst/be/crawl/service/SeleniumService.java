@@ -4,6 +4,7 @@ import com.yumst.be.crawl.dto.CrawledNaverRestaurant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -36,7 +37,9 @@ public class SeleniumService {
     public static final String ENTRY_IFRAME = "iframe#entryIframe";
     // 검색 결과에서 링크 a tag
     public static final String HREF_A_TAG = "a.P7gyV";
-    public static final String HREF_A_TAG2 = "a.tzwk0";
+    public static final String HREF_A_TAG2 = "a.Gvf9B";
+    public static final String HREF_A_TAG3 = "a.tzwk0";
+
 
 
     @Value("${chrome.driver.path}")
@@ -103,21 +106,34 @@ public class SeleniumService {
     }
 
     private void clickReviewTab() throws InterruptedException {
-
+        // 리뷰 탭 클릭
         List<WebElement> elements = driver.findElements(By.cssSelector("a.tpj9w._tab-menu"));
-
         for (WebElement element : elements) {
             if (element.getText().equals("리뷰")) {
                 element.click();
                 Thread.sleep(1000);
                 element.sendKeys(ENTER);
+                break;  // 리뷰 탭을 찾으면 바로 종료
             }
         }
 
-        // 더보기 클릭
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.dP0sq"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.dP0sq"))).click();
+        // "더보기" 버튼 클릭: 최대 두 번 클릭
+        int maxClicks = 3;
+        for (int i = 0; i < maxClicks; i++) {
+            try {
+                WebElement moreButton = wait.until(
+                        ExpectedConditions.elementToBeClickable(By.cssSelector("a.dP0sq"))
+                );
+                moreButton.click();
+                // 클릭 후 버튼이 업데이트 될 시간을 잠깐 대기
+                Thread.sleep(500);
+            } catch (TimeoutException e) {
+                // 더 이상 "더보기" 버튼이 없거나 클릭할 수 없으면 루프 종료
+                break;
+            }
+        }
     }
+
 
     private Map<String, String> ReviewDetail() {
 
@@ -147,7 +163,7 @@ public class SeleniumService {
         List<WebElement> reviews = driver.findElements(By.cssSelector(".dAsGb > span"));
 
         if (reviews.size() == 2) {
-            result.add(null);
+            result.add("0");
         }
 
         for (WebElement review : reviews) {
@@ -279,6 +295,10 @@ public class SeleniumService {
         List<WebElement> elements = driver.findElements(By.cssSelector(HREF_A_TAG));
         if (elements.isEmpty()) {
             elements = driver.findElements(By.cssSelector(HREF_A_TAG2));
+        }
+
+        if (elements.isEmpty()) {
+            elements = driver.findElements(By.cssSelector(HREF_A_TAG3));
         }
 
         log.debug("elements size: {}", elements.size());

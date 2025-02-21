@@ -55,7 +55,7 @@ public class RestaurantReaderConfig {
         reader.setEntityManagerFactory(entityManagerFactory);
         reader.setPageSize(5);
 
-        reader.setMaxItemCount(100);
+        reader.setMaxItemCount(300);
 
 
         reader.setQueryString("SELECT r FROM Restaurant r " +

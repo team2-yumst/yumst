@@ -60,7 +60,25 @@ public class RestaurantProcessorConfig {
 
                 updateFeature(item, crawlResult);
 
-                NaverInformation naverInformation = modelMapper.map(crawlResult, NaverInformation.class);
+                NaverInformation naverInformation = NaverInformation.builder()
+                        .name(crawlResult.getName())
+                        .category(crawlResult.getCategory())
+                        .latitude(crawlResult.getLatitude())
+                        .longitude(crawlResult.getLongitude())
+                        .mondayHours(crawlResult.getMondayHours())
+                        .tuesdayHours(crawlResult.getTuesdayHours())
+                        .wednesdayHours(crawlResult.getWednesdayHours())
+                        .thursdayHours(crawlResult.getThursdayHours())
+                        .fridayHours(crawlResult.getFridayHours())
+                        .saturdayHours(crawlResult.getSaturdayHours())
+                        .sundayHours(crawlResult.getSundayHours())
+                        .phoneNumber(crawlResult.getPhoneNumber())
+                        .thumbnailUrl(crawlResult.getThumbnailUrl())
+                        .visitorReviewCount(Long.parseLong(crawlResult.getVisitorReviewCount().replace(",", "")))
+                        .blogReviewCount(Long.parseLong(crawlResult.getBlogReviewCount().replace(",", "")))
+                        .rating(Double.parseDouble(crawlResult.getRating()))
+                        .build();
+
                 item.updateNaverCrawlData(naverInformation);
 
                 return item;
