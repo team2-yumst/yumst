@@ -46,7 +46,7 @@ class Restaurant {
     phoneNumber = json['phoneNumber'];
     todayOpening = json['todayOpening'];
     top2Features = json['top2Features'].cast<String>();
-    isScrapped = json['isScrapped'];
+    isScrapped = json['scrapped'];
     likeCount = json['likeCount'];
     dislikeCount = json['dislikeCount'];
   }

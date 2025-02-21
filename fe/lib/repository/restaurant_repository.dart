@@ -27,10 +27,20 @@ class RestaurantRepository {
       final List<dynamic> data = response.data;
       return data.map((json) => Restaurant.fromJson(json)).toList();
     } else {
-      throw Exception("Failed to load restaurants");
+      throw Exception("식당 정보를 불러오는데 실패했습니다.");
     }
+  }
 
-
+  Future scrapRestaurant(Restaurant restaurant) async {
+    final response = await dio.post(
+        "http://localhost:8080/api/user/v1/scrap/${restaurant.restaurantId}"
+    );
+    if (response.statusCode == 200) {
+      restaurant.isScrapped = response.data['scrapped'];
+      return;
+    } else {
+      throw Exception("스크랩 실패");
+    }
   }
 
 

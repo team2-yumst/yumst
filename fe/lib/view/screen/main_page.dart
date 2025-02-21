@@ -13,7 +13,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static final List<Widget> _pages = [
     RecommendationPage(),
-    Center(child: Text('투표페이지는 준비중입니다')),
+    Center(child: Text('투표 기능은 준비중입니다')),
     Center(child: Text('프로필 페이지')),
   ];
 
