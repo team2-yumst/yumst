@@ -3,6 +3,7 @@ package com.yumst.be.restaurant.domain;
 import com.yumst.be.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -10,6 +11,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Entity
 @Table(name = "restaurant_naver_review_count")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class RestaurantNaverReviewFeatureCount extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)

@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface UserRestaurantScrapRepository extends JpaRepository<UserRestaurantScrap, Long> {
     Optional<UserRestaurantScrap> findByUserIdAndRestaurantId(String userId, String restaurantId);
+    boolean existsByUserIdAndRestaurantId(String userId, String restaurantId);
 }

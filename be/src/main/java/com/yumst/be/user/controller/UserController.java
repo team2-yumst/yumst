@@ -55,8 +55,8 @@ public class UserController {
     }
 
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ResponseUser> getUser (@PathVariable String userId) {
+    @GetMapping()
+    public ResponseEntity<ResponseUser> getUser (@RequestHeader String userId) {
 
         UserDto userDto = userService.getUser(userId);
         ResponseUser responseUser = modelMapper.map(userDto, ResponseUser.class);
@@ -65,8 +65,8 @@ public class UserController {
     }
 
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<ResponseUser> deleteUser (@PathVariable String userId) {
+    @DeleteMapping()
+    public ResponseEntity<ResponseUser> deleteUser (@RequestHeader String userId) {
 
         UserDto userDto = userService.deleteUser(userId);
         ResponseUser responseUser = modelMapper.map(userDto, ResponseUser.class);

@@ -74,7 +74,8 @@ class TokenInterceptor extends Interceptor {
   // 3) 에러가 났을때
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    print('[ERR] [${err.requestOptions.method}] ${err.requestOptions.uri} ');
+    print('[ERR_URI] [${err.requestOptions.method}] ${err.requestOptions.uri} ');
+    print('[ERR] ${err.response?.data}');
 
     return super.onError(err, handler);
   }

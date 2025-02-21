@@ -35,6 +35,19 @@ public class NaverInformation {
 
     private double rating;
 
+
+    public String getTodayOperatingHours() {
+        return switch (java.time.LocalDate.now().getDayOfWeek()) {
+            case MONDAY -> mondayHours;
+            case TUESDAY -> tuesdayHours;
+            case WEDNESDAY -> wednesdayHours;
+            case THURSDAY -> thursdayHours;
+            case FRIDAY -> fridayHours;
+            case SATURDAY -> saturdayHours;
+            case SUNDAY -> sundayHours;
+        };
+    }
+
     @Builder
     public NaverInformation(String name, String category, String latitude, String longitude, String mondayHours, String tuesdayHours, String wednesdayHours, String thursdayHours, String fridayHours, String saturdayHours, String sundayHours, String phoneNumber, String thumbnailUrl, long visitorReviewCount, long blogReviewCount, double rating) {
         this.name = name;
