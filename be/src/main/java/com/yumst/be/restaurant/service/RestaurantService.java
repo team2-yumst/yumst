@@ -25,30 +25,45 @@ public class RestaurantService {
 
         List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrue();
 
-        return result.stream().map(restaurant -> {
-            ResponseRestaurant responseRestaurant = new ResponseRestaurant();
-
-            responseRestaurant.setRestaurantId(restaurant.getRestaurantId());
-            setNaverInfo(responseRestaurant, restaurant.getNaverInformation());
-            setOpenDataInfo(responseRestaurant, restaurant.getOpenDataInformation());
-            setFeatures(responseRestaurant, restaurant.getRestaurantId());
-            setScrapped(responseRestaurant, restaurant.getRestaurantId(), userId);
-            // TODO: V2 투표기능 개발후 추가
-//            setLikeAndDislike(responseRestaurant, restaurant.getRestaurantId());
-
-            return responseRestaurant;
-        }).collect(Collectors.toList());
+        return result.stream().map(
+                restaurant -> getResponseRestaurant(userId, restaurant))
+                .collect(Collectors.toList());
 
     }
 
-    private void setScrapped(ResponseRestaurant responseRestaurant,
-                             String restaurantId,
-                             String userId) {
+    public List<ResponseRestaurant> getResponseRestaurantList(List<String> restaurantIds, String userId) {
+        return restaurantIds.stream()
+                .map(restaurantId -> getResponseRestaurantByRestaurantId(userId, restaurantId))
+                .collect(Collectors.toList());
+    }
+
+    private ResponseRestaurant getResponseRestaurantByRestaurantId(String userId, String restaurantId) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 식당이 존재하지 않습니다."));
+        return getResponseRestaurant(userId, restaurant);
+    }
+
+    private ResponseRestaurant getResponseRestaurant(String userId, Restaurant restaurant) {
+        ResponseRestaurant responseRestaurant = new ResponseRestaurant();
+
+        responseRestaurant.setRestaurantId(restaurant.getRestaurantId());
+        addNaverInfoToResponse(responseRestaurant, restaurant.getNaverInformation());
+        addOpenDataInfoToResponse(responseRestaurant, restaurant.getOpenDataInformation());
+        addFeaturesToResponse(responseRestaurant, restaurant.getRestaurantId());
+        addScrappedToResponse(responseRestaurant, restaurant.getRestaurantId(), userId);
+        // TODO: V2 투표기능 개발후 추가
+//            setLikeAndDislike(responseRestaurant, restaurant.getRestaurantId());
+        return responseRestaurant;
+    }
+
+    private void addScrappedToResponse(ResponseRestaurant responseRestaurant,
+                                       String restaurantId,
+                                       String userId) {
         boolean result = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurantId);
         responseRestaurant.setScrapped(result);
     }
 
-    private void setFeatures(ResponseRestaurant responseRestaurant, String restaurantId) {
+    private void addFeaturesToResponse(ResponseRestaurant responseRestaurant, String restaurantId) {
         List<String> top2Features = naverReviewFeatureCountRepository.findTop2ByRestaurantIdOrderByReviewCountDesc(restaurantId)
                 .stream()
                 .map(c -> c.getNaverReviewFeature().getFeature())
@@ -56,13 +71,13 @@ public class RestaurantService {
         responseRestaurant.setTop2Features(top2Features);
     }
 
-    private void setOpenDataInfo(ResponseRestaurant responseRestaurant, OpenDataInformation openDataInformation) {
+    private void addOpenDataInfoToResponse(ResponseRestaurant responseRestaurant, OpenDataInformation openDataInformation) {
         responseRestaurant.setFullAddress(openDataInformation.getFullAddress());
         responseRestaurant.setRoadNameFullAddress(openDataInformation.getRoadNameFullAddress());
         responseRestaurant.setPhoneNumber(openDataInformation.getContactNumber());
     }
 
-    private void setNaverInfo(ResponseRestaurant responseRestaurant, NaverInformation naverInformation) {
+    private void addNaverInfoToResponse(ResponseRestaurant responseRestaurant, NaverInformation naverInformation) {
         responseRestaurant.setName(naverInformation.getName());
         responseRestaurant.setCategory(naverInformation.getCategory());
         responseRestaurant.setLatitude(naverInformation.getLatitude());
