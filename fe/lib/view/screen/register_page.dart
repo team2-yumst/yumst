@@ -22,7 +22,7 @@ class RegisterPage extends ConsumerWidget {
                 flex: 7,
                 child: Center(
                   child: Text(
-                    "Yumst",
+                    "Yums",
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Inter',
