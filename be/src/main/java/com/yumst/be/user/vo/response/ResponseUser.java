@@ -1,7 +1,7 @@
 package com.yumst.be.user.vo.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.yumst.be.restaurant.domain.Restaurant;
+import com.yumst.be.restaurant.vo.ResponseRestaurant;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,5 +18,7 @@ public class ResponseUser {
     private String email;
     private String name;
 
-    private List<Restaurant> scrap;
+    private String imageUrl;
+
+    private List<ResponseRestaurant> scrap;
 }

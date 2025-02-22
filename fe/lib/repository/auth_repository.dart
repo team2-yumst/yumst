@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:fe/data/secure_storage.dart';
 import 'package:fe/data/token_interceptor.dart';
+import 'package:fe/model/user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -26,6 +27,17 @@ class AuthRepository {
   });
   final Dio dio;
   final SecureStorage storage;
+
+
+  Future<User> getUser() async {
+    final response = await dio.get('http://localhost:8080/api/user/v1');
+
+    if (response.statusCode == 200) {
+      return User.fromJson(response.data);
+    } else {
+      throw Exception('유저 정보를 불러오는데 실패했습니다.');
+    }
+  }
 
   void signInWithGoogle() async {
     try {

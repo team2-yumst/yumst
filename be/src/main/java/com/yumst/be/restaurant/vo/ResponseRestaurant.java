@@ -1,10 +1,14 @@
 package com.yumst.be.restaurant.vo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
+
 @Data
+@JsonInclude(NON_NULL)
 public class ResponseRestaurant {
 
     private String restaurantId;

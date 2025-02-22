@@ -1,5 +1,7 @@
 package com.yumst.be.user.service;
 
+import com.yumst.be.restaurant.service.RestaurantService;
+import com.yumst.be.restaurant.vo.ResponseRestaurant;
 import com.yumst.be.user.domain.UserEntity;
 import com.yumst.be.user.dto.UserDto;
 import com.yumst.be.user.exception.AuthException;
@@ -9,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.yumst.be.user.exception.UserErrorCode.USER_NOT_FOUND;
 
@@ -20,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final UserRestaurantScrapRepository userRestaurantScrapRepository;
+    private final RestaurantService restaurantService;
 
 
     @Transactional
@@ -35,7 +40,14 @@ public class UserService {
     public UserDto getUser(String userId) {
         UserEntity user = userRepository.findByUserId(userId)
                                         .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
-        return modelMapper.map(user, UserDto.class);
+
+        UserDto userDto = modelMapper.map(user, UserDto.class);
+
+        List<String> scrappedId = userRestaurantScrapRepository.findAllRestaurantIdByUserId(userId);
+        List<ResponseRestaurant> responseRestaurantList = restaurantService.getResponseRestaurantList(scrappedId, userId);
+
+        userDto.setScrap(responseRestaurantList);
+        return userDto;
     }
 
     @Transactional
