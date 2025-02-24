@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fe/repository/auth_repository.dart';
+import 'package:fe/view/screen/setting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fe/model/restaurant.dart';
@@ -35,10 +36,16 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {},
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -58,31 +65,34 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
             }
             return true;
           },
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            slivers: [
-              SliverToBoxAdapter(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  height: _isRefreshing ? 60 : 0,
-                  curve: Curves.easeOut,
-                  child: Center(
-                    child: _isRefreshing
-                        ? const CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(Color(0XC8530EFF)),
-                    )
-                        : const SizedBox(),
+          child: Container(
+            color: Colors.white,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    height: _isRefreshing ? 60 : 0,
+                    curve: Curves.easeOut,
+                    child: Center(
+                      child: _isRefreshing
+                          ? const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(Color(0XC8530EFF)),
+                      )
+                          : const SizedBox(),
+                    ),
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: _UserProfileSection(user: user),
-              ),
-              _ScrapGrid(scrapList: user.scrapList),
-            ],
+                SliverToBoxAdapter(
+                  child: _UserProfileSection(user: user),
+                ),
+                _ScrapGrid(scrapList: user.scrapList),
+              ],
+            ),
           ),
         ),
       ),
@@ -152,12 +162,13 @@ class _ScrapGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
       sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          crossAxisSpacing: 4,
-          mainAxisSpacing: 4,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
+          childAspectRatio: 1,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) => _ScrapGridItem(
