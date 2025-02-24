@@ -2,7 +2,6 @@ package com.yumst.be.user.handler;
 
 import com.yumst.be.user.dto.PrincipalUserDetails;
 import com.yumst.be.user.jwt.JwtProvider;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
@@ -26,7 +23,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication){
 
         PrincipalUserDetails principal = (PrincipalUserDetails) authentication.getPrincipal();
         String userId = principal.getUserEntity().getUserId();
@@ -37,6 +34,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // TODO: 웹 사용시 경로 수정, 헤더->쿼리 파라미터로 수정
         response.setHeader("access", access);
 
-        response.sendRedirect(authSuccessUrl);
+//        response.sendRedirect(authSuccessUrl);
     }
 }

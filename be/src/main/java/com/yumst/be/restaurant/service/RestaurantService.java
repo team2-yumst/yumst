@@ -3,6 +3,7 @@ package com.yumst.be.restaurant.service;
 import com.yumst.be.restaurant.domain.Restaurant;
 import com.yumst.be.restaurant.domain.embed.NaverInformation;
 import com.yumst.be.restaurant.domain.embed.OpenDataInformation;
+import com.yumst.be.restaurant.exception.RestaurantException;
 import com.yumst.be.restaurant.repository.NaverReviewFeatureCountRepository;
 import com.yumst.be.restaurant.repository.RestaurantRepository;
 import com.yumst.be.restaurant.vo.ResponseRestaurant;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.yumst.be.restaurant.exception.RestaurantErrorCode.RESTAURANT_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +42,7 @@ public class RestaurantService {
 
     private ResponseRestaurant getResponseRestaurantByRestaurantId(String userId, String restaurantId) {
         Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 식당이 존재하지 않습니다."));
+                .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
         return getResponseRestaurant(userId, restaurant);
     }
 
