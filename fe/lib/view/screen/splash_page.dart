@@ -1,42 +1,84 @@
+import 'package:fe/repository/auth_repository.dart';
+import 'package:fe/view/screen/main_page.dart';
 import 'package:fe/view/screen/register_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
+  const SplashScreen({super.key});
+
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // 앱 초기화 로직
-    _initializeApp();
+    checkAuth();
   }
 
-  Future<void> _initializeApp() async {
-    // 필요한 초기화 작업들 (토큰 체크, 데이터 로드 등)
-    await Future.delayed(Duration(seconds: 2)); // 최소 2초 대기
+  Future<void> checkAuth() async {
+    await Future.delayed(const Duration(seconds: 2));
 
-    // 메인 화면 or 로그인 화면으로 이동
+    final authRepo = ref.read(authRepositoryProvider);
+    try {
+      await authRepo.getUser();
+      // 인증 성공 시 메인 화면으로 이동
+      _navigateToMain();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        // 401 Unauthorized: 로그인 화면으로 이동
+        authRepo.deleteStorageInfo();
+        _navigateToLogin();
+      } else {
+        // 기타 Dio 에러 발생 시 로그인 화면으로 이동
+        authRepo.deleteStorageInfo();
+        _navigateToLogin();
+      }
+    } catch (e) {
+      // 기타 에러 발생 시 메인 화면으로 이동
+      authRepo.deleteStorageInfo();
+      _navigateToLogin();
+    }
+  }
+
+  void _navigateToMain() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => RegisterPage()),
+      MaterialPageRoute(builder: (_) => const MainScreen()),
+    );
+  }
+
+  void _navigateToLogin() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const RegisterPage()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 앱 로고
-            FlutterLogo(size: 100),
-            SizedBox(height: 20),
-            // 로딩 인디케이터
-            CircularProgressIndicator(),
-          ],
+      // 배경 그라데이션을 위해 Container 사용
+      body: Container(
+        color: Color(0xFFDA5100),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 로고 이미지
+              Image.asset(
+                'assets/images/yumst_logo.png',
+                height: 200,
+                width: 200,
+              ),
+              const SizedBox(height: 50),
+              // CircularProgressIndicator 스타일 변경
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+              ),
+            ],
+          ),
         ),
       ),
     );

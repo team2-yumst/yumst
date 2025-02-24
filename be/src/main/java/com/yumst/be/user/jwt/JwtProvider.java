@@ -1,6 +1,7 @@
 package com.yumst.be.user.jwt;
 
 import com.yumst.be.redis.service.RefreshTokenRedisService;
+import com.yumst.be.user.exception.AuthException;
 import com.yumst.be.user.exception.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -93,7 +94,7 @@ public class JwtProvider {
         } catch (SecurityException e) {
             throw new TokenException(INVALID_SIGNATURE);
         } catch (Exception e) {
-            throw e;
+            throw new AuthException(INVALID_TOKEN);
         }
     }
 

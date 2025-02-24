@@ -13,7 +13,7 @@ class RegisterPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
         body: Container(
-          color: Color(0xFFE86111),
+          color: Color(0xFFDA5100),
           padding: EdgeInsets.only(top: 170, bottom: 90),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

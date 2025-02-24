@@ -4,6 +4,7 @@ import com.yumst.be.user.dto.UserDto;
 import com.yumst.be.user.jwt.JwtProvider;
 import com.yumst.be.user.service.OAuthClient;
 import com.yumst.be.user.service.UserService;
+import com.yumst.be.user.vo.request.RequestFinalRegister;
 import com.yumst.be.user.vo.request.RequestToken;
 import com.yumst.be.user.vo.response.ResponseUser;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,23 @@ public class UserController {
                 .body(responseUser);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<ResponseUser> registerFinalStep (
+            @RequestHeader String userId,
+            @RequestBody RequestFinalRegister requestFinalRegister
+    ) {
+
+        userService.updateAdditionalRegister(userId, requestFinalRegister.getPreferences());
+        return ResponseEntity.status(OK).body(null);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout (@RequestHeader String userId) {
+
+        userService.logout(userId);
+
+        return ResponseEntity.status(OK).body("logout success");
+    }
 
     @GetMapping()
     public ResponseEntity<ResponseUser> getUser (@RequestHeader String userId) {

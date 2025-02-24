@@ -28,4 +28,8 @@ public class RefreshTokenRedisService {
         return refreshTokenRepository.findById(userId);
     }
 
+    public void deleteRefreshToken(String userId) {
+        refreshTokenRepository.deleteById(userId);
+    }
+
 }

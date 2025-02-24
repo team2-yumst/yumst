@@ -123,5 +123,57 @@ class SecureStorage {
     }
   }
 
+  Future<void> deleteEmail() async {
+    try {
+      await storage.delete(key: 'email');
+      if (kDebugMode) {
+        print('[Secure Storage] email 삭제');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("[ERR] Email 삭제 실패: $e");
+      }
+    }
+  }
+
+  Future<void> deleteUserId() async {
+    try {
+      await storage.delete(key: 'userId');
+      if (kDebugMode) {
+        print('[Secure Storage] userId 삭제');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("[ERR] UserId 삭제 실패: $e");
+      }
+    }
+  }
+
+  Future<void> deleteAccessToken() async {
+    try {
+      await storage.delete(key: 'accessToken');
+      if (kDebugMode) {
+        print('[Secure Storage] accessToken 삭제');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("[ERR] AccessToken 삭제 실패: $e");
+      }
+    }
+  }
+
+  Future<void> deleteUserName() async {
+    try {
+      await storage.delete(key: 'userName');
+      if (kDebugMode) {
+        print('[Secure Storage] userName 삭제');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("[ERR] UserName 삭제 실패: $e");
+      }
+    }
+  }
+
 
 }

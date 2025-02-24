@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:fe/data/secure_storage.dart';
 import 'package:fe/data/token_interceptor.dart';
 import 'package:fe/model/user.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -39,12 +40,12 @@ class AuthRepository {
     }
   }
 
-  void signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? user = await GoogleSignIn().signIn();
 
       if (user == null) {
-        return;
+        return false;
       }
 
       final GoogleSignInAuthentication googleAuth = await user.authentication;
@@ -59,29 +60,38 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         addToStorage(response);
-      } else {
+        return true;
 
+      } else {
+        if (kDebugMode) {
+          print(response.statusCode);
+          print(response.statusMessage);
+        }
+        return false;
       }
     } catch (e) {
       print(e);
+      return false;
     }
   }
 
-  void signInWithGuest() async {
+  Future<bool> signInWithGuest() async {
     try {
-
       final response = await dio.post(
         'http://localhost:8080/api/user/v1/login/guest',
       );
 
       if (response.statusCode == 200) {
         addToStorage(response);
+        return true;
       } else {
         print(response.statusCode);
         print(response.statusMessage);
+        return false;
       }
     } catch (e) {
       print(e);
+      return false;
     }
   }
 
@@ -99,6 +109,44 @@ class AuthRepository {
     String name = response.data['name'];
     storage.saveUserName(name);
   }
+
+  deleteStorageInfo() {
+    storage.deleteAccessToken();
+    storage.deleteUserId();
+    storage.deleteEmail();
+    storage.deleteUserName();
+  }
+
+
+  Future<bool> submitRegistrationData(Map<String, dynamic> data) async {
+    try {
+      // 데이터 변환
+      final requestData = {
+        "preferences": [
+          ...data['step1'] as List<String>,
+          ...data['step2'] as List<String>,
+          ...data['step3'] as List<String>,
+        ]
+      };
+
+      // 백엔드 API 호출
+      final response = await dio.post(
+        "http://localhost:8080/api/user/v1/register",
+        data: requestData,
+      );
+
+      return response.statusCode == 200;
+    } on DioException catch (e) {
+      print('Error submitting data: ${e.message}');
+      return false;
+    }
+  }
+
+  sendLogout() async {
+    await dio.post('http://localhost:8080/api/user/v1/logout');
+    deleteStorageInfo();
+  }
+
 
 
 }
