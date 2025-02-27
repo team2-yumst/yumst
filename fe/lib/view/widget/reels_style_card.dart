@@ -219,8 +219,7 @@ class _ReelsStyleCardState extends ConsumerState<ReelsStyleCard>
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '#${restaurant.top2Features?[0]}  #${restaurant.top2Features?[1]}' ??
-                                          '정보 없음',
+                                      _buildTopFeatures(restaurant.top2Features),
                                       style: const TextStyle(
                                           color: Colors.white, fontSize: 16),
                                     ),
@@ -265,3 +264,12 @@ class _ReelsStyleCardState extends ConsumerState<ReelsStyleCard>
     );
   }
 }
+
+// 2개 미만일 경우를 위해 분리
+String _buildTopFeatures(List<String>? features) {
+  if (features == null || features.isEmpty) {
+    return '정보 없음';
+  }
+  return features.take(2).map((feature) => '#$feature').join(' ');
+}
+
