@@ -10,6 +10,7 @@ class GuestLoginButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authRepository = ref.watch(authRepositoryProvider);
+    // final locationService = ref.watch(locationServiceProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {

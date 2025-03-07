@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fe/data/secure_storage.dart';
@@ -131,7 +130,7 @@ class AuthRepository {
 
       // 백엔드 API 호출
       final response = await dio.post(
-        "http://localhost:8080/api/user/v1/register",
+        "http://localhost:8080/api/user/v1/register/survey",
         data: requestData,
       );
 
