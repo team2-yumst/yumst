@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:fe/model/restaurant.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/token_interceptor.dart';
@@ -19,7 +20,12 @@ class RestaurantRepository {
   });
   final Dio dio;
 
-  Future<List<Restaurant>> getRestaurants() async {
+  Future<List<Restaurant>> getRestaurants(Position position) async {
+
+    print("**********위도 경도********");
+    print(position.latitude.toString());
+    print(position.longitude.toString());
+
 
     final response = await dio.get("http://localhost:8080/api/restaurant/v0");
 

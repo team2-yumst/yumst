@@ -1,13 +1,16 @@
 import 'package:fe/repository/auth_repository.dart';
 import 'package:fe/view/screen/register_first_selection_page.dart';
+import 'package:fe/view/widget/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GuestLoginButton extends ConsumerWidget {
   const GuestLoginButton({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authRepository = ref.watch(authRepositoryProvider);
+    // final locationService = ref.watch(locationServiceProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -19,22 +22,36 @@ class GuestLoginButton extends ConsumerWidget {
 
         return Center(
           child: InkWell(
-            onTap: () async {
-              // 게스트 로그인 수행
-              final success = await authRepository.signInWithGuest();
-              if (success) {
-                // 로그인 성공 시 첫 번째 설문조사 화면으로 이동
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FirstRegisterSelection(),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('게스트 로그인에 실패했습니다.')),
-                );
-              }
+            onTap: () {
+              // UDialog를 사용하여 확인 다이얼로그 띄우기
+              UDialog.confirm(
+                context,
+                title: '비회원 로그인',
+                content: '비회원으로 로그인하시겠습니까? \n 비회원으로 시작하면 로그아웃 시\n모든 데이터가 삭제됩니다.',
+                negative: DialogAction('취소', () {
+                  // 취소 버튼 클릭 시 단순 dismiss
+                  return true;
+                }),
+                positive: DialogAction('계속', () {
+                  // 확인 버튼 클릭 시 비동기로 게스트 로그인 진행
+                  authRepository.signInWithGuest().then((success) {
+                    if (success) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FirstRegisterSelection(),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('게스트 로그인에 실패했습니다.')),
+                      );
+                    }
+                  });
+                  return true;
+                }),
+
+              );
             },
             child: Container(
               width: buttonWidth,
@@ -42,20 +59,17 @@ class GuestLoginButton extends ConsumerWidget {
               decoration: ShapeDecoration(
                 color: Colors.white30,
                 shape: RoundedRectangleBorder(
-                  // side: BorderSide(width: 1, color: Colors.white),
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Google Logo
                   Container(
                     width: logoSize,
                     height: logoSize,
                   ),
                   SizedBox(width: buttonWidth * 0.03), // Responsive spacing
-                  // Text
                   Text(
                     '비회원으로 시작하기',
                     style: TextStyle(
@@ -68,9 +82,9 @@ class GuestLoginButton extends ConsumerWidget {
                 ],
               ),
             ),
-          )
+          ),
         );
-        }
+      },
     );
   }
 }

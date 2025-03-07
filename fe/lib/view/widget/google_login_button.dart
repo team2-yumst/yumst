@@ -1,5 +1,6 @@
 
 import 'package:fe/repository/auth_repository.dart';
+import 'package:fe/view/screen/register_first_selection_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,7 +23,21 @@ class GoogleLoginButton extends ConsumerWidget {
         return Center(
           child: InkWell(
             onTap: () async {
-              authRepository.signInWithGoogle();
+              bool isAuthorized = await authRepository.signInWithGoogle();
+
+              if (isAuthorized) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FirstRegisterSelection(),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Google 로그인에 실패했습니다.')),
+                );
+              }
+
             },
             child: Container(
               width: buttonWidth,

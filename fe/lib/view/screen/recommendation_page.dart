@@ -1,3 +1,4 @@
+import 'package:fe/data/location_service.dart';
 import 'package:fe/repository/restaurant_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +8,9 @@ import '../widget/reels_style_card.dart';
 
 final restaurantsFutureProvider = FutureProvider<List<Restaurant>>((ref) async {
   final repository = ref.watch(restaurantRepositoryProvider);
-  return repository.getRestaurants();
+  final locationService = ref.watch(locationServiceProvider);
+  final position = await locationService.getPosition();
+  return repository.getRestaurants(position);
 });
 
 class RecommendationPage extends ConsumerWidget {
