@@ -5,8 +5,8 @@ import 'package:fe/view/widget/register_select_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ThirdRegisterSelection extends ConsumerWidget {
-  const ThirdRegisterSelection({super.key});
+class SurveyThird extends ConsumerWidget {
+  const SurveyThird({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

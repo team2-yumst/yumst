@@ -1,30 +1,35 @@
+// first_register_selection.dart
 import 'package:fe/data/register_state.dart';
-import 'package:fe/view/screen/register_third_selection_page.dart';
+import 'package:fe/view/screen/auth_page/survey_second_page.dart';
 import 'package:fe/view/widget/register_select_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SecondRegisterSelection extends ConsumerWidget {
-  const SecondRegisterSelection({super.key});
+class SurveyFirst extends ConsumerWidget {
+  const SurveyFirst({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // step2 데이터를 List<String>으로 캐스팅
-    final step2Data = ref.watch(registrationDataProvider)['step2'] as List<String>;
-    final selectedOptions = step2Data.toSet();
+    // step1 데이터는 이제 List<String> 타입입니다.
+    final step1Data = ref.watch(registrationDataProvider)['step1'] as List<String>;
+    final selectedOptions = step1Data.toSet();
 
-    final String title = "어떤 식당을 좋아하나요?";
+    final String title = "선호하는 분위기를 알려주세요";
     final List<String> options = [
-      "혼밥하기 좋은 곳",
-      "양이 많은 곳",
-      "재료가 신선한 곳",
-      "빨리 나오는 곳",
-      "맛있는 곳"
+      "친절한 곳",
+      "인테리어가 멋진 곳",
+      "가성비 좋은 곳",
+      "청결한 곳",
+      "대화하기 좋은 곳",
+      "단체 모임하기 좋은 곳",
+      "주차하기 편한 곳",
+      "넓은 곳",
+      "뷰가 좋은 곳",
+      "특별한 날 가기 좋은 곳"
     ];
-    final int maxSelection = 2;
+    final int maxSelection = 4;
 
     return Scaffold(
-      appBar: AppBar(backgroundColor: const Color(0xFFDA5100)),
       body: Container(
         color: const Color(0xFFDA5100),
         padding: const EdgeInsets.only(top: 100, bottom: 30),
@@ -48,8 +53,9 @@ class SecondRegisterSelection extends ConsumerWidget {
                 isSelected: selectedOptions.contains(options[i]),
                 onTap: () {
                   final currentData = ref.read(registrationDataProvider);
-                  final currentSelections = List<String>.from(currentData['step2']);
-                  Set<String> newSet = Set<String>.from(currentSelections);
+                  // 현재 step1의 데이터는 List<String>입니다.
+                  final currentSelections = List<String>.from(currentData['step1']);
+                  final Set<String> newSet = Set<String>.from(currentSelections);
                   final String optionValue = options[i];
 
                   if (newSet.contains(optionValue)) {
@@ -58,8 +64,9 @@ class SecondRegisterSelection extends ConsumerWidget {
                     newSet.add(optionValue);
                   }
 
-                  ref.read(registrationDataProvider.notifier)
-                      .updateStepData('step2', newSet.toList());
+                  ref
+                      .read(registrationDataProvider.notifier)
+                      .updateStepData('step1', newSet.toList());
                 },
               ),
               if (i != options.length - 1) const SizedBox(height: 10),
@@ -70,7 +77,7 @@ class SecondRegisterSelection extends ConsumerWidget {
                   ? () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ThirdRegisterSelection(),
+                  builder: (context) => const SurveySecond(),
                 ),
               )
                   : null,
