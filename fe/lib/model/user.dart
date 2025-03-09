@@ -6,6 +6,13 @@ class User{
   String? userName;
   String? imageUrl;
 
+  bool? finishedSurvey;
+  bool? agreedPrivacyPolicy;
+  bool? agreedTermsOfService;
+  bool? agreedLocationTerms;
+
+  bool? isEnabled;
+
   List<Restaurant> scrapList = [];
 
   User({
@@ -23,6 +30,12 @@ class User{
         .map((item) => Restaurant.fromJson(item as Map<String, dynamic>))
         .toList()
         : [];
+
+    finishedSurvey = json['finishedSurvey'];
+    agreedPrivacyPolicy = json['agreedPrivacyPolicy'];
+    agreedTermsOfService = json['agreedTermsOfService'];
+    agreedLocationTerms = json['agreedLocationTerms'];
+    isEnabled = json['isEnabled'];
   }
 
 
