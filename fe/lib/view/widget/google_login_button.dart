@@ -1,6 +1,6 @@
 
 import 'package:fe/repository/auth_repository.dart';
-import 'package:fe/view/screen/register_first_selection_page.dart';
+import 'package:fe/view/screen/auth_page/user_terms_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +29,7 @@ class GoogleLoginButton extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const FirstRegisterSelection(),
+                    builder: (context) => UserTermsPage(),
                   ),
                 );
               } else {
