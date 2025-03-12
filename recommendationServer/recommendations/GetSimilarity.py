@@ -164,7 +164,7 @@ class SimilarityCalc:
 
     def getRecommedScore(self):
         user_features, restaurant_table = self.getUserFeature()
-        if user_features.empty:
+        if user_features.shape[0]==0:
             return JsonResponse({
                 "status": "404 Not Found",
                 "message": f"Empty Restaurant Feature"
@@ -182,7 +182,7 @@ class SimilarityCalc:
         restaurant_feature_table = rt_pivot.reset_index()
         restaurant_feature_table = restaurant_feature_table.set_index('restaurant_id')
         restaurant_features = restaurant_feature_table.drop(columns=['name']).values  # restaurant_df에서 feature들만 사용
-        if restaurant_features.empty:
+        if restaurant_features.shape[0]==0:
             return JsonResponse({
                 "status": "404 Not Found",
                 "message": f"Empty Restaurant Feature"

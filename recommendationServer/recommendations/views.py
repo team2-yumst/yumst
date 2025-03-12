@@ -50,6 +50,7 @@ def restaurant_recommendation_walk(request):
 
         similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=True)
         recommend_table = similarityCalc.getRecommedScore()
+        print(recommend_table)
         if isinstance(recommend_table, JsonResponse):
             return recommend_table
 
@@ -83,16 +84,16 @@ def restaurant_recommendation_vehicle(request):
     try:
         # 헤더에서 user_id를 가져오기
         user_id = request.META.get('HTTP_USERID')  # HTTP_ 접두사와 대문자 사용
-        if user_id is None:
+        if user_id is None or user_id == '':
             return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(userId)"}, status=400)
 
         # 쿼리 파라미터에서 위도와 경도를 가져오기
         user_lat = request.GET.get('latitude')
-        if user_lat is None:
+        if user_lat is None or user_lat == '':
             return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(latitude)"}, status=400)
 
         user_long = request.GET.get('longitude')
-        if user_long is None:
+        if user_long is None or user_long == '':
             return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(longitude)"}, status=400)
 
         user_lat = float(user_lat)
@@ -103,6 +104,8 @@ def restaurant_recommendation_vehicle(request):
 
         similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=False)
         recommend_table = similarityCalc.getRecommedScore()
+        if isinstance(recommend_table, JsonResponse):
+            return recommend_table
 
         # recommend_score 컬럼을 기준으로 내림차순 정렬
         recommend_table_sorted = recommend_table.sort_values(by='recommend_score', ascending=False)
