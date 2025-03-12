@@ -45,9 +45,6 @@ def restaurant_recommendation_walk(request):
         user_lat = float(user_lat)
         user_long = float(user_long)
 
-        if not user_id or not user_lat or not user_long:
-            return JsonResponse({"error": "Missing required parameters"}, status=400)
-
         similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=True)
         recommend_table = similarityCalc.getRecommedScore()
         print(recommend_table)
@@ -98,9 +95,6 @@ def restaurant_recommendation_vehicle(request):
 
         user_lat = float(user_lat)
         user_long = float(user_long)
-
-        if not user_id or not user_lat or not user_long:
-            return JsonResponse({"error": "Missing required parameters"}, status=400)
 
         similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=False)
         recommend_table = similarityCalc.getRecommedScore()
