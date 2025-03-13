@@ -25,71 +25,101 @@ class RecommendationPagination(PageNumberPagination):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def restaurant_recommendation_walk(request):
-    # 헤더에서 user_id를 가져오기
-    user_id = request.META.get('HTTP_USERID')  # HTTP_ 접두사와 대문자 사용
+    try:
+        # 헤더에서 user_id를 가져오기
+        user_id = request.META.get('HTTP_USERID')  # HTTP_ 접두사와 대문자 사용
+        if user_id is None:
+            return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(userId)"}, status=400)
 
-    # 쿼리 파라미터에서 위도와 경도를 가져오기
-    user_lat = request.GET.get('latitude')
-    user_long = request.GET.get('longitude')
-    user_lat = float(user_lat)
-    user_long = float(user_long)
+        # 쿼리 파라미터에서 위도와 경도를 가져오기
+        user_lat = request.GET.get('latitude')
+        if user_lat is None:
+            return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(latitude)"},
+                                status=400)
 
-    if not user_id or not user_lat or not user_long:
-        return JsonResponse({"error": "Missing required parameters"}, status=400)
+        user_long = request.GET.get('longitude')
+        if user_long is None:
+            return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(longitude)"},
+                                status=400)
 
-    similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=True)
-    recommend_table = similarityCalc.getRecommedScore()
-    recommend_table.to_csv('recommend_table.csv')
+        user_lat = float(user_lat)
+        user_long = float(user_long)
 
-    # recommend_score 컬럼을 기준으로 내림차순 정렬
-    recommend_table_sorted = recommend_table.sort_values(by='recommend_score', ascending=False)
+        similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=True)
+        recommend_table = similarityCalc.getRecommedScore()
+        print(recommend_table)
+        if isinstance(recommend_table, JsonResponse):
+            return recommend_table
 
-    top_restaurants = []
-    for idx, row in recommend_table_sorted.iterrows():
-        recommend = {
-            'restaurant_id': row['restaurant_id'],
-            'distance': row['distance'],
-            'recommend_score': row['recommend_score']
-        }
-        top_restaurants.append(recommend)
+        # recommend_score 컬럼을 기준으로 내림차순 정렬
+        recommend_table_sorted = recommend_table.sort_values(by='recommend_score', ascending=False)
 
-    # 페이지네이션 적용
-    paginator = RecommendationPagination()
-    page = paginator.paginate_queryset(top_restaurants, request)
-    return paginator.get_paginated_response(page)
+        top_restaurants = []
+        for idx, row in recommend_table_sorted.iterrows():
+            recommend = {
+                'restaurant_id': row['restaurant_id'],
+                'distance': row['distance'],
+                'recommend_score': row['recommend_score']
+            }
+            top_restaurants.append(recommend)
+
+        # 페이지네이션 적용
+        paginator = RecommendationPagination()
+        page = paginator.paginate_queryset(top_restaurants, request)
+        return paginator.get_paginated_response(page)
+    except Exception as e:
+        # 예기치 않은 오류가 발생했을 경우 그 오류 메시지를 반환
+        return JsonResponse({
+            "status": "500 Internal Server Error",
+            "message": f"An unexpected error occurred: {str(e)}"
+        }, status=500)
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def restaurant_recommendation_vehicle(request):
-    # 헤더에서 user_id를 가져오기
-    user_id = request.META.get('HTTP_USERID')  # HTTP_ 접두사와 대문자 사용
+    try:
+        # 헤더에서 user_id를 가져오기
+        user_id = request.META.get('HTTP_USERID')  # HTTP_ 접두사와 대문자 사용
+        if not user_id:
+            return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(userId)"}, status=400)
 
-    # 쿼리 파라미터에서 위도와 경도를 가져오기
-    user_lat = request.GET.get('latitude')
-    user_long = request.GET.get('longitude')
-    user_lat = float(user_lat)
-    user_long = float(user_long)
+        # 쿼리 파라미터에서 위도와 경도를 가져오기
+        user_lat = request.GET.get('latitude')
+        if not user_lat:
+            return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(latitude)"}, status=400)
 
-    if not user_id or not user_lat or not user_long:
-        return JsonResponse({"error": "Missing required parameters"}, status=400)
+        user_long = request.GET.get('longitude')
+        if not user_long:
+            return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(longitude)"}, status=400)
 
-    similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=False)
-    recommend_table = similarityCalc.getRecommedScore()
+        user_lat = float(user_lat)
+        user_long = float(user_long)
 
-    # recommend_score 컬럼을 기준으로 내림차순 정렬
-    recommend_table_sorted = recommend_table.sort_values(by='recommend_score', ascending=False)
+        similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=False)
+        recommend_table = similarityCalc.getRecommedScore()
+        if isinstance(recommend_table, JsonResponse):
+            return recommend_table
 
-    top_restaurants = []
-    for idx, row in recommend_table_sorted.iterrows():
-        recommend = {
-            'restaurant_id': row['restaurant_id'],
-            'distance': row['distance'],
-            'recommend_score': row['recommend_score']
-        }
-        top_restaurants.append(recommend)
+        # recommend_score 컬럼을 기준으로 내림차순 정렬
+        recommend_table_sorted = recommend_table.sort_values(by='recommend_score', ascending=False)
 
-    # 페이지네이션 적용
-    paginator = RecommendationPagination()
-    page = paginator.paginate_queryset(top_restaurants, request)
-    return paginator.get_paginated_response(page)
+        top_restaurants = []
+        for idx, row in recommend_table_sorted.iterrows():
+            recommend = {
+                'restaurant_id': row['restaurant_id'],
+                'distance': row['distance'],
+                'recommend_score': row['recommend_score']
+            }
+            top_restaurants.append(recommend)
+
+        # 페이지네이션 적용
+        paginator = RecommendationPagination()
+        page = paginator.paginate_queryset(top_restaurants, request)
+        return paginator.get_paginated_response(page)
+    except Exception as e:
+        # 예기치 않은 오류가 발생했을 경우 그 오류 메시지를 반환
+        return JsonResponse({
+            "status": "500 Internal Server Error",
+            "message": f"An unexpected error occurred: {str(e)}"
+        }, status=500)
