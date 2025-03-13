@@ -90,7 +90,7 @@ def restaurant_recommendation_vehicle(request):
             return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(latitude)"}, status=400)
 
         user_long = request.GET.get('longitude')
-        if user_long is None or user_long == '':
+        if not user_long:
             return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(longitude)"}, status=400)
 
         user_lat = float(user_lat)
