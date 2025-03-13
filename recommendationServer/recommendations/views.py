@@ -81,7 +81,7 @@ def restaurant_recommendation_vehicle(request):
     try:
         # 헤더에서 user_id를 가져오기
         user_id = request.META.get('HTTP_USERID')  # HTTP_ 접두사와 대문자 사용
-        if user_id is None or user_id == '':
+        if not user_id:
             return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(userId)"}, status=400)
 
         # 쿼리 파라미터에서 위도와 경도를 가져오기
