@@ -86,7 +86,7 @@ def restaurant_recommendation_vehicle(request):
 
         # 쿼리 파라미터에서 위도와 경도를 가져오기
         user_lat = request.GET.get('latitude')
-        if user_lat is None or user_lat == '':
+        if not user_lat:
             return JsonResponse({"error": "400 Bad Request", "message": "Missing required parameters(latitude)"}, status=400)
 
         user_long = request.GET.get('longitude')
