@@ -31,14 +31,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
       if (user.finishedSurvey == false) {
         _navigateToSurvey();
-      }
-
-      if (user.agreedPrivacyPolicy == false) {
+      } else if (user.agreedPrivacyPolicy == false) {
         _navigateToTerms();
-      }
-
-      if (user.isEnabled == true) {
+      } else if (user.isEnabled == true) {
         _navigateToMain();
+      } else {
+        _navigateToLogin();
       }
 
     } on DioException catch (e) {
