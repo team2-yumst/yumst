@@ -1,9 +1,12 @@
 import 'package:fe/repository/auth_repository.dart';
 import 'package:fe/view/screen/main_page.dart';
-import 'package:fe/view/screen/register_page.dart';
+import 'package:fe/view/screen/auth_page/survey_first_page.dart';
+import 'package:fe/view/screen/auth_page/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+
+import 'auth_page/user_terms_page.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -24,9 +27,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     final authRepo = ref.read(authRepositoryProvider);
     try {
-      await authRepo.getUser();
-      // 인증 성공 시 메인 화면으로 이동
-      _navigateToMain();
+      final user =  await authRepo.getUser();
+
+      if (user.finishedSurvey == false) {
+        _navigateToSurvey();
+      } else if (user.agreedPrivacyPolicy == false) {
+        _navigateToTerms();
+      } else if (user.isEnabled == true) {
+        _navigateToMain();
+      } else {
+        _navigateToLogin();
+      }
+
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         // 401 Unauthorized: 로그인 화면으로 이동
@@ -53,6 +65,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   void _navigateToLogin() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const RegisterPage()),
+    );
+  }
+
+  void _navigateToSurvey() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const SurveyFirst()),
+    );
+  }
+
+  void _navigateToTerms() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => UserTermsPage()),
     );
   }
 

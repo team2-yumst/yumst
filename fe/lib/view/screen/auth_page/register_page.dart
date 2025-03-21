@@ -4,7 +4,7 @@ import 'package:fe/view/widget/google_login_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../widget/guest_login_button.dart';
+import '../../widget/guest_login_button.dart';
 
 class RegisterPage extends ConsumerWidget {
   const RegisterPage({super.key});
