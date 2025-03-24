@@ -11,7 +11,7 @@ spring:
     job:
       enabled: false
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
 
   jpa:
     hibernate:
@@ -40,10 +40,10 @@ spring:
       port: ${REDIS_PORT}
 
 logging.level:
-  org.hibernate.SQL: debug
+#  org.hibernate.SQL: debug
+  org.springframework.web: debug
+  org.springframework.security: debug
 #  org.springframework.batch: debug
-  #  org.springframework.security: debug
-  #  org.springframework.web: debug
 #  com.yumst.be.crawl: debug
 
 jwt:
