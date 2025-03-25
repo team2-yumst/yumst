@@ -56,24 +56,18 @@ public class UserEntity extends BaseTimeEntity {
         this.userId = UUID.randomUUID().toString();
         this.role = Role.USER;
         this.isDeleted = false;
+        this.userTerms = new UserTerms();
 
         this.name = name;
         this.email = email;
         this.imageUrl = imageUrl;
-
-        this.userTerms = new UserTerms();
     }
 
     public UserEntity registerGuest() {
-        this.userId = UUID.randomUUID().toString();
         this.name = "guest";
         this.email = userId + "@guest.com";
         this.imageUrl = "https://img.icons8.com/fluency-systems-filled/96/guest-male.png";
-        this.role = Role.USER;
-        this.isDeleted = false;
         this.isGuest = true;
-
-        this.userTerms = new UserTerms();
 
         return this;
     }

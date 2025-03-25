@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ResponseError {
-    private String status;
+    private int status;
     private String message;
     
 }
