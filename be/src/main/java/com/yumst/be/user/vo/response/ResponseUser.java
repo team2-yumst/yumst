@@ -20,5 +20,12 @@ public class ResponseUser {
 
     private String imageUrl;
 
+    private boolean finishedSurvey;
+    private boolean agreedPrivacyPolicy;
+    private boolean agreedTermsOfService;
+    private boolean agreedLocationTerms;
+
+    private boolean isEnabled;
+
     private List<ResponseRestaurant> scrap;
 }
