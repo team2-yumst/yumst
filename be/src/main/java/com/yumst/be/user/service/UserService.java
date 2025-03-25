@@ -43,16 +43,14 @@ public class UserService {
         return modelMapper.map(user, UserDto.class);
     }
 
-    public UserDto getUser(String userId) {
+    public UserDto findUserWithScrappedRestaurant(String userId) {
         UserEntity user = userRepository.findByUserId(userId)
                                         .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
 
         UserDto userDto = modelMapper.map(user, UserDto.class);
+        findUserTermsInfo(userDto, user);
+        findScrappedRestaurant(userId, userDto);
 
-        List<String> scrappedId = userRestaurantScrapRepository.findAllRestaurantIdByUserId(userId);
-        List<ResponseRestaurant> responseRestaurantList = restaurantService.getResponseRestaurantList(scrappedId, userId);
-
-        userDto.setScrap(responseRestaurantList);
         return userDto;
     }
 
@@ -67,7 +65,7 @@ public class UserService {
 
 
     @Transactional
-    public void updateAdditionalRegister(String userId, List<String> preferences) {
+    public void updateSurveyInfo(String userId, List<String> preferences) {
 
         UserEntity user = userRepository.findByUserId(userId)
                                         .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
@@ -76,11 +74,40 @@ public class UserService {
                 .map(preference -> new UserPreference(user, preference))
                 .collect(Collectors.toList());
 
+        user.finishedSurvey();
+        user.finishRegisterAndEnable();
+
         userPreferenceRepository.saveAll(userPreferences);
+    }
+
+    @Transactional
+    public void updateAgreeTerms(String userId) {
+
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
+
+        user.updateAgreeTerms();
     }
 
     public void logout(String userId) {
         refreshTokenRedisService.deleteRefreshToken(userId);
     }
+
+
+    private void findScrappedRestaurant(String userId, UserDto userDto) {
+        List<String> scrappedId = userRestaurantScrapRepository.findAllRestaurantIdByUserId(userId);
+        List<ResponseRestaurant> responseRestaurantList = restaurantService.getResponseRestaurantList(scrappedId, userId);
+
+        userDto.setScrap(responseRestaurantList);
+    }
+
+    private void findUserTermsInfo(UserDto userDto, UserEntity user) {
+        userDto.setFinishedSurvey(user.getUserTerms().isFinishedSurvey());
+        userDto.setAgreedLocationTerms(user.getUserTerms().isAgreedLocationTerms());
+        userDto.setAgreedPrivacyPolicy(user.getUserTerms().isAgreedPrivacyPolicy());
+        userDto.setAgreedTermsOfService(user.getUserTerms().isAgreedTermsOfService());
+    }
+
+
 }
 

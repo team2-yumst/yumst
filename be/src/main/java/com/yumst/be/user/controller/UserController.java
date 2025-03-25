@@ -55,13 +55,22 @@ public class UserController {
                 .body(responseUser);
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<ResponseUser> registerFinalStep (
+    @PostMapping("/register/agree")
+    public ResponseEntity<ResponseUser> agreeTerms(
+            @RequestHeader String userId
+    ) {
+        userService.updateAgreeTerms(userId);
+        return ResponseEntity.status(OK).body(null);
+    }
+
+
+    @PostMapping("/register/survey")
+    public ResponseEntity<ResponseUser> registerFinalStepSurvey(
             @RequestHeader String userId,
             @RequestBody RequestFinalRegister requestFinalRegister
     ) {
 
-        userService.updateAdditionalRegister(userId, requestFinalRegister.getPreferences());
+        userService.updateSurveyInfo(userId, requestFinalRegister.getPreferences());
         return ResponseEntity.status(OK).body(null);
     }
 
@@ -76,7 +85,7 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<ResponseUser> getUser (@RequestHeader String userId) {
 
-        UserDto userDto = userService.getUser(userId);
+        UserDto userDto = userService.findUserWithScrappedRestaurant(userId);
         ResponseUser responseUser = modelMapper.map(userDto, ResponseUser.class);
 
         return ResponseEntity.status(OK).body(responseUser);
