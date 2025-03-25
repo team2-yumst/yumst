@@ -44,6 +44,12 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean isDeleted;
 
+    @ColumnDefault("false")
+    private boolean isEnabled;
+
+    @Embedded
+    private UserTerms userTerms;
+
     // OAuth 회원가입
     @Builder
     public UserEntity(String email, String name, String imageUrl) {
@@ -54,6 +60,8 @@ public class UserEntity extends BaseTimeEntity {
         this.name = name;
         this.email = email;
         this.imageUrl = imageUrl;
+
+        this.userTerms = new UserTerms();
     }
 
     public UserEntity registerGuest() {
@@ -65,7 +73,23 @@ public class UserEntity extends BaseTimeEntity {
         this.isDeleted = false;
         this.isGuest = true;
 
+        this.userTerms = new UserTerms();
+
         return this;
+    }
+
+    public void finishRegisterAndEnable() {
+        this.isEnabled = true;
+    }
+
+    public void finishedSurvey() {
+        this.userTerms.finishSurvey();
+    }
+
+    public void updateAgreeTerms() {
+        this.userTerms.agreeTermsOfService();
+        this.userTerms.agreePrivacyPolicy();
+        this.userTerms.agreeLocationTerms();
     }
 
 
