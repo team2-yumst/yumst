@@ -61,6 +61,7 @@ public class RestaurantService {
         addOpenDataInfoToResponse(responseRestaurant, restaurant.getOpenDataInformation());
         addFeaturesToResponse(responseRestaurant, restaurant.getRestaurantId());
         addScrappedToResponse(responseRestaurant, restaurant.getRestaurantId(), userId);
+        setLikeAndDislike(responseRestaurant, restaurant.getRestaurantId());
         return responseRestaurant;
     }
 
@@ -92,6 +93,13 @@ public class RestaurantService {
         responseRestaurant.setLongitude(naverInformation.getLongitude());
         responseRestaurant.setThumbnailUrl(naverInformation.getThumbnailUrl());
         responseRestaurant.setTodayOpening(naverInformation.getTodayOperatingHours());
+    }
+
+    private void setLikeAndDislike(ResponseRestaurant responseRestaurant, String restaurantId) {
+        Long likes = Long.valueOf(userRestaurantVoteRepository.countByRestaurantIdAndVoteType(restaurantId, VoteType.LIKE));
+        Long dislikes = Long.valueOf(userRestaurantVoteRepository.countByRestaurantIdAndVoteType(restaurantId, VoteType.DISLIKE));
+        responseRestaurant.setLikeCount(likes);
+        responseRestaurant.setDislikeCount(dislikes);
     }
 
     public List<ResponseRestaurant> findNearbyRestaurants(String userId, Double latitude, Double longitude, Double radius, String sort, Pageable pageable) {
