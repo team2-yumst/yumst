@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: prod, jwt, oauth
+    include: local, jwt, oauth
 
   datasource:
     url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE}
@@ -60,4 +60,4 @@ etc:
 
 chrome:
   driver:
-    path: "C:\\Users\\Leo\\chromedriver-win64\\chromedriver.exe"
+    path: ${CHROME_DRIVER_PATH}
