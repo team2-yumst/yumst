@@ -60,4 +60,4 @@ etc:
 
 chrome:
   driver:
-    path: "C:\\Users\\Leo\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe"
+    path: ${CHROME_DRIVER_PATH}
