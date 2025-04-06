@@ -33,4 +33,6 @@ public class ResponseRestaurant {
 
     private Long likeCount;
     private Long dislikeCount;
+
+    private Double distance;
 }
