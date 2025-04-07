@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:fe/data/secure_storage.dart';
 import 'package:fe/data/token_interceptor.dart';
@@ -146,6 +145,21 @@ class AuthRepository {
     deleteStorageInfo();
   }
 
+  Future<bool> agreeToTerms() async {
+    try {
+      final response = await dio.post(
+        "http://localhost:8080/api/user/v1/register/agree",
+      );
 
+      return response.statusCode == 200;
+    } on DioException catch (e) {
+      print('Error agreeing to terms: ${e.message}');
+      print('Error response: ${e.response?.data}');
+      return false;
+    } catch (e) {
+      print('Error agreeing to terms: $e');
+      return false;
+    }
+  }
 
 }

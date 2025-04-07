@@ -12,8 +12,8 @@ class Restaurant {
     required this.todayOpening,
     required this.top2Features,
     required this.isScrapped,
-    required this.likeCount,
-    required this.dislikeCount,
+    this.likeCount,
+    this.dislikeCount,
   });
 
   String? restaurantId;
@@ -45,7 +45,11 @@ class Restaurant {
     roadNameFullAddress = json['roadNameFullAddress'];
     phoneNumber = json['phoneNumber'];
     todayOpening = json['todayOpening'];
-    top2Features = json['top2Features'].cast<String>();
+    if (json['top2Features'] != null && json['top2Features'] is List) {
+        top2Features = List<String>.from(json['top2Features']);
+    } else {
+        top2Features = null;
+    }
     isScrapped = json['scrapped'];
     likeCount = json['likeCount'];
     dislikeCount = json['dislikeCount'];
@@ -60,6 +64,8 @@ class Restaurant {
     data['thumbnailUrl'] = thumbnailUrl;
     data['fullAddress'] = fullAddress;
     data['roadNameFullAddress'] = roadNameFullAddress;
+    data['likeCount'] = likeCount;
+    data['dislikeCount'] = dislikeCount;
     return data;
   }
 

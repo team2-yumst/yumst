@@ -1,5 +1,6 @@
 import 'package:fe/view/screen/my_page.dart';
 import 'package:fe/view/screen/recommendation_page.dart';
+import 'package:fe/view/screen/vote_page.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -14,7 +15,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static final List<Widget> _pages = [
     RecommendationPage(),
-    Center(child: Text('투표 기능은 준비중입니다')),
+    VotePage(),
     MyPageScreen(),
   ];
 

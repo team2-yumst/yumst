@@ -7,9 +7,8 @@ import '../../model/restaurant.dart';
 import '../widget/reels_style_card.dart';
 
 final restaurantsFutureProvider = FutureProvider<List<Restaurant>>((ref) async {
+  final position = await ref.watch(currentPositionProvider.future);
   final repository = ref.watch(restaurantRepositoryProvider);
-  final locationService = ref.watch(locationServiceProvider);
-  final position = await locationService.getPosition();
   return repository.getRestaurants(position);
 });
 
@@ -34,7 +33,7 @@ class RecommendationPage extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stackTrace) => Scaffold(
-        body: Center(child: Text("Error: $error")),
+        body: Center(child: Text("Error loading recommendations: $error")),
       ),
     );
   }
