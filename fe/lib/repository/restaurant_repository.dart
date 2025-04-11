@@ -27,7 +27,7 @@ class RestaurantRepository {
     print(position.longitude.toString());
 
 
-    final response = await dio.get("http://localhost:8080/api/restaurant/v0");
+    final response = await dio.get("http://localhost:8080/api/recommendation/v0");
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data;

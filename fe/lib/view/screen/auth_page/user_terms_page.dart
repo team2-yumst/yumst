@@ -1,15 +1,18 @@
 import 'package:fe/view/screen/auth_page/survey_first_page.dart';
 import 'package:fe/view/screen/auth_page/terms_detail_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class UserTermsPage extends StatefulWidget {
+import '../../../repository/auth_repository.dart';
+
+class UserTermsPage extends ConsumerStatefulWidget {
   const UserTermsPage({super.key});
 
   @override
-  _UserTermsPageState createState() => _UserTermsPageState();
+  ConsumerState<UserTermsPage> createState() => _UserTermsPageState();
 }
 
-class _UserTermsPageState extends State<UserTermsPage> {
+class _UserTermsPageState extends ConsumerState<UserTermsPage> {
   bool _allAgreed = false;
   bool _ageAgreed = false;
   bool _serviceAgreed = false;
@@ -23,7 +26,6 @@ class _UserTermsPageState extends State<UserTermsPage> {
     });
   }
 
-  // 제목에 포함된 (필수) 텍스트만 주황색으로 처리하는 헬퍼 함수
   List<TextSpan> _buildTermTitle(String title) {
     if (title.startsWith('(필수)')) {
       String rest = title.substring('(필수)'.length).trimLeft();
@@ -42,6 +44,24 @@ class _UserTermsPageState extends State<UserTermsPage> {
     }
   }
 
+  Future<void> _handleAgreement() async {
+    final authRepo = ref.read(authRepositoryProvider);
+    final success = await authRepo.agreeTerms();
+
+    if (success && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const SurveyFirst()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('약관 동의에 실패했습니다. 다시 시도해주세요.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +71,6 @@ class _UserTermsPageState extends State<UserTermsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 전체 동의 (체크박스를 오른쪽에 배치하며 여백 조정)
             CheckboxListTile(
               contentPadding: EdgeInsets.only(right: 8, left: 8),
               title: Text('전체 동의',
@@ -70,7 +89,6 @@ class _UserTermsPageState extends State<UserTermsPage> {
             ),
             Divider(thickness: 2),
             SizedBox(height: 16),
-            // 개별 약관 동의
             _buildTermRow(
               title: '(필수)  만 14세 이상입니다',
               agreed: _ageAgreed,
@@ -137,11 +155,10 @@ class _UserTermsPageState extends State<UserTermsPage> {
       ),
       bottomNavigationBar: ElevatedButton(
         onPressed: (_ageAgreed &&
-                _serviceAgreed &&
-                _privacyAgreed &&
-                _locationAgreed)
-            ? () => Navigator.pop(context,
-                MaterialPageRoute(builder: (context) => const SurveyFirst()))
+            _serviceAgreed &&
+            _privacyAgreed &&
+            _locationAgreed)
+            ? _handleAgreement
             : null,
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
@@ -191,7 +208,6 @@ class _UserTermsPageState extends State<UserTermsPage> {
               ),
             ),
           ),
-          // 체크박스로 동의 여부 표시
           Checkbox(
             value: agreed,
             onChanged: (bool? value) {
