@@ -45,7 +45,8 @@ public class OAuthClient {
                 .build();
 
         UserEntity userEntity = getOrSave(oAuth2UserInfo);
-        return modelMapper.map(userEntity, UserDto.class);
+
+        return UserDto.from(userEntity);
     }
 
     public UsernamePasswordAuthenticationToken getAuthentication(String name) {
