@@ -4,6 +4,9 @@ import 'package:fe/view/screen/auth_page/user_terms_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../screen/auth_page/survey_first_page.dart';
+import '../screen/main_page.dart';
+
 class GoogleLoginButton extends ConsumerWidget {
   const GoogleLoginButton({super.key});
 
@@ -23,21 +26,25 @@ class GoogleLoginButton extends ConsumerWidget {
         return Center(
           child: InkWell(
             onTap: () async {
-              bool isAuthorized = await authRepository.signInWithGoogle();
+              final user = await authRepository.signInWithGoogle();
 
-              if (isAuthorized) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UserTermsPage(),
-                  ),
+              // 약관 동의 체크
+              if (user.agreedPrivacyPolicy == false) {
+                // 약관 동의 페이지로 이동
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => UserTermsPage()),
                 );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Google 로그인에 실패했습니다.')),
+              } else if (user.finishedSurvey == false) {
+                // 설문 페이지로 이동
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => SurveyFirst()),
+                );
+              } else if (user.enabled == true) {
+                // 메인 화면으로 이동
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => MainScreen()),
                 );
               }
-
             },
             child: Container(
               width: buttonWidth,
