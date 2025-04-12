@@ -1,36 +1,66 @@
 package com.yumst.be.restaurant.vo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
+import com.yumst.be.restaurant.domain.Restaurant;
+import lombok.Builder;
 
 import java.util.List;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-@Data
+@Builder
 @JsonInclude(NON_NULL)
-public class ResponseRestaurant {
+public record ResponseRestaurant(
+        String restaurantId,
+        String name,
+        String category,
+        String latitude,
+        String longitude,
+        String thumbnailUrl,
+        String fullAddress,
+        String roadNameFullAddress,
+        String phoneNumber,
+        String todayOpening,
+        List<String> top2Features,
+        boolean isScrapped,
+        Long likeCount,
+        Long dislikeCount,
+        Double distance
+) {
 
-    private String restaurantId;
+    public static ResponseRestaurant from(Restaurant restaurant, List<String> top2Features, boolean isScrapped, double distance) {
+        return ResponseRestaurant.builder()
+                .restaurantId(restaurant.getRestaurantId())
+                .name(restaurant.getNaverInformation().getName())
+                .category(restaurant.getNaverInformation().getCategory())
+                .latitude(restaurant.getNaverInformation().getLatitude())
+                .longitude(restaurant.getNaverInformation().getLongitude())
+                .thumbnailUrl(restaurant.getNaverInformation().getThumbnailUrl())
+                .fullAddress(restaurant.getOpenDataInformation().getFullAddress())
+                .roadNameFullAddress(restaurant.getOpenDataInformation().getRoadNameFullAddress())
+                .phoneNumber(restaurant.getOpenDataInformation().getContactNumber())
+                .todayOpening(restaurant.getNaverInformation().getTodayOperatingHours())
+                .top2Features(top2Features)
+                .isScrapped(isScrapped)
+                .distance(distance)
+                .build();
+    }
 
-    private String name;
-    private String category;
+    public static ResponseRestaurant createWithNoDistance(Restaurant restaurant, List<String> top2Features, boolean isScrapped) {
+        return ResponseRestaurant.builder()
+                .restaurantId(restaurant.getRestaurantId())
+                .name(restaurant.getNaverInformation().getName())
+                .category(restaurant.getNaverInformation().getCategory())
+                .latitude(restaurant.getNaverInformation().getLatitude())
+                .longitude(restaurant.getNaverInformation().getLongitude())
+                .thumbnailUrl(restaurant.getNaverInformation().getThumbnailUrl())
+                .fullAddress(restaurant.getOpenDataInformation().getFullAddress())
+                .roadNameFullAddress(restaurant.getOpenDataInformation().getRoadNameFullAddress())
+                .phoneNumber(restaurant.getOpenDataInformation().getContactNumber())
+                .todayOpening(restaurant.getNaverInformation().getTodayOperatingHours())
+                .top2Features(top2Features)
+                .isScrapped(isScrapped)
+                .build();
+    }
 
-    private String latitude;
-    private String longitude;
-
-    private String thumbnailUrl;
-
-    private String fullAddress;
-    private String roadNameFullAddress;
-
-    private String phoneNumber;
-
-    private String todayOpening;
-    private List<String> top2Features;
-
-    private boolean isScrapped;
-
-    private Long likeCount;
-    private Long dislikeCount;
 }
