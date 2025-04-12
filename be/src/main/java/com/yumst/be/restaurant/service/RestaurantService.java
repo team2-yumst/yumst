@@ -1,8 +1,7 @@
 package com.yumst.be.restaurant.service;
 
+import com.yumst.be.recommendation.dto.response.RecommendedRestaurant;
 import com.yumst.be.restaurant.domain.Restaurant;
-import com.yumst.be.restaurant.domain.embed.NaverInformation;
-import com.yumst.be.restaurant.domain.embed.OpenDataInformation;
 import com.yumst.be.restaurant.exception.RestaurantException;
 import com.yumst.be.restaurant.repository.NaverReviewFeatureCountRepository;
 import com.yumst.be.restaurant.repository.RestaurantRepository;
@@ -26,7 +25,7 @@ public class RestaurantService {
 
     public List<ResponseRestaurant> getRandomRestaurant(String userId) {
 
-        List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrue();
+        List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrueOrderByNaverInformation();
 
         return result.stream().map(
                 restaurant -> getResponseRestaurant(userId, restaurant))
@@ -34,61 +33,64 @@ public class RestaurantService {
 
     }
 
+    public List<ResponseRestaurant> getResponseRestaurantFromRecommend(List<RecommendedRestaurant> results, String userId) {
+        return results.stream()
+                .map(recommendedRestaurant -> getResponseRestaurantWithDistanceByRestaurantId(
+                        userId,
+                        recommendedRestaurant.restaurantId(),
+                        recommendedRestaurant.distance()))
+                .toList();
+    }
+
+
     public List<ResponseRestaurant> getResponseRestaurantList(List<String> restaurantIds, String userId) {
         return restaurantIds.stream()
                 .map(restaurantId -> getResponseRestaurantByRestaurantId(userId, restaurantId))
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    private ResponseRestaurant getResponseRestaurantWithDistanceByRestaurantId(String userId, String restaurantId, double distance) {
+        Restaurant restaurant = findRestaurantById(restaurantId);
+        List<String> top2Features = findTop2Features(restaurant);
+        boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());
+
+        return ResponseRestaurant.from(
+                restaurant,
+                top2Features,
+                scrapped,
+                distance
+        );
     }
 
     private ResponseRestaurant getResponseRestaurantByRestaurantId(String userId, String restaurantId) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
+        Restaurant restaurant = findRestaurantById(restaurantId);
         return getResponseRestaurant(userId, restaurant);
     }
 
+    private Restaurant findRestaurantById(String restaurantId) {
+        return restaurantRepository.findByRestaurantId(restaurantId)
+        .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
+    }
+
     private ResponseRestaurant getResponseRestaurant(String userId, Restaurant restaurant) {
-        ResponseRestaurant responseRestaurant = new ResponseRestaurant();
 
-        responseRestaurant.setRestaurantId(restaurant.getRestaurantId());
-        addNaverInfoToResponse(responseRestaurant, restaurant.getNaverInformation());
-        addOpenDataInfoToResponse(responseRestaurant, restaurant.getOpenDataInformation());
-        addFeaturesToResponse(responseRestaurant, restaurant.getRestaurantId());
-        addScrappedToResponse(responseRestaurant, restaurant.getRestaurantId(), userId);
-        // TODO: V2 투표기능 개발후 추가
-//            setLikeAndDislike(responseRestaurant, restaurant.getRestaurantId());
-        return responseRestaurant;
+        List<String> top2Features = findTop2Features(restaurant);
+        boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());
+
+        return ResponseRestaurant.createWithNoDistance(
+                restaurant,
+                top2Features,
+                scrapped
+        );
     }
 
-    private void addScrappedToResponse(ResponseRestaurant responseRestaurant,
-                                       String restaurantId,
-                                       String userId) {
-        boolean result = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurantId);
-        responseRestaurant.setScrapped(result);
+    private List<String> findTop2Features(Restaurant restaurant) {
+        return naverReviewFeatureCountRepository
+        .findTop2ByRestaurantIdOrderByReviewCountDesc(restaurant.getRestaurantId())
+        .stream()
+        .map(c -> c.getNaverReviewFeature().getFeature())
+        .toList();
     }
-
-    private void addFeaturesToResponse(ResponseRestaurant responseRestaurant, String restaurantId) {
-        List<String> top2Features = naverReviewFeatureCountRepository.findTop2ByRestaurantIdOrderByReviewCountDesc(restaurantId)
-                .stream()
-                .map(c -> c.getNaverReviewFeature().getFeature())
-                .toList();
-        responseRestaurant.setTop2Features(top2Features);
-    }
-
-    private void addOpenDataInfoToResponse(ResponseRestaurant responseRestaurant, OpenDataInformation openDataInformation) {
-        responseRestaurant.setFullAddress(openDataInformation.getFullAddress());
-        responseRestaurant.setRoadNameFullAddress(openDataInformation.getRoadNameFullAddress());
-        responseRestaurant.setPhoneNumber(openDataInformation.getContactNumber());
-    }
-
-    private void addNaverInfoToResponse(ResponseRestaurant responseRestaurant, NaverInformation naverInformation) {
-        responseRestaurant.setName(naverInformation.getName());
-        responseRestaurant.setCategory(naverInformation.getCategory());
-        responseRestaurant.setLatitude(naverInformation.getLatitude());
-        responseRestaurant.setLongitude(naverInformation.getLongitude());
-        responseRestaurant.setThumbnailUrl(naverInformation.getThumbnailUrl());
-        responseRestaurant.setTodayOpening(naverInformation.getTodayOperatingHours());
-    }
-
 
 
 
