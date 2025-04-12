@@ -2,6 +2,7 @@ package com.yumst.be.recommendation.service;
 
 import com.yumst.be.recommendation.dto.request.RequestRecommend;
 import com.yumst.be.recommendation.dto.response.ResponseRecommend;
+import com.yumst.be.recommendation.exception.RecommendException;
 import com.yumst.be.restaurant.service.RestaurantService;
 import com.yumst.be.restaurant.vo.ResponseRestaurant;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+
+import static com.yumst.be.recommendation.exception.RecommendErrorCode.RECOMMEND_SERVER_ERROR;
 
 @Service
 @RequiredArgsConstructor
@@ -57,11 +60,15 @@ public class RecommendationService {
                 .encode()
                 .toUriString();
 
-        return restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                entity,
-                ResponseRecommend.class
-        );
+        try {
+            return restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    ResponseRecommend.class
+            );
+        } catch (Exception e) {
+            throw new RecommendException(RECOMMEND_SERVER_ERROR, "추천 서버가 응답하지 않았습니다");
+        }
     }
 }
