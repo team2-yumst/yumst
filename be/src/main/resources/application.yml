@@ -55,6 +55,7 @@ jwt:
 etc:
   base-url: ${BASE_URL}
   front-url: ${FRONT_URL}
+  recommend-url: ${RECOMMEND_URL}
   front-auth-success: ${FRONT_URL}/auth/success
   google-profile-url: https://www.googleapis.com/userinfo/v2/me
 
