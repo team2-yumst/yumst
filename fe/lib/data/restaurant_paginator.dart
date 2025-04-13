@@ -14,9 +14,13 @@ class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaur
 
   final Ref ref;
   int _currentPage = 1;
-  bool _hasMore = true;
   Position? _currentPosition;
   StreamSubscription<Position>? _locationSubscription;
+
+  bool _hasMore = true;
+  bool _isLoadingNextPage = false;
+  bool get hasMore => _hasMore;
+  bool get isLoading => _isLoadingNextPage;
 
   Future<void> _init() async {
     await loadInitial();
@@ -59,10 +63,15 @@ class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaur
   Future<void> loadInitial() async {
     state = const AsyncValue.loading();
     try {
+      _currentPage = 1; // 페이지 번호 초기화 추가
+      _hasMore = true; // 페이지네이션 상태 초기화
+      _isLoadingNextPage = false; // 기존 로딩 상태 취소
+
       final locationService = ref.read(locationServiceProvider);
       _currentPosition = await locationService.getPosition();
       final repository = ref.read(restaurantRepositoryProvider);
       final restaurants = await repository.getWalkRecommendations(_currentPosition!, _currentPage);
+
       _hasMore = restaurants.isNotEmpty;
       state = AsyncValue.data(restaurants);
     } catch (e, st) {
@@ -71,9 +80,11 @@ class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaur
   }
 
   Future<void> loadNextPage() async {
-    if (!_hasMore || _currentPosition == null) return;
+    if (!_hasMore || _currentPosition == null || _isLoadingNextPage) return;
 
+    _isLoadingNextPage = true;
     _currentPage++;
+
     try {
       final repository = ref.read(restaurantRepositoryProvider);
       final newRestaurants = await repository.getWalkRecommendations(_currentPosition!, _currentPage);
@@ -82,6 +93,8 @@ class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaur
     } catch (e, st) {
       _currentPage--;
       state = AsyncValue.error(e, st);
+    } finally {
+      _isLoadingNextPage = false;
     }
   }
 }

@@ -14,21 +14,50 @@ final restaurantsFutureProvider = FutureProvider<List<Restaurant>>((ref) async {
   return repository.getRestaurantsV0(position);
 });
 
-class RecommendationPage extends ConsumerWidget {
+class RecommendationPage extends ConsumerStatefulWidget {
   const RecommendationPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecommendationPage> createState() => _RecommendationPageState();
+}
+
+class _RecommendationPageState extends ConsumerState<RecommendationPage> {
+  final SwiperController _swiperController = SwiperController();
+  final int _preloadThreshold = 4; // 6번째에서 미리 로드
+
+  void _handleIndexChanged(int index) {
+    final asyncValue = ref.read(restaurantPaginationProvider);
+    final notifier = ref.read(restaurantPaginationProvider.notifier);
+
+    if (asyncValue is! AsyncData) return;
+
+    final remainingItems = asyncValue.value!.length - index;
+    if (remainingItems <= _preloadThreshold &&
+        notifier.hasMore &&
+        !notifier.isLoading) {
+      notifier.loadNextPage();
+    }
+  }
+
+  @override
+  void dispose() {
+    _swiperController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final restaurantsAsync = ref.watch(restaurantPaginationProvider);
 
     return Scaffold(
       body: restaurantsAsync.when(
         data: (restaurants) => Swiper(
-          itemCount: restaurants.length + 1, // +1 for loading indicator
+          controller: _swiperController,
+          onIndexChanged: _handleIndexChanged,
+          itemCount: restaurants.length + 1,
           scrollDirection: Axis.vertical,
           itemBuilder: (context, index) {
             if (index == restaurants.length) {
-              ref.read(restaurantPaginationProvider.notifier).loadNextPage();
               return const Center(child: CircularProgressIndicator());
             }
             return ReelsStyleCard(restaurant: restaurants[index]);
