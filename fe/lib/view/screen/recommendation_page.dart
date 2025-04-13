@@ -3,6 +3,7 @@ import 'package:fe/repository/restaurant_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:card_swiper/card_swiper.dart';
+import '../../data/restaurant_pagination.dart';
 import '../../model/restaurant.dart';
 import '../widget/reels_style_card.dart';
 
@@ -10,7 +11,7 @@ final restaurantsFutureProvider = FutureProvider<List<Restaurant>>((ref) async {
   final repository = ref.watch(restaurantRepositoryProvider);
   final locationService = ref.watch(locationServiceProvider);
   final position = await locationService.getPosition();
-  return repository.getRestaurants(position);
+  return repository.getRestaurantsV0(position);
 });
 
 class RecommendationPage extends ConsumerWidget {
@@ -18,23 +19,23 @@ class RecommendationPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final restaurantsAsync = ref.watch(restaurantsFutureProvider);
+    final restaurantsAsync = ref.watch(restaurantPaginationProvider);
 
-    return restaurantsAsync.when(
-      data: (restaurants) => Scaffold(
-        body: Swiper(
-          itemCount: restaurants.length,
+    return Scaffold(
+      body: restaurantsAsync.when(
+        data: (restaurants) => Swiper(
+          itemCount: restaurants.length + 1, // +1 for loading indicator
           scrollDirection: Axis.vertical,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (context, index) {
+            if (index == restaurants.length) {
+              ref.read(restaurantPaginationProvider.notifier).loadNextPage();
+              return const Center(child: CircularProgressIndicator());
+            }
             return ReelsStyleCard(restaurant: restaurants[index]);
           },
         ),
-      ),
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stackTrace) => Scaffold(
-        body: Center(child: Text("Error: $error")),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text("Error: $error")),
       ),
     );
   }
