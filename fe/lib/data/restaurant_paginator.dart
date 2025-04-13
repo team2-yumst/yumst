@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -7,13 +9,51 @@ import 'location_service.dart';
 
 class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaurant>>> {
   RestaurantPaginationNotifier(this.ref) : super(const AsyncValue.loading()) {
-    loadInitial();
+    _init();
   }
 
   final Ref ref;
   int _currentPage = 1;
   bool _hasMore = true;
   Position? _currentPosition;
+  StreamSubscription<Position>? _locationSubscription;
+
+  Future<void> _init() async {
+    await loadInitial();
+    _setupLocationListener();
+  }
+
+  void _setupLocationListener() {
+    _locationSubscription = ref
+        .read(locationServiceProvider)
+        .getPositionStream()
+        .listen((newPosition) {
+      _handlePositionChange(newPosition);
+    });
+  }
+
+  void _handlePositionChange(Position newPosition) {
+    if (_currentPosition == null) return;
+
+    final distance = Geolocator.distanceBetween(
+      _currentPosition!.latitude,
+      _currentPosition!.longitude,
+      newPosition.latitude,
+      newPosition.longitude,
+    );
+
+    // 1km 이상 이동 시 새로고침
+    if (distance > 1000) {
+      _currentPosition = newPosition;
+      loadInitial();
+    }
+  }
+
+  @override
+  void dispose() {
+    _locationSubscription?.cancel();
+    super.dispose();
+  }
 
   // 위치는 initial load 시에만 가져옴 - 페이징 기준을 유지 하기 위해
   Future<void> loadInitial() async {

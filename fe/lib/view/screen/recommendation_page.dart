@@ -3,7 +3,7 @@ import 'package:fe/repository/restaurant_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:card_swiper/card_swiper.dart';
-import '../../data/restaurant_pagination.dart';
+import '../../data/restaurant_paginator.dart';
 import '../../model/restaurant.dart';
 import '../widget/reels_style_card.dart';
 
