@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fe/model/restaurant.dart';
@@ -83,15 +84,23 @@ class _ReelsStyleCardState extends ConsumerState<ReelsStyleCard>
         fit: StackFit.expand,
         children: [
           /// 1) 배경 이미지
-          Image.network(
-            restaurant.thumbnailUrl ?? '',
+          CachedNetworkImage(
+            imageUrl: restaurant.thumbnailUrl ?? '',
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) =>
+            fadeInDuration: Duration.zero,
+            fadeOutDuration: Duration.zero,
+            errorWidget: (context, url, error) =>
             const Center(child: Icon(Icons.error)),
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return const Center(child: CircularProgressIndicator());
-            },
+            progressIndicatorBuilder: (context, url, progress) =>
+            const Center(child: CircularProgressIndicator()),
+            imageBuilder: (context, imageProvider) => Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
           ),
 
           /// 2) 펼쳤을 때 배경 어둡게 처리
