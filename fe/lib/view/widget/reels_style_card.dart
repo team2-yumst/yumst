@@ -170,6 +170,15 @@ class _ReelsStyleCardState extends ConsumerState<ReelsStyleCard>
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                           ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                          '${restaurant.distance?.toStringAsFixed(0) ?? 'N/A'}m',
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.white70,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                         const SizedBox(height: 4),
                                         Row(
