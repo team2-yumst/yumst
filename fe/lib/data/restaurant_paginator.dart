@@ -7,6 +7,9 @@ import '../model/restaurant.dart';
 import '../repository/restaurant_repository.dart';
 import 'location_service.dart';
 
+final transportationModeProvider = StateProvider<String>((ref) => 'walk');
+
+
 class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaurant>>> {
   RestaurantPaginationNotifier(this.ref) : super(const AsyncValue.loading()) {
     _init();
@@ -63,14 +66,20 @@ class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaur
   Future<void> loadInitial() async {
     state = const AsyncValue.loading();
     try {
-      _currentPage = 1; // 페이지 번호 초기화 추가
-      _hasMore = true; // 페이지네이션 상태 초기화
-      _isLoadingNextPage = false; // 기존 로딩 상태 취소
+      _currentPage = 1;
+      _hasMore = true;
+      _isLoadingNextPage = false;
 
+      final transportMode = ref.read(transportationModeProvider);
       final locationService = ref.read(locationServiceProvider);
       _currentPosition = await locationService.getPosition();
+
       final repository = ref.read(restaurantRepositoryProvider);
-      final restaurants = await repository.getWalkRecommendations(_currentPosition!, _currentPage);
+      final restaurants = await repository.getRecommendations(
+        _currentPosition!,
+        _currentPage,
+        transportMode: transportMode, // 이동 수단 파라미터 추가
+      );
 
       _hasMore = restaurants.isNotEmpty;
       state = AsyncValue.data(restaurants);
@@ -79,15 +88,22 @@ class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaur
     }
   }
 
+  // 이동 수단 변경 시 초기화 메서드
+  Future<void> switchTransportMode(String newMode) async {
+    ref.read(transportationModeProvider.notifier).state = newMode;
+    await loadInitial();
+  }
+
   Future<void> loadNextPage() async {
     if (!_hasMore || _currentPosition == null || _isLoadingNextPage) return;
 
     _isLoadingNextPage = true;
     _currentPage++;
+    final transportMode = ref.read(transportationModeProvider);
 
     try {
       final repository = ref.read(restaurantRepositoryProvider);
-      final newRestaurants = await repository.getWalkRecommendations(_currentPosition!, _currentPage);
+      final newRestaurants = await repository.getRecommendations(_currentPosition!, _currentPage, transportMode: transportMode);
       _hasMore = newRestaurants.isNotEmpty;
       state = AsyncValue.data([...state.value ?? [], ...newRestaurants]);
     } catch (e, st) {

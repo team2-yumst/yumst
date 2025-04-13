@@ -37,9 +37,15 @@ class RestaurantRepository {
     }
   }
 
-  Future<List<Restaurant>> getWalkRecommendations(Position position, int page) async {
+  Future<List<Restaurant>> getRecommendations(
+      Position position,
+      int page, {
+        required String transportMode,
+      }) async {
     final response = await dio.get(
-      "http://localhost:8080/api/recommendation/v1/walk",
+      transportMode == 'walk'
+          ? "http://localhost:8080/api/recommendation/v1/walk"
+          : "http://localhost:8080/api/recommendation/v1/car",
       queryParameters: {
         'latitude': position.latitude,
         'longitude': position.longitude,
@@ -56,7 +62,7 @@ class RestaurantRepository {
   }
 
   Future scrapRestaurant(Restaurant restaurant) async {
-    final response = await dio.post(
+    final response = await dio.patch(
         "http://localhost:8080/api/user/v1/scrap/${restaurant.restaurantId}"
     );
     if (response.statusCode == 200) {

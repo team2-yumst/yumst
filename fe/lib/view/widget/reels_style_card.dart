@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fe/model/restaurant.dart';
 import 'package:fe/repository/restaurant_repository.dart';
 
+import '../../data/restaurant_paginator.dart';
+
 class ReelsStyleCard extends ConsumerStatefulWidget {
   final Restaurant restaurant;
 
@@ -259,7 +261,33 @@ class _ReelsStyleCardState extends ConsumerState<ReelsStyleCard>
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          // TODO: 여기에 신고 / 투표 좋아요 싫어요 개수 / 공유 버튼 추가
+                          // 이동 수단 토글 버튼
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final transportMode = ref.watch(transportationModeProvider);
+                              return IconButton(
+                                icon: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 200),
+                                  child: transportMode == 'car'
+                                      ? const Icon(
+                                    Icons.directions_car, // 색칠된 차량 아이콘
+                                    key: ValueKey('car_filled'),
+                                    color: Colors.white,
+                                  )
+                                      : const Icon(
+                                    Icons.directions_car_outlined, // 테두리만 있는 차량 아이콘
+                                    key: ValueKey('car_outlined'),
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  final newMode = transportMode == 'car' ? 'walk' : 'car';
+                                  ref.read(transportationModeProvider.notifier).state = newMode;
+                                },
+                              );
+                            },
+                          ),
+                          SizedBox(height: 10),
                           IconButton(
                             icon: Icon(
                               (restaurant.isScrapped ?? false)
@@ -270,7 +298,7 @@ class _ReelsStyleCardState extends ConsumerState<ReelsStyleCard>
                             onPressed: _toggleScrap,
                           ),
                         ],
-                      ),
+                      )
                     ),
                   ],
                 ),
