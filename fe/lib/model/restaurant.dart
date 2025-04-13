@@ -14,6 +14,7 @@ class Restaurant {
     required this.isScrapped,
     required this.likeCount,
     required this.dislikeCount,
+    required this.distance
   });
 
   String? restaurantId;
@@ -34,6 +35,8 @@ class Restaurant {
   int? likeCount;
   int? dislikeCount;
 
+  double? distance;
+
   Restaurant.fromJson(Map<String, dynamic> json) {
     restaurantId = json['restaurantId'];
     name = json['name'];
@@ -49,6 +52,7 @@ class Restaurant {
     isScrapped = json['scrapped'];
     likeCount = json['likeCount'];
     dislikeCount = json['dislikeCount'];
+    distance = json['distance'];
   }
 
   Map<String, dynamic> toJson() {
