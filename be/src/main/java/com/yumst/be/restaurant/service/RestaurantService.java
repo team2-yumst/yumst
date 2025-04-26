@@ -1,5 +1,6 @@
 package com.yumst.be.restaurant.service;
 
+import com.yumst.be.recommendation.dto.response.RecommendedRestaurant;
 import com.yumst.be.restaurant.domain.Restaurant;
 import com.yumst.be.restaurant.domain.RestaurantNaverReviewFeatureCount;
 import com.yumst.be.restaurant.domain.embed.NaverInformation;
@@ -39,22 +40,57 @@ public class RestaurantService {
         List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrue();
         return result.stream()
                 .map(restaurant -> getResponseRestaurant(userId, restaurant))
+
+        List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrueOrderByNaverInformation();
+
+        return result.stream().map(
+                restaurant -> getResponseRestaurant(userId, restaurant))
                 .collect(Collectors.toList());
     }
+
+    public List<ResponseRestaurant> getResponseRestaurantFromRecommend(List<RecommendedRestaurant> results, String userId) {
+        return results.stream()
+                .map(recommendedRestaurant -> getResponseRestaurantWithDistanceByRestaurantId(
+                        userId,
+                        recommendedRestaurant.restaurantId(),
+                        recommendedRestaurant.distance()))
+                .toList();
+    }
+
 
     public List<ResponseRestaurant> getResponseRestaurantList(List<String> restaurantIds, String userId) {
         return restaurantIds.stream()
                 .map(restaurantId -> getResponseRestaurantByRestaurantId(userId, restaurantId))
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    private ResponseRestaurant getResponseRestaurantWithDistanceByRestaurantId(String userId, String restaurantId, double distance) {
+        Restaurant restaurant = findRestaurantById(restaurantId);
+        List<String> top2Features = findTop2Features(restaurant);
+        boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());
+
+        return ResponseRestaurant.from(
+                restaurant,
+                top2Features,
+                scrapped,
+                distance
+        );
     }
 
     private ResponseRestaurant getResponseRestaurantByRestaurantId(String userId, String restaurantId) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
+        Restaurant restaurant = findRestaurantById(restaurantId);
         return getResponseRestaurant(userId, restaurant);
     }
 
+    private Restaurant findRestaurantById(String restaurantId) {
+        return restaurantRepository.findByRestaurantId(restaurantId)
+        .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
+    }
+
     private ResponseRestaurant getResponseRestaurant(String userId, Restaurant restaurant) {
+
+        List<String> top2Features = findTop2Features(restaurant);
+        boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());
         ResponseRestaurant responseRestaurant = new ResponseRestaurant();
         responseRestaurant.setRestaurantId(restaurant.getRestaurantId());
         addNaverInfoToResponse(responseRestaurant, restaurant.getNaverInformation());
@@ -65,25 +101,19 @@ public class RestaurantService {
         return responseRestaurant;
     }
 
-    private void addScrappedToResponse(ResponseRestaurant responseRestaurant,
-                                       String restaurantId,
-                                       String userId) {
-        boolean result = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurantId);
-        responseRestaurant.setScrapped(result);
+        return ResponseRestaurant.createWithNoDistance(
+                restaurant,
+                top2Features,
+                scrapped
+        );
     }
 
-    private void addFeaturesToResponse(ResponseRestaurant responseRestaurant, String restaurantId) {
-        List<String> top2Features = naverReviewFeatureCountRepository.findTop2ByRestaurantIdOrderByReviewCountDesc(restaurantId)
-                .stream()
-                .map(c -> c.getNaverReviewFeature().getFeature())
-                .toList();
-        responseRestaurant.setTop2Features(top2Features);
-    }
-
-    private void addOpenDataInfoToResponse(ResponseRestaurant responseRestaurant, OpenDataInformation openDataInformation) {
-        responseRestaurant.setFullAddress(openDataInformation.getFullAddress());
-        responseRestaurant.setRoadNameFullAddress(openDataInformation.getRoadNameFullAddress());
-        responseRestaurant.setPhoneNumber(openDataInformation.getContactNumber());
+    private List<String> findTop2Features(Restaurant restaurant) {
+        return naverReviewFeatureCountRepository
+        .findTop2ByRestaurantIdOrderByReviewCountDesc(restaurant.getRestaurantId())
+        .stream()
+        .map(c -> c.getNaverReviewFeature().getFeature())
+        .toList();
     }
 
     private void addNaverInfoToResponse(ResponseRestaurant responseRestaurant, NaverInformation naverInformation) {
@@ -162,7 +192,7 @@ public class RestaurantService {
                     response.setLikeCount(likeCount);
                     response.setDislikeCount(dislikeCount);
                     response.setTop2Features(featureMap.getOrDefault(restaurantId, new ArrayList<>()));
-                    
+
                     return response;
                 })
                 .toList();

@@ -29,11 +29,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     try {
       final user =  await authRepo.getUser();
 
-      if (user.finishedSurvey == false) {
-        _navigateToSurvey();
-      } else if (user.agreedPrivacyPolicy == false) {
+      if (user.agreedPrivacyPolicy == false) {
         _navigateToTerms();
-      } else if (user.isEnabled == true) {
+      } else if (user.finishedSurvey == false) {
+        _navigateToSurvey();
+      } else if (user.enabled == true) {
         _navigateToMain();
       } else {
         _navigateToLogin();

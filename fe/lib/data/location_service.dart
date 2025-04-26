@@ -33,6 +33,16 @@ class LocationService {
       throw LocationRetrievalException(e.toString());
     }
   }
+
+  Stream<Position> getPositionStream() {
+    return Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 500,
+      ),
+    );
+  }
+
 }
 
 // Custom Exception Classes

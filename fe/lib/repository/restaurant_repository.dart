@@ -20,14 +20,38 @@ class RestaurantRepository {
   });
   final Dio dio;
 
-  Future<List<Restaurant>> getRestaurants(Position position) async {
+  Future<List<Restaurant>> getRestaurantsV0(Position position) async {
 
     print("**********위도 경도********");
     print(position.latitude.toString());
     print(position.longitude.toString());
 
 
-    final response = await dio.get("http://localhost:8080/api/restaurant/v0");
+    final response = await dio.get("http://localhost:8080/api/recommendation/v0");
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data;
+      return data.map((json) => Restaurant.fromJson(json)).toList();
+    } else {
+      throw Exception("식당 정보를 불러오는데 실패했습니다.");
+    }
+  }
+
+  Future<List<Restaurant>> getRecommendations(
+      Position position,
+      int page, {
+        required String transportMode,
+      }) async {
+    final response = await dio.get(
+      transportMode == 'walk'
+          ? "http://localhost:8080/api/recommendation/v1/walk"
+          : "http://localhost:8080/api/recommendation/v1/car",
+      queryParameters: {
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'page': page,
+      },
+    );
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data;
@@ -38,7 +62,7 @@ class RestaurantRepository {
   }
 
   Future scrapRestaurant(Restaurant restaurant) async {
-    final response = await dio.post(
+    final response = await dio.patch(
         "http://localhost:8080/api/user/v1/scrap/${restaurant.restaurantId}"
     );
     if (response.statusCode == 200) {

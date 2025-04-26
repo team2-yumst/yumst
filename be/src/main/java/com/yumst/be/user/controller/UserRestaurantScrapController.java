@@ -15,7 +15,7 @@ public class UserRestaurantScrapController {
 
     private final UserRestaurantScrapService scrapService;
 
-    @PostMapping("/scrap/{restaurantId}")
+    @PatchMapping("/scrap/{restaurantId}")
     public ResponseEntity<ResponseScrap> scrap(
             @RequestHeader String userId,
             @PathVariable String restaurantId) {

@@ -77,13 +77,6 @@ class SurveyThird extends ConsumerWidget {
                       final success =
                           await authRepository.submitRegistrationData(data);
                       if (success) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MainScreen(),
-                          ),
-                        );
-
                         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
                           builder: (context) {
                             return MainScreen();
