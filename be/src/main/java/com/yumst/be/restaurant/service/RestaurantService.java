@@ -3,14 +3,11 @@ package com.yumst.be.restaurant.service;
 import com.yumst.be.recommendation.dto.response.RecommendedRestaurant;
 import com.yumst.be.restaurant.domain.Restaurant;
 import com.yumst.be.restaurant.domain.RestaurantNaverReviewFeatureCount;
-import com.yumst.be.restaurant.domain.embed.NaverInformation;
-import com.yumst.be.restaurant.domain.embed.OpenDataInformation;
 import com.yumst.be.restaurant.exception.RestaurantException;
 import com.yumst.be.restaurant.repository.NaverReviewFeatureCountRepository;
 import com.yumst.be.restaurant.repository.RestaurantRepository;
 import com.yumst.be.restaurant.vo.ResponseRestaurant;
 import com.yumst.be.user.repository.UserRestaurantScrapRepository;
-import com.yumst.be.vote.dto.VoteType;
 import com.yumst.be.vote.repository.UserRestaurantVoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,14 +33,9 @@ public class RestaurantService {
     private final UserRestaurantVoteRepository userRestaurantVoteRepository;
 
     public List<ResponseRestaurant> getRandomRestaurant(String userId) {
-        List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrue();
+        List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrueOrderByNaverInformation();
         return result.stream()
                 .map(restaurant -> getResponseRestaurant(userId, restaurant))
-
-        List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrueOrderByNaverInformation();
-
-        return result.stream().map(
-                restaurant -> getResponseRestaurant(userId, restaurant))
                 .collect(Collectors.toList());
     }
 
@@ -57,11 +48,10 @@ public class RestaurantService {
                 .toList();
     }
 
-
     public List<ResponseRestaurant> getResponseRestaurantList(List<String> restaurantIds, String userId) {
         return restaurantIds.stream()
                 .map(restaurantId -> getResponseRestaurantByRestaurantId(userId, restaurantId))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private ResponseRestaurant getResponseRestaurantWithDistanceByRestaurantId(String userId, String restaurantId, double distance) {
@@ -84,22 +74,12 @@ public class RestaurantService {
 
     private Restaurant findRestaurantById(String restaurantId) {
         return restaurantRepository.findByRestaurantId(restaurantId)
-        .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
+            .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
     }
 
     private ResponseRestaurant getResponseRestaurant(String userId, Restaurant restaurant) {
-
         List<String> top2Features = findTop2Features(restaurant);
         boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());
-        ResponseRestaurant responseRestaurant = new ResponseRestaurant();
-        responseRestaurant.setRestaurantId(restaurant.getRestaurantId());
-        addNaverInfoToResponse(responseRestaurant, restaurant.getNaverInformation());
-        addOpenDataInfoToResponse(responseRestaurant, restaurant.getOpenDataInformation());
-        addFeaturesToResponse(responseRestaurant, restaurant.getRestaurantId());
-        addScrappedToResponse(responseRestaurant, restaurant.getRestaurantId(), userId);
-        setLikeAndDislike(responseRestaurant, restaurant.getRestaurantId());
-        return responseRestaurant;
-    }
 
         return ResponseRestaurant.createWithNoDistance(
                 restaurant,
@@ -110,26 +90,10 @@ public class RestaurantService {
 
     private List<String> findTop2Features(Restaurant restaurant) {
         return naverReviewFeatureCountRepository
-        .findTop2ByRestaurantIdOrderByReviewCountDesc(restaurant.getRestaurantId())
-        .stream()
-        .map(c -> c.getNaverReviewFeature().getFeature())
-        .toList();
-    }
-
-    private void addNaverInfoToResponse(ResponseRestaurant responseRestaurant, NaverInformation naverInformation) {
-        responseRestaurant.setName(naverInformation.getName());
-        responseRestaurant.setCategory(naverInformation.getCategory());
-        responseRestaurant.setLatitude(naverInformation.getLatitude());
-        responseRestaurant.setLongitude(naverInformation.getLongitude());
-        responseRestaurant.setThumbnailUrl(naverInformation.getThumbnailUrl());
-        responseRestaurant.setTodayOpening(naverInformation.getTodayOperatingHours());
-    }
-
-    private void setLikeAndDislike(ResponseRestaurant responseRestaurant, String restaurantId) {
-        Long likes = Long.valueOf(userRestaurantVoteRepository.countByRestaurantIdAndVoteType(restaurantId, VoteType.LIKE));
-        Long dislikes = Long.valueOf(userRestaurantVoteRepository.countByRestaurantIdAndVoteType(restaurantId, VoteType.DISLIKE));
-        responseRestaurant.setLikeCount(likes);
-        responseRestaurant.setDislikeCount(dislikes);
+            .findTop2ByRestaurantIdOrderByReviewCountDesc(restaurant.getRestaurantId())
+            .stream()
+            .map(c -> c.getNaverReviewFeature().getFeature())
+            .toList();
     }
 
     public List<ResponseRestaurant> findNearbyRestaurants(String userId, Double latitude, Double longitude, Double radius, String sort, Pageable pageable) {
@@ -172,29 +136,17 @@ public class RestaurantService {
             ));
 
         return content.stream()
-                .map(result -> {
-                    String restaurantId = (String) result[0];
-                    String name = (String) result[1];
-                    String category = (String) result[2];
-                    String thumbnailUrl = (String) result[3];
-                    Double dist = ((Number) result[4]).doubleValue();
-                    Boolean isScrapped = (Boolean) result[5];
-                    Long likeCount = ((Number) result[6]).longValue();
-                    Long dislikeCount = ((Number) result[7]).longValue();
-
-                    ResponseRestaurant response = new ResponseRestaurant();
-                    response.setRestaurantId(restaurantId);
-                    response.setName(name);
-                    response.setCategory(category);
-                    response.setThumbnailUrl(thumbnailUrl);
-                    response.setDistance(dist);
-                    response.setScrapped(isScrapped);
-                    response.setLikeCount(likeCount);
-                    response.setDislikeCount(dislikeCount);
-                    response.setTop2Features(featureMap.getOrDefault(restaurantId, new ArrayList<>()));
-
-                    return response;
-                })
+                .map(result -> ResponseRestaurant.fromSearchResult(
+                    (String) result[0], // restaurantId
+                    (String) result[1], // name
+                    (String) result[2], // category
+                    (String) result[3], // thumbnailUrl
+                    ((Number) result[4]).doubleValue(), // distance
+                    (Boolean) result[5], // isScrapped
+                    ((Number) result[6]).longValue(), // likeCount
+                    ((Number) result[7]).longValue(), // dislikeCount
+                    featureMap.getOrDefault((String) result[0], new ArrayList<>()) // features
+                ))
                 .toList();
     }
 }

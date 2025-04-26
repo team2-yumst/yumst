@@ -27,7 +27,7 @@ public class UserRestaurantVoteController {
         return ResponseEntity.ok(restaurants);
     }
 
-    @PostMapping("/restaurants/{restaurantId}")
+    @PatchMapping("/restaurants/{restaurantId}")
     public ResponseEntity<VoteResponse> vote(
             @RequestHeader("userId") String userId,
             @PathVariable String restaurantId,

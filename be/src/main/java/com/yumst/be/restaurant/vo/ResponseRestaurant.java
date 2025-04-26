@@ -54,6 +54,36 @@ public record ResponseRestaurant(
                 .isScrapped(isScrapped);
     }
 
+    public static ResponseRestaurant fromSearchResult(
+            String restaurantId,
+            String name,
+            String category,
+            String thumbnailUrl,
+            Double distance,
+            Boolean isScrapped,
+            Long likeCount,
+            Long dislikeCount,
+            List<String> features
+    ) {
+        return new ResponseRestaurant(
+            restaurantId,
+            name,
+            category,
+            null, // latitude
+            null, // longitude
+            thumbnailUrl,
+            null, // fullAddress
+            null, // roadNameFullAddress
+            null, // phoneNumber
+            null, // todayOpening
+            features,
+            isScrapped,
+            likeCount,
+            dislikeCount,
+            distance
+        );
+    }
+
     @Builder
     public ResponseRestaurant(String restaurantId, String name, String category, String latitude, String longitude, String thumbnailUrl, String fullAddress, String roadNameFullAddress, String phoneNumber, String todayOpening, List<String> top2Features, boolean isScrapped, Long likeCount, Long dislikeCount, Double distance) {
         this.restaurantId = restaurantId;
