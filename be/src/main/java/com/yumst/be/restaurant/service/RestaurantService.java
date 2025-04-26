@@ -77,6 +77,15 @@ public class RestaurantService {
             .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
     }
 
+    /**
+     * Validates if a restaurant exists by its ID
+     * @param restaurantId the ID of the restaurant to check
+     * @throws RestaurantException if the restaurant doesn't exist
+     */
+    public void validateRestaurantExists(String restaurantId) {
+        findRestaurantById(restaurantId);
+    }
+
     private ResponseRestaurant getResponseRestaurant(String userId, Restaurant restaurant) {
         List<String> top2Features = findTop2Features(restaurant);
         boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());

@@ -8,6 +8,7 @@ import com.yumst.be.vote.dto.RestaurantRequest;
 import com.yumst.be.vote.dto.VoteResponse;
 import com.yumst.be.vote.dto.VoteType;
 import com.yumst.be.vote.repository.UserRestaurantVoteRepository;
+import com.yumst.be.restaurant.exception.RestaurantException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,7 +48,7 @@ public class UserRestaurantVoteService {
         userService.validateUserExists(userId);
 
         // 식당 존재 여부 확인
-        restaurantService.getResponseRestaurantList(List.of(restaurantId), userId);
+        restaurantService.validateRestaurantExists(restaurantId);
 
         Optional<UserRestaurantVote> existingVote = userRestaurantVoteRepository
                 .findByUserIdAndRestaurantId(userId, restaurantId);
