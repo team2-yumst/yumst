@@ -21,7 +21,7 @@ public class UserRestaurantVoteController {
     @GetMapping("/restaurants")
     public ResponseEntity<List<ResponseRestaurant>> getVotableRestaurants(
             @RequestHeader("userId") String userId,
-            @ModelAttribute RestaurantRequest restaurantRequest) {
+            @Valid @ModelAttribute RestaurantRequest restaurantRequest) {
         List<ResponseRestaurant> restaurants =
             userRestaurantVoteService.getVotableRestaurants(userId, restaurantRequest);
         return ResponseEntity.ok(restaurants);
