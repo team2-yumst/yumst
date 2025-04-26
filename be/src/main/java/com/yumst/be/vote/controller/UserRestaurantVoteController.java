@@ -21,13 +21,13 @@ public class UserRestaurantVoteController {
     @GetMapping("/restaurants")
     public ResponseEntity<List<ResponseRestaurant>> getVotableRestaurants(
             @RequestHeader("userId") String userId,
-            @ModelAttribute RestaurantRequest restaurantRequest) {
+            @Valid @ModelAttribute RestaurantRequest restaurantRequest) {
         List<ResponseRestaurant> restaurants =
             userRestaurantVoteService.getVotableRestaurants(userId, restaurantRequest);
         return ResponseEntity.ok(restaurants);
     }
 
-    @PostMapping("/restaurants/{restaurantId}")
+    @PatchMapping("/restaurants/{restaurantId}")
     public ResponseEntity<VoteResponse> vote(
             @RequestHeader("userId") String userId,
             @PathVariable String restaurantId,

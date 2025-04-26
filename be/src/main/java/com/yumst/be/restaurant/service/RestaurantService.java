@@ -2,12 +2,12 @@ package com.yumst.be.restaurant.service;
 
 import com.yumst.be.recommendation.dto.response.RecommendedRestaurant;
 import com.yumst.be.restaurant.domain.Restaurant;
+import com.yumst.be.restaurant.domain.RestaurantNaverReviewFeatureCount;
 import com.yumst.be.restaurant.exception.RestaurantException;
 import com.yumst.be.restaurant.repository.NaverReviewFeatureCountRepository;
 import com.yumst.be.restaurant.repository.RestaurantRepository;
 import com.yumst.be.restaurant.vo.ResponseRestaurant;
 import com.yumst.be.user.repository.UserRestaurantScrapRepository;
-import com.yumst.be.vote.dto.VoteType;
 import com.yumst.be.vote.repository.UserRestaurantVoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,11 +33,9 @@ public class RestaurantService {
     private final UserRestaurantVoteRepository userRestaurantVoteRepository;
 
     public List<ResponseRestaurant> getRandomRestaurant(String userId) {
-
         List<Restaurant> result = restaurantRepository.findTop10RestaurantsByCrawlCompleteTrueOrderByNaverInformation();
-
-        return result.stream().map(
-                restaurant -> getResponseRestaurant(userId, restaurant))
+        return result.stream()
+                .map(restaurant -> getResponseRestaurant(userId, restaurant))
                 .collect(Collectors.toList());
     }
 
@@ -51,11 +48,10 @@ public class RestaurantService {
                 .toList();
     }
 
-
     public List<ResponseRestaurant> getResponseRestaurantList(List<String> restaurantIds, String userId) {
         return restaurantIds.stream()
                 .map(restaurantId -> getResponseRestaurantByRestaurantId(userId, restaurantId))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private ResponseRestaurant getResponseRestaurantWithDistanceByRestaurantId(String userId, String restaurantId, double distance) {
@@ -78,11 +74,19 @@ public class RestaurantService {
 
     private Restaurant findRestaurantById(String restaurantId) {
         return restaurantRepository.findByRestaurantId(restaurantId)
-        .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
+            .orElseThrow(() -> new RestaurantException(RESTAURANT_NOT_FOUND));
+    }
+
+    /**
+     * Validates if a restaurant exists by its ID
+     * @param restaurantId the ID of the restaurant to check
+     * @throws RestaurantException if the restaurant doesn't exist
+     */
+    public void validateRestaurantExists(String restaurantId) {
+        findRestaurantById(restaurantId);
     }
 
     private ResponseRestaurant getResponseRestaurant(String userId, Restaurant restaurant) {
-
         List<String> top2Features = findTop2Features(restaurant);
         boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());
 
@@ -95,12 +99,14 @@ public class RestaurantService {
 
     private List<String> findTop2Features(Restaurant restaurant) {
         return naverReviewFeatureCountRepository
-        .findTop2ByRestaurantIdOrderByReviewCountDesc(restaurant.getRestaurantId())
-        .stream()
-        .map(c -> c.getNaverReviewFeature().getFeature())
-        .toList();
+            .findTop2ByRestaurantIdOrderByReviewCountDesc(restaurant.getRestaurantId())
+            .stream()
+            .map(c -> c.getNaverReviewFeature().getFeature())
+            .toList();
     }
 
+    public List<ResponseRestaurant> findNearbyRestaurants(String userId, Double latitude, Double longitude, Double radius, String sort, Pageable pageable) {
+        Page<Object[]> results;
 
         switch (sort) {
             case "likes":
@@ -139,29 +145,17 @@ public class RestaurantService {
             ));
 
         return content.stream()
-                .map(result -> {
-                    String restaurantId = (String) result[0];
-                    String name = (String) result[1];
-                    String category = (String) result[2];
-                    String thumbnailUrl = (String) result[3];
-                    Double dist = ((Number) result[4]).doubleValue();
-                    Boolean isScrapped = (Boolean) result[5];
-                    Long likeCount = ((Number) result[6]).longValue();
-                    Long dislikeCount = ((Number) result[7]).longValue();
-
-                    ResponseRestaurant response = new ResponseRestaurant();
-                    response.setRestaurantId(restaurantId);
-                    response.setName(name);
-                    response.setCategory(category);
-                    response.setThumbnailUrl(thumbnailUrl);
-                    response.setDistance(dist);
-                    response.setScrapped(isScrapped);
-                    response.setLikeCount(likeCount);
-                    response.setDislikeCount(dislikeCount);
-                    response.setTop2Features(featureMap.getOrDefault(restaurantId, new ArrayList<>()));
-                    
-                    return response;
-                })
+                .map(result -> ResponseRestaurant.fromSearchResult(
+                    (String) result[0], // restaurantId
+                    (String) result[1], // name
+                    (String) result[2], // category
+                    (String) result[3], // thumbnailUrl
+                    ((Number) result[4]).doubleValue(), // distance
+                    (Boolean) result[5], // isScrapped
+                    ((Number) result[6]).longValue(), // likeCount
+                    ((Number) result[7]).longValue(), // dislikeCount
+                    featureMap.getOrDefault((String) result[0], new ArrayList<>()) // features
+                ))
                 .toList();
     }
 }
