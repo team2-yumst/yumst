@@ -11,7 +11,7 @@ class User{
   bool? agreedTermsOfService;
   bool? agreedLocationTerms;
 
-  bool? isEnabled;
+  bool? enabled;
 
   List<Restaurant> scrapList = [];
 
@@ -19,6 +19,11 @@ class User{
     this.userId,
     this.userName,
     this.imageUrl,
+    this.finishedSurvey,
+    this.agreedPrivacyPolicy,
+    this.agreedTermsOfService,
+    this.agreedLocationTerms,
+    this.enabled
   });
 
   User.fromJson(Map<String, dynamic> json) {
@@ -35,7 +40,7 @@ class User{
     agreedPrivacyPolicy = json['agreedPrivacyPolicy'];
     agreedTermsOfService = json['agreedTermsOfService'];
     agreedLocationTerms = json['agreedLocationTerms'];
-    isEnabled = json['isEnabled'];
+    enabled = json['enabled'];
   }
 
 

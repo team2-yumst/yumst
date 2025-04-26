@@ -1,4 +1,4 @@
-package com.yumst.be.restaurant.controller;
+package com.yumst.be.recommendation.controller;
 
 import com.yumst.be.restaurant.service.RestaurantService;
 import com.yumst.be.restaurant.vo.ResponseRestaurant;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/restaurant/v0")
+@RequestMapping("api/recommendation/v0")
 @RequiredArgsConstructor
-public class RestaurantControllerV0 {
+public class RecommendationControllerV0 {
 
     private final RestaurantService restaurantService;
 

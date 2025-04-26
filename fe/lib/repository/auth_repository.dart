@@ -38,12 +38,12 @@ class AuthRepository {
     }
   }
 
-  Future<bool> signInWithGoogle() async {
+  Future<User> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? user = await GoogleSignIn().signIn();
 
       if (user == null) {
-        return false;
+        throw Exception('Google 로그인에 실패했습니다.');
       }
 
       final GoogleSignInAuthentication googleAuth = await user.authentication;
@@ -58,18 +58,18 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         addToStorage(response);
-        return true;
+        return User.fromJson(response.data);
 
       } else {
         if (kDebugMode) {
           print(response.statusCode);
           print(response.statusMessage);
         }
-        return false;
+        throw Exception('Google 로그인에 실패했습니다.');
       }
     } catch (e) {
       print(e);
-      return false;
+      throw Exception('Google 로그인에 실패했습니다.');
     }
   }
 
@@ -127,7 +127,6 @@ class AuthRepository {
         ]
       };
 
-      // 백엔드 API 호출
       final response = await dio.post(
         "http://localhost:8080/api/user/v1/register/survey",
         data: requestData,
@@ -151,15 +150,20 @@ class AuthRepository {
         "http://localhost:8080/api/user/v1/register/agree",
       );
 
-      return response.statusCode == 200;
-    } on DioException catch (e) {
-      print('Error agreeing to terms: ${e.message}');
-      print('Error response: ${e.response?.data}');
-      return false;
+  Future<bool> agreeTerms() async {
+    try {
+      final response = await dio.post(
+          'http://localhost:8080/api/user/v1/register/agree'
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
-      print('Error agreeing to terms: $e');
       return false;
     }
   }
+
 
 }

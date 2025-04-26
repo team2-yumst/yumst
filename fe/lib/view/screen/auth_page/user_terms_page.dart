@@ -2,8 +2,8 @@ import 'package:fe/view/screen/auth_page/survey_first_page.dart';
 import 'package:fe/view/screen/auth_page/terms_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fe/repository/auth_repository.dart';
-import 'package:fe/view/screen/main_page.dart';
+
+import '../../../repository/auth_repository.dart';
 
 class UserTermsPage extends ConsumerStatefulWidget {
   const UserTermsPage({super.key});
@@ -27,7 +27,6 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
     });
   }
 
-  // 제목에 포함된 (필수) 텍스트만 주황색으로 처리하는 헬퍼 함수
   List<TextSpan> _buildTermTitle(String title) {
     if (title.startsWith('(필수)')) {
       String rest = title.substring('(필수)'.length).trimLeft();
@@ -46,6 +45,24 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
     }
   }
 
+  Future<void> _handleAgreement() async {
+    final authRepo = ref.read(authRepositoryProvider);
+    final success = await authRepo.agreeTerms();
+
+    if (success && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const SurveyFirst()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('약관 동의에 실패했습니다. 다시 시도해주세요.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +72,6 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 전체 동의 (체크박스를 오른쪽에 배치하며 여백 조정)
             CheckboxListTile(
               contentPadding: EdgeInsets.only(right: 8, left: 8),
               title: Text('전체 동의',
@@ -74,7 +90,6 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
             ),
             Divider(thickness: 2),
             SizedBox(height: 16),
-            // 개별 약관 동의
             _buildTermRow(
               title: '(필수)  만 14세 이상입니다',
               agreed: _ageAgreed,
@@ -93,7 +108,7 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
                 MaterialPageRoute(
                     builder: (context) => TermsDetailPage(
                         title: '서비스 이용 약관',
-                        content: '서비스 이용 약관 내용입니다. (추후 로드)')),
+                        assetPath: 'assets/terms/service_term.txt')),
               ),
               onAgreed: (value) {
                 setState(() {
@@ -110,7 +125,7 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
                 MaterialPageRoute(
                     builder: (context) => TermsDetailPage(
                         title: '개인정보 처리 방침',
-                        content: '개인정보 처리 방침 내용입니다. (추후 로드)')),
+                        assetPath: 'assets/terms/privacy_policy.txt')),
               ),
               onAgreed: (value) {
                 setState(() {
@@ -127,7 +142,7 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
                 MaterialPageRoute(
                     builder: (context) => TermsDetailPage(
                         title: '위치기반 서비스 약관',
-                        content: '위치기반 서비스 약관 내용입니다. (추후 로드)')),
+                        assetPath: 'assets/terms/location_term.txt')),
               ),
               onAgreed: (value) {
                 setState(() {
@@ -141,10 +156,10 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
       ),
       bottomNavigationBar: ElevatedButton(
         onPressed: (_ageAgreed &&
-                _serviceAgreed &&
-                _privacyAgreed &&
-                _locationAgreed)
-            ? _submitAgreement
+            _serviceAgreed &&
+            _privacyAgreed &&
+            _locationAgreed)
+            ? _handleAgreement
             : null,
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
@@ -254,7 +269,6 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
               ),
             ),
           ),
-          // 체크박스로 동의 여부 표시
           Checkbox(
             value: agreed,
             onChanged: (bool? value) {

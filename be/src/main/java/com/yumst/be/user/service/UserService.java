@@ -40,14 +40,13 @@ public class UserService {
                                     .registerGuest();
 
         userRepository.save(user);
-        return modelMapper.map(user, UserDto.class);
+        return UserDto.from(user);
     }
 
     public UserDto findUserWithScrappedRestaurant(String userId) {
-        UserEntity user = userRepository.findByUserId(userId)
-                                        .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
+        UserEntity user = findUserOrThrow(userId);
 
-        UserDto userDto = modelMapper.map(user, UserDto.class);
+        UserDto userDto = UserDto.from(user);
         findUserTermsInfo(userDto, user);
         findScrappedRestaurant(userId, userDto);
 
@@ -66,15 +65,14 @@ public class UserService {
         UserEntity user = userRepository.deleteByUserId(userId)
                                         .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
 
-        return modelMapper.map(user, UserDto.class);
+        return UserDto.from(user);
     }
 
 
     @Transactional
     public void updateSurveyInfo(String userId, List<String> preferences) {
 
-        UserEntity user = userRepository.findByUserId(userId)
-                                        .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
+        UserEntity user = findUserOrThrow(userId);
 
         List<UserPreference> userPreferences = preferences.stream()
                 .map(preference -> new UserPreference(user, preference))
@@ -89,8 +87,7 @@ public class UserService {
     @Transactional
     public void updateAgreeTerms(String userId) {
 
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
+        UserEntity user = findUserOrThrow(userId);
 
         user.updateAgreeTerms();
     }
@@ -114,6 +111,10 @@ public class UserService {
         userDto.setAgreedTermsOfService(user.getUserTerms().isAgreedTermsOfService());
     }
 
+    private UserEntity findUserOrThrow(String userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
+    }
 
 }
 
