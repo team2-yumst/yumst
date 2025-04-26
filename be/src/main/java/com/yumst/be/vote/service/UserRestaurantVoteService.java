@@ -73,10 +73,13 @@ public class UserRestaurantVoteService {
     }
 
     private VoteResponse createVoteResponse(String message, String restaurantId) {
+        Integer likes = userRestaurantVoteRepository.countByRestaurantIdAndVoteType(restaurantId, VoteType.LIKE);
+        Integer dislikes = userRestaurantVoteRepository.countByRestaurantIdAndVoteType(restaurantId, VoteType.DISLIKE);
+        
         return VoteResponse.builder()
                 .message(message)
-                .likes(Long.valueOf(userRestaurantVoteRepository.countByRestaurantIdAndVoteType(restaurantId, VoteType.LIKE)))
-                .dislikes(Long.valueOf(userRestaurantVoteRepository.countByRestaurantIdAndVoteType(restaurantId, VoteType.DISLIKE)))
+                .likes(likes.longValue())
+                .dislikes(dislikes.longValue())
                 .build();
     }
 }
