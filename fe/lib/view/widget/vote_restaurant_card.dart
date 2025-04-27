@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fe/model/vote_restaurant.dart';
+import 'package:fe/provider/vote_state_provider.dart'; // VoteType을 여기서 가져옴
 // import 'package:fe/repository/vote_repository.dart'; // Repository 직접 사용 안 함
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,5 +139,4 @@ class VoteRestaurantCard extends ConsumerWidget { // ConsumerWidget으로 변경
   }
 }
 
-// 투표 타입을 위한 Enum (동일)
-enum VoteType { LIKE, DISLIKE } 
+// 투표 타입을 위한 Enum (제거하고 vote_state_provider.dart에서 가져오기) 

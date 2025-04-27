@@ -2,9 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:fe/data/secure_storage.dart';
 import 'package:fe/data/token_interceptor.dart'; // Assuming Dio setup is similar
 import 'package:fe/model/vote_restaurant.dart';
+import 'package:fe/provider/vote_state_provider.dart'; // VoteType enum 가져오기
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:fe/view/widget/vote_restaurant_card.dart'; // VoteType Enum import
 
 part 'vote_repository.g.dart';
 
