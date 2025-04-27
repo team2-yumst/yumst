@@ -62,7 +62,7 @@ public class SeleniumService {
             String name = name();
             String category = category();
             Map<String, String> openHours = OpenHour();
-            List<String> latitudeLongtitude = location();
+            List<String> latitudeLongitude = location();
             String phoneNumber = phoneNumber();
             String thumbNail = thumbNail();
             List<String> starsVisitorReviewCountBlogReviewCount = reviewAndRating();
@@ -76,8 +76,8 @@ public class SeleniumService {
             CrawledNaverRestaurant crawlResult = CrawledNaverRestaurant.builder()
                     .name(name)
                     .category(category)
-                    .latitude(latitudeLongtitude.get(0))
-                    .longitude(latitudeLongtitude.get(1))
+                    .latitude(latitudeLongitude.get(0))
+                    .longitude(latitudeLongitude.get(1))
                     .phoneNumber(phoneNumber)
                     .thumbnailUrl(thumbNail)
                     .mondayHours(openHours.get("월"))
@@ -223,7 +223,7 @@ public class SeleniumService {
     }
 
     private List<String> location() {
-        WebElement scriptElement = driver.findElement(By.xpath("/html/body/script[6]"));
+        WebElement scriptElement = driver.findElement(By.xpath("/html/body/script[3]"));
         String script = scriptElement.getAttribute("innerHTML");
 
         Pattern pattern = Pattern.compile("\"x\":\"([^\"]+)\",\\s*\"y\":\"([^\"]+)\"");

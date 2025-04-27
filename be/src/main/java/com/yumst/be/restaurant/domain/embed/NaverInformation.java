@@ -1,5 +1,6 @@
 package com.yumst.be.restaurant.domain.embed;
 
+import com.yumst.be.crawl.dto.CrawledNaverRestaurant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Builder;
@@ -66,5 +67,26 @@ public class NaverInformation {
         this.visitorReviewCount = visitorReviewCount;
         this.blogReviewCount = blogReviewCount;
         this.rating = rating;
+    }
+
+    public static NaverInformation from(CrawledNaverRestaurant crawledNaverRestaurant) {
+        return NaverInformation.builder()
+                .name(crawledNaverRestaurant.getName())
+                .category(crawledNaverRestaurant.getCategory())
+                .latitude(crawledNaverRestaurant.getLatitude())
+                .longitude(crawledNaverRestaurant.getLongitude())
+                .mondayHours(crawledNaverRestaurant.getMondayHours())
+                .tuesdayHours(crawledNaverRestaurant.getTuesdayHours())
+                .wednesdayHours(crawledNaverRestaurant.getWednesdayHours())
+                .thursdayHours(crawledNaverRestaurant.getThursdayHours())
+                .fridayHours(crawledNaverRestaurant.getFridayHours())
+                .saturdayHours(crawledNaverRestaurant.getSaturdayHours())
+                .sundayHours(crawledNaverRestaurant.getSundayHours())
+                .phoneNumber(crawledNaverRestaurant.getPhoneNumber())
+                .thumbnailUrl(crawledNaverRestaurant.getThumbnailUrl())
+                .visitorReviewCount(Long.parseLong(crawledNaverRestaurant.getVisitorReviewCount().replace(",", "")))
+                .blogReviewCount(Long.parseLong(crawledNaverRestaurant.getBlogReviewCount().replace(",", "")))
+                .rating(Double.parseDouble(crawledNaverRestaurant.getRating()))
+                .build();
     }
 }

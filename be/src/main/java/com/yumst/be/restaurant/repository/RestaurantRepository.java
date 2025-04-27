@@ -19,4 +19,5 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
                     "LIMIT 10"
     )
     List<Restaurant> findTop10RestaurantsByCrawlCompleteTrueOrderByNaverInformation();
+    Restaurant findFirstByOpenDataInformation_BusinessNameContainingAndOpenDataInformation_FullAddressContaining(String businessName, String fullAddress);
 }
