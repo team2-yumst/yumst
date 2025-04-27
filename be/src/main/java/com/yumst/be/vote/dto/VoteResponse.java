@@ -7,6 +7,7 @@ import lombok.Getter;
 @Builder
 public class VoteResponse {
     private String message;
+    private String restaurantId;
     private Long likes;
     private Long dislikes;
 } 

@@ -28,6 +28,9 @@ public class UserRestaurantVote extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "vote_type", nullable = false)
     private VoteType voteType;
+    
+    @Version
+    private Long version;
 
     @Builder
     public UserRestaurantVote(String userId, String restaurantId, VoteType voteType) {

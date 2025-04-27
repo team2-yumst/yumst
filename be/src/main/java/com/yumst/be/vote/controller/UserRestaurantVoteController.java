@@ -1,6 +1,7 @@
 package com.yumst.be.vote.controller;
 
 import com.yumst.be.restaurant.vo.ResponseRestaurant;
+import com.yumst.be.vote.dto.BatchVoteRequest;
 import com.yumst.be.vote.dto.RestaurantRequest;
 import com.yumst.be.vote.dto.VoteRequest;
 import com.yumst.be.vote.dto.VoteResponse;
@@ -33,5 +34,13 @@ public class UserRestaurantVoteController {
             @PathVariable String restaurantId,
             @Valid @RequestBody VoteRequest request) {
         return ResponseEntity.ok(userRestaurantVoteService.vote(userId, restaurantId, request.getVoteType()));
+    }
+    
+    @PostMapping("/batch")
+    public ResponseEntity<List<VoteResponse>> batchVote(
+            @RequestHeader("userId") String userId,
+            @Valid @RequestBody BatchVoteRequest request) {
+        List<VoteResponse> responses = userRestaurantVoteService.batchVote(userId, request.getVotes());
+        return ResponseEntity.ok(responses);
     }
 } 

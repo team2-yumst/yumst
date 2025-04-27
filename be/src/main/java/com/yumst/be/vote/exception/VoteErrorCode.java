@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum VoteErrorCode implements ErrorCode {
     INVALID_VOTE_TYPE(HttpStatus.BAD_REQUEST, "잘못된 투표 타입입니다."),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요."),
+    BATCH_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "배치 요청 개수가 제한을 초과했습니다.");
 
     private final HttpStatus status;
     private final String message;
