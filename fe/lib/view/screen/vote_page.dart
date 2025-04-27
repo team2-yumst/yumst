@@ -25,6 +25,11 @@ class _VotePageState extends ConsumerState<VotePage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    
+    // 페이지 진입 시 명시적으로 데이터 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort);
+    });
   }
 
   @override
@@ -101,70 +106,105 @@ class _VotePageState extends ConsumerState<VotePage> {
     }
     // 2. 에러가 있고, 데이터가 없을 때 (초기 로딩 실패)
     if (stateData.error != null && stateData.restaurants.isEmpty) {
+      String errorMessage = stateData.error.toString();
+      // Exception 메시지에서 'Exception:' 부분 제거
+      if (errorMessage.startsWith('Exception: ')) {
+        errorMessage = errorMessage.substring(11);
+      }
+      
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(stateData.error.toString()),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort),
-              child: const Text('다시 시도'),
-            )
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                errorMessage,
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort),
+                icon: const Icon(Icons.refresh),
+                label: const Text('다시 시도'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+              )
+            ],
+          ),
         )
       );
     }
     // 3. 데이터가 있을 때 (로딩 성공 또는 페이지네이션 중)
-    return RefreshIndicator(
-      onRefresh: () => ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort),
-      child: GridView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(4),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 4,
-          mainAxisSpacing: 4,
-          childAspectRatio: 0.7,
+    return Theme(
+      // 스크롤바 스타일 테마 설정
+      data: Theme.of(context).copyWith(
+        scrollbarTheme: ScrollbarThemeData(
+          thumbColor: MaterialStateProperty.all(Colors.white.withOpacity(0.5)),
+          thickness: MaterialStateProperty.all(6.0),
+          radius: const Radius.circular(8.0),
+          thumbVisibility: MaterialStateProperty.all(true),
         ),
-        itemCount: stateData.restaurants.length + (stateData.isLoadingNextPage || (stateData.error != null && !stateData.isLoadingInitial) ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == stateData.restaurants.length) {
-            if (stateData.isLoadingNextPage) {
-              return const Center(child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ));
-            } else if (stateData.error != null && !stateData.isLoadingInitial) {
-              return Center(child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                     Text("다음 페이지 로딩 실패", style: TextStyle(color: Colors.red)),
-                     SizedBox(height: 4),
-                     // 여기서 '다시 시도' 버튼을 추가할 수도 있습니다.
-                     // ElevatedButton(onPressed: () => ref.read(votePageStateProvider.notifier).fetchNextPage(), child: Text('다음 페이지 재시도'))
-                  ],
-                )
-              ));
-            }
-            return const SizedBox.shrink();
-          }
-          final restaurantState = stateData.restaurants[index];
-          return VoteRestaurantCard(
-            key: ValueKey(restaurantState.restaurant.restaurantId),
-            restaurant: restaurantState.restaurant,
-            userVote: restaurantState.userVote,
-            isVoting: restaurantState.isVoting,
-            onVote: (voteType) {
-              ref.read(votePageStateProvider.notifier).handleVote(
-                restaurantState.restaurant.restaurantId,
-                voteType,
+      ),
+      child: Scrollbar(
+        controller: _scrollController,
+        radius: const Radius.circular(8.0), // 스크롤바 모서리 둥글기
+        thumbVisibility: true, // 항상 스크롤바 표시
+        child: RefreshIndicator(
+          onRefresh: () => ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort),
+          child: GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(4),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 4,
+              mainAxisSpacing: 4,
+              childAspectRatio: 0.7,
+            ),
+            itemCount: stateData.restaurants.length + (stateData.isLoadingNextPage || (stateData.error != null && !stateData.isLoadingInitial) ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == stateData.restaurants.length) {
+                if (stateData.isLoadingNextPage) {
+                  return const Center(child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ));
+                } else if (stateData.error != null && !stateData.isLoadingInitial) {
+                  return Center(child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                         Text("다음 페이지 로딩 실패", style: TextStyle(color: Colors.red)),
+                         SizedBox(height: 4),
+                         // 여기서 '다시 시도' 버튼을 추가할 수도 있습니다.
+                         // ElevatedButton(onPressed: () => ref.read(votePageStateProvider.notifier).fetchNextPage(), child: Text('다음 페이지 재시도'))
+                      ],
+                    )
+                  ));
+                }
+                return const SizedBox.shrink();
+              }
+              final restaurantState = stateData.restaurants[index];
+              return VoteRestaurantCard(
+                key: ValueKey(restaurantState.restaurant.restaurantId),
+                restaurant: restaurantState.restaurant,
+                userVote: restaurantState.userVote,
+                isVoting: restaurantState.isVoting,
+                onVote: (voteType) {
+                  ref.read(votePageStateProvider.notifier).handleVote(
+                    restaurantState.restaurant.restaurantId,
+                    voteType,
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+        ),
       ),
     );
   }

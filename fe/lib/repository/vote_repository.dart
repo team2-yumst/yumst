@@ -138,4 +138,35 @@ class VoteRepository {
       throw Exception('Failed to batch vote.');
     }
   }
+
+  // 스크랩 토글 메소드 추가
+  Future<bool> scrapRestaurant(String restaurantId) async {
+    try {
+      final userId = await storage.readUserId();
+      if (userId == null) {
+        throw Exception('User ID not found');
+      }
+
+      final response = await dio.patch(
+        'http://localhost:8080/api/user/v1/scrap/$restaurantId',
+        options: Options(headers: {'userId': userId}),
+      );
+
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        // 스크랩 상태 반환 (true: 스크랩됨, false: 스크랩 해제됨)
+        final scrapped = response.data['scrapped'] as bool? ?? false;
+        return scrapped;
+      } else {
+        throw Exception('Failed to toggle scrap: Status code ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      print('DioException scrapping: ${e.message}');
+      print('Error response: ${e.response?.data}');
+      final errorMessage = e.response?.data?['message'] ?? e.message;
+      throw Exception('Failed to toggle scrap: $errorMessage');
+    } catch (e) {
+      print('Error scrapping: $e');
+      throw Exception('Failed to toggle scrap.');
+    }
+  }
 } 

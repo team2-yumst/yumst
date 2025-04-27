@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // VoteRestaurantCard 위젯 정의 수정 (StatelessWidget으로 변경 가능하나 일단 유지)
-class VoteRestaurantCard extends ConsumerWidget { // ConsumerWidget으로 변경
+class VoteRestaurantCard extends ConsumerStatefulWidget {
   final VoteRestaurant restaurant;
-  final VoteType? userVote; // 외부에서 전달받는 투표 상태
-  final bool isVoting;      // 외부에서 전달받는 로딩 상태
-  final Function(VoteType) onVote; // 외부에서 전달받는 투표 콜백
+  final VoteType? userVote;
+  final bool isVoting;
+  final Function(VoteType) onVote;
 
   const VoteRestaurantCard({
     super.key,
@@ -20,16 +20,20 @@ class VoteRestaurantCard extends ConsumerWidget { // ConsumerWidget으로 변경
     required this.onVote,
   });
 
-  // State 클래스 및 내부 상태, _handleVote 메소드 제거됨
-  // initState, setState 등도 제거
+  @override
+  ConsumerState<VoteRestaurantCard> createState() => _VoteRestaurantCardState();
+}
+
+class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> {
+  bool _isDetailExpanded = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) { // WidgetRef 추가
-    // final restaurant = widget.restaurant; // ConsumerWidget에서는 직접 접근
-
-    // 좋아요/싫어요 카운트는 restaurant 객체에서 직접 읽음
+  Widget build(BuildContext context) {
+    final restaurant = widget.restaurant;
     final likeCount = restaurant.likeCount ?? 0;
     final dislikeCount = restaurant.dislikeCount ?? 0;
+    final distance = restaurant.distance != null ? '${restaurant.distance!.round()}m' : '';
+    final isScrapped = restaurant.isScrapped ?? false;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -37,102 +41,268 @@ class VoteRestaurantCard extends ConsumerWidget { // ConsumerWidget으로 변경
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. 배경 이미지 (동일)
-          if (restaurant.thumbnailUrl != null && restaurant.thumbnailUrl!.isNotEmpty)
+          // 배경 이미지
+          if (restaurant.thumbnailUrl?.isNotEmpty == true)
             CachedNetworkImage(
               imageUrl: restaurant.thumbnailUrl!,
               fit: BoxFit.cover,
-              placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              errorWidget: (context, url, error) => const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
+              placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+              errorWidget: (context, url, error) =>
+                  const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
             )
           else
             Container(
               color: Colors.grey[300],
-              child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
+              child: const Center(
+                  child: Icon(Icons.image_not_supported, color: Colors.grey)),
             ),
 
-          // 2. 하단 정보 영역 + 투표 버튼 통합
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+          // 확장 정보 패널
+          if (_isDetailExpanded)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.95),
+                      Colors.black.withOpacity(0.2)
+                    ],
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // 왼쪽: 식당 정보 (동일)
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 식당 이름 + 접기 버튼
+                    Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           restaurant.name,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (restaurant.category != null)
-                          Text(
-                            restaurant.category!,
-                            style: const TextStyle(color: Colors.white70, fontSize: 12),
-                             maxLines: 1,
-                             overflow: TextOverflow.ellipsis,
+                        const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() => _isDetailExpanded = false);
+                          },
+                          child: const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white70,
+                            size: 20,
                           ),
+                        ),
                       ],
                     ),
-                  ),
-
-                  // 오른쪽: 투표 버튼 (세로 배치)
-                  isVoting
-                      ? SizedBox(
-                          width: 50,
-                          height: 80, // 세로 높이 확보
-                          child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))),
-                        )
-                      : Column( // Column으로 변경하여 세로 배치
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // 좋아요 (위에 배치)
-                            IconButton(
-                              icon: Icon(
-                                userVote == VoteType.LIKE ? Icons.thumb_up_alt : Icons.thumb_up_alt_outlined,
-                                color: Colors.white,
-                              ),
-                              iconSize: 24,
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                              onPressed: () => onVote(VoteType.LIKE),
-                            ),
-                            Text(likeCount.toString(), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                            SizedBox(height: 4), // 아이콘 사이 간격
-                            // 싫어요 (아래에 배치)
-                            IconButton(
-                              icon: Icon(
-                                userVote == VoteType.DISLIKE ? Icons.thumb_down_alt : Icons.thumb_down_alt_outlined,
-                                color: Colors.white,
-                              ),
-                              iconSize: 24,
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                              onPressed: () => onVote(VoteType.DISLIKE),
-                            ),
-                            Text(dislikeCount.toString(), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                          ],
+                    // 거리
+                    Text(
+                      distance,
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 13),
+                    ),
+                    // 카테고리
+                    if (restaurant.category != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, bottom: 8),
+                        child: Text(
+                          restaurant.category!,
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 13),
                         ),
-                ],
+                      ),
+                    // 추가 정보
+                    Text(
+                      "서울특별시 마포구 서교동 358-45",
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 12),
+                    ),
+                    if (restaurant.businessHours != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          restaurant.businessHours!,
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 12),
+                        ),
+                      ),
+                    if (restaurant.topFeatures?.isNotEmpty == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          restaurant.topFeatures!
+                              .map((f) => '#$f')
+                              .join(' '),
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
+
+          // 기본 하단 정보 (접혀있을 때)
+          if (!_isDetailExpanded)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.9),
+                      Colors.transparent
+                    ],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 식당 이름
+                    Text(
+                      restaurant.name,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    // 거리
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, bottom: 2),
+                      child: Text(
+                        distance,
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 13),
+                      ),
+                    ),
+                    // 카테고리 + 상세 버튼
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          restaurant.category ?? '',
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() => _isDetailExpanded = true);
+                          },
+                          child: const Icon(
+                            Icons.more_horiz,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          // 투표 및 스크랩 버튼 (우측 정렬)
+          Positioned(
+            bottom: 45,
+            right: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 좋아요 버튼
+                IconButton(
+                  icon: Icon(
+                    widget.userVote == VoteType.LIKE
+                        ? Icons.thumb_up
+                        : Icons.thumb_up_outlined,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => widget.onVote(VoteType.LIKE),
+                ),
+                Text(
+                  likeCount.toString(),
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+                const SizedBox(height: 2),
+                // 싫어요 버튼
+                IconButton(
+                  icon: Icon(
+                    widget.userVote == VoteType.DISLIKE
+                        ? Icons.thumb_down
+                        : Icons.thumb_down_outlined,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => widget.onVote(VoteType.DISLIKE),
+                ),
+                Text(
+                  dislikeCount.toString(),
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+                const SizedBox(height: 2),
+                // 스크랩 버튼
+                IconButton(
+                  icon: Icon(
+                    isScrapped ? Icons.bookmark : Icons.bookmark_outline,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () {
+                    ref
+                        .read(votePageStateProvider.notifier)
+                        .toggleScrap(restaurant.restaurantId);
+                  },
+                ),
+              ],
+            ),
           ),
+
+          // 로딩 인디케이터
+          if (widget.isVoting)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.3),
+                child: const Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
