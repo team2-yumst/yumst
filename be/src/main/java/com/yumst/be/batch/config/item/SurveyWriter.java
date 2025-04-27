@@ -21,8 +21,10 @@ public class SurveyWriter implements ItemWriter<SurveyCompositeData> {
     @Override
     @Transactional
     public void write(Chunk<? extends SurveyCompositeData> chunk) throws Exception {
-
-
-
+        for (SurveyCompositeData surveyCompositeData : chunk) {
+            userRepository.save(surveyCompositeData.getUserEntity());
+            userPreferenceRepository.saveAll(surveyCompositeData.getPreferences());
+            userRestaurantVoteRepository.saveAll(surveyCompositeData.getVotes());
+        }
     }
 }
