@@ -1,9 +1,11 @@
 package com.yumst.be.crawl.controller;
 
 import com.yumst.be.crawl.dto.CrawledNaverRestaurant;
+import com.yumst.be.crawl.service.AfterCrawlService;
 import com.yumst.be.crawl.service.SeleniumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CrawlController {
 
     private final SeleniumService seleniumService;
+    private final AfterCrawlService afterCrawlService;
 
     @GetMapping("/crawl")
     public String crawl() {
@@ -18,6 +21,13 @@ public class CrawlController {
         CrawledNaverRestaurant crawl = seleniumService.crawl("판초", "서울특별시 마포구");
 //        CrawledNaverRestaurant crawl = seleniumService.crawl("하카타분코", "서울");
 
+        return crawl.toString();
+    }
+
+    @GetMapping("/crawl/{restaurantName}")
+    public String crawlSpecific (@PathVariable String restaurantName) {
+        CrawledNaverRestaurant crawl = seleniumService.crawl(restaurantName, "서울특별시 마포구");
+        afterCrawlService.updateRestaurant(crawl);
         return crawl.toString();
     }
 }
