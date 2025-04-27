@@ -17,8 +17,10 @@ public class CrawlController {
 
     @GetMapping("/crawl")
     public String crawl() {
-//        CrawledNaverRestaurant crawl = seleniumService.crawl("7번방", "서울특별시 마포구");
-        CrawledNaverRestaurant crawl = seleniumService.crawl("판초", "서울특별시 마포구");
+        CrawledNaverRestaurant crawl = seleniumService.crawl("7번방", "서울특별시 마포구");
+//        CrawledNaverRestaurant crawl = seleniumService.crawl("라멘트럭", "서울특별시 마포구");
+//        CrawledNaverRestaurant crawl2 = seleniumService.crawl("소코아", "서울특별시 마포구");
+//        CrawledNaverRestaurant crawl3 = seleniumService.crawl("더피자보이즈", "서울특별시 마포구");
 //        CrawledNaverRestaurant crawl = seleniumService.crawl("하카타분코", "서울");
 
         return crawl.toString();
@@ -27,7 +29,7 @@ public class CrawlController {
     @GetMapping("/crawl/{restaurantName}")
     public String crawlSpecific (@PathVariable String restaurantName) {
         CrawledNaverRestaurant crawl = seleniumService.crawl(restaurantName, "서울특별시 마포구");
-        afterCrawlService.updateRestaurant(crawl);
+        afterCrawlService.updateRestaurant(restaurantName, "서울특별시 마포구" ,crawl);
         return crawl.toString();
     }
 }
