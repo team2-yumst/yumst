@@ -66,7 +66,7 @@ class VoteRepository {
     }
   }
 
-  // 투표 API 호출 메소드 추가
+  // 투표 API 호출 메소드 수정
   Future<Map<String, dynamic>> voteRestaurant({
     required String restaurantId,
     required VoteType voteType, // 좋아요(LIKE) 또는 싫어요(DISLIKE)
@@ -77,7 +77,8 @@ class VoteRepository {
         throw Exception('User ID not found');
       }
 
-      final response = await dio.post(
+      // POST에서 PATCH로 변경하고 URL 경로 수정
+      final response = await dio.patch(
         'http://localhost:8080/api/vote/v1/restaurants/$restaurantId',
         options: Options(headers: {'userId': userId}),
         data: {
@@ -100,6 +101,41 @@ class VoteRepository {
     } catch (e) {
       print('Error voting: $e');
       throw Exception('Failed to vote.');
+    }
+  }
+
+  // 배치 투표 API 호출 메소드 추가
+  Future<List<Map<String, dynamic>>> batchVote({
+    required List<Map<String, dynamic>> votes, // [{restaurantId: String, voteType: String}]
+  }) async {
+    try {
+      final userId = await storage.readUserId();
+      if (userId == null) {
+        throw Exception('User ID not found');
+      }
+
+      final response = await dio.post(
+        'http://localhost:8080/api/vote/v1/batch',
+        options: Options(headers: {'userId': userId}),
+        data: {
+          'votes': votes, // 배치 투표 요청 형식에 맞게 전달
+        },
+      );
+
+      if (response.statusCode == 200 && response.data is List) {
+        // 성공 시 응답 데이터 반환
+        return (response.data as List).cast<Map<String, dynamic>>();
+      } else {
+        throw Exception('Failed to batch vote: Status code ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      print('DioException batch voting: ${e.message}');
+      print('Error response: ${e.response?.data}');
+      final errorMessage = e.response?.data?['message'] ?? e.message;
+      throw Exception('Failed to batch vote: $errorMessage');
+    } catch (e) {
+      print('Error batch voting: $e');
+      throw Exception('Failed to batch vote.');
     }
   }
 } 

@@ -18,10 +18,11 @@ VoteRestaurant _$VoteRestaurantFromJson(Map<String, dynamic> json) =>
       topFeatures: (json['top2Features'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      likeCount: (json['likeCount'] as num?)?.toInt(),
-      dislikeCount: (json['dislikeCount'] as num?)?.toInt(),
+      likeCount: json['likeCount'] as int?,
+      dislikeCount: json['dislikeCount'] as int?,
       distance: (json['distance'] as num?)?.toDouble(),
       isScrapped: json['scrapped'] as bool?,
+      userVoteStatus: json['voteStatus'] as String?,
     );
 
 Map<String, dynamic> _$VoteRestaurantToJson(VoteRestaurant instance) =>
@@ -38,4 +39,5 @@ Map<String, dynamic> _$VoteRestaurantToJson(VoteRestaurant instance) =>
       'dislikeCount': instance.dislikeCount,
       'distance': instance.distance,
       'scrapped': instance.isScrapped,
-    };
+      'voteStatus': instance.userVoteStatus,
+    }; 

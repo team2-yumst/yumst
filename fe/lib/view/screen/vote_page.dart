@@ -36,34 +36,10 @@ class VoteRestaurantState {
   // 임시 초기 데이터 변환 (실제 VoteRestaurant 모델 업데이트 필요)
   factory VoteRestaurantState.fromRestaurant(VoteRestaurant restaurant) {
     VoteType? initialVote;
-    String? voteStatusFromApi = restaurant.userVoteStatus; // 임시 extension 사용
+    String? voteStatusFromApi = restaurant.userVoteStatus; // 이제 실제 모델에서 userVoteStatus를 읽음
     if (voteStatusFromApi == 'LIKE') initialVote = VoteType.LIKE;
     else if (voteStatusFromApi == 'DISLIKE') initialVote = VoteType.DISLIKE;
     return VoteRestaurantState(restaurant: restaurant, userVote: initialVote);
-  }
-}
-
-// 임시 VoteRestaurant extension (실제 모델 수정 필요)
-extension VoteRestaurantExtension on VoteRestaurant {
-  String? get userVoteStatus => null;
-  VoteRestaurant copyWith({
-    int? likeCount,
-    int? dislikeCount,
-  }) {
-    return VoteRestaurant(
-      restaurantId: this.restaurantId,
-      name: this.name,
-      category: this.category,
-      thumbnailUrl: this.thumbnailUrl,
-      latitude: this.latitude,
-      longitude: this.longitude,
-      businessHours: this.businessHours,
-      topFeatures: this.topFeatures,
-      distance: this.distance,
-      isScrapped: this.isScrapped,
-      likeCount: likeCount ?? this.likeCount,
-      dislikeCount: dislikeCount ?? this.dislikeCount,
-    );
   }
 }
 
@@ -116,6 +92,9 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
   final dynamic _read;
   int _currentPage = 0;
   final int _pageSize = 10; // 페이지 당 아이템 수 (API와 일치시켜야 함)
+  
+  // 위치 정보를 저장할 변수 추가
+  Position? _lastPosition;
 
   VotePageStateNotifier(this._voteRepository, this._read)
       : super(const VotePageCombinedState()) { // 초기 상태
@@ -133,11 +112,12 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
       clearError: true,
     );
     try {
-      final position = await _read(currentPositionProvider.future);
+      // 초기 로드 또는 새로고침 시에만 새 위치 정보 가져오기
+      _lastPosition = await _read(currentPositionProvider.future);
 
       final restaurants = await _voteRepository.getVotableRestaurants(
-        latitude: position.latitude,
-        longitude: position.longitude,
+        latitude: _lastPosition!.latitude,
+        longitude: _lastPosition!.longitude,
         radius: 5.0,
         sort: newSort,
         page: _currentPage,
@@ -165,15 +145,24 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
   // 다음 페이지 로드
   Future<void> fetchNextPage() async {
     if (state.isLoadingInitial || state.isLoadingNextPage || !state.hasMore) return;
+    
+    // 위치 정보가 없는 경우 처리
+    if (_lastPosition == null) {
+      state = state.copyWith(
+        error: Exception('위치 정보를 가져올 수 없습니다. 새로고침을 시도해주세요.'),
+        stackTrace: StackTrace.current,
+      );
+      return;
+    }
 
     state = state.copyWith(isLoadingNextPage: true, clearError: true);
     _currentPage++;
 
     try {
-      final position = await _read(currentPositionProvider.future);
+      // 저장된 위치 정보 사용
       final restaurants = await _voteRepository.getVotableRestaurants(
-        latitude: position.latitude,
-        longitude: position.longitude,
+        latitude: _lastPosition!.latitude,
+        longitude: _lastPosition!.longitude,
         radius: 5.0,
         sort: state.currentSort,
         page: _currentPage,
@@ -219,9 +208,12 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
         restaurantId: restaurantId,
         voteType: voteType,
       );
+      
+      // 실제 모델의 copyWith 메소드 사용
       final updatedRestaurant = originalState.restaurant.copyWith(
          likeCount: (response['likes'] as num?)?.toInt() ?? 0,
          dislikeCount: (response['dislikes'] as num?)?.toInt() ?? 0,
+         userVoteStatus: optimisticVote?.name, // 투표 상태 업데이트 (LIKE, DISLIKE, null)
       );
 
       // API 성공 후 최종 상태 업데이트
