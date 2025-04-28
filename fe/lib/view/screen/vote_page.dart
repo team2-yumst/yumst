@@ -1,4 +1,5 @@
 import 'package:fe/provider/vote_state_provider.dart';
+import 'package:fe/repository/vote_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widget/vote_restaurant_card.dart';

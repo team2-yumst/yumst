@@ -101,11 +101,10 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> with Si
           .read(restaurantRepositoryProvider)
           .scrapRestaurant(restaurantData);
       
-      // 스크랩 상태 변경
-      widget.restaurant.copyWith(
-        isScrapped: !(restaurant.isScrapped ?? false),
-      );
-      setState(() {}); // 상태가 바뀌었으니 다시 빌드해서 아이콘 갱신
+      // provider를 통해 스크랩 상태 업데이트
+      ref.read(voteRestaurantProvider(restaurant.restaurantId).notifier)
+        ..updateRestaurant(restaurant)
+        ..toggleScrap();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -118,10 +117,11 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> with Si
   @override
   Widget build(BuildContext context) {
     final restaurant = widget.restaurant;
+    // provider를 통해 스크랩 상태 관찰
+    final isScrapped = ref.watch(voteRestaurantProvider(restaurant.restaurantId)).isScrapped ?? false;
     final likeCount = restaurant.likeCount ?? 0;
     final dislikeCount = restaurant.dislikeCount ?? 0;
     final distance = restaurant.distance != null ? '${restaurant.distance!.round()}m' : '';
-    final isScrapped = restaurant.isScrapped ?? false;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -383,7 +383,7 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> with Si
                 // 스크랩 버튼
                 IconButton(
                   icon: Icon(
-                    (restaurant.isScrapped ?? false)
+                    isScrapped
                         ? Icons.bookmark
                         : Icons.bookmark_border,
                     color: Colors.white,

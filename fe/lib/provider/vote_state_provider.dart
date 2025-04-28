@@ -345,4 +345,25 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
 final votePageStateProvider = StateNotifierProvider<VotePageStateNotifier, VotePageCombinedState>((ref) {
   final voteRepository = ref.watch(voteRepositoryProvider);
   return VotePageStateNotifier(voteRepository, ref.read);
-}); 
+});
+
+final voteRestaurantProvider = StateNotifierProvider.family<VoteRestaurantNotifier, VoteRestaurant, String>((ref, restaurantId) {
+  return VoteRestaurantNotifier();
+});
+
+class VoteRestaurantNotifier extends StateNotifier<VoteRestaurant> {
+  VoteRestaurantNotifier() : super(VoteRestaurant(
+    restaurantId: '',
+    name: '',
+  ));
+
+  void updateRestaurant(VoteRestaurant restaurant) {
+    state = restaurant;
+  }
+
+  void toggleScrap() {
+    state = state.copyWith(
+      isScrapped: !(state.isScrapped ?? false),
+    );
+  }
+} 
