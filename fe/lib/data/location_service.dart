@@ -5,16 +5,6 @@ final locationServiceProvider = Provider<LocationService>((ref) {
   return LocationService();
 });
 
-final currentPositionProvider = FutureProvider<Position>((ref) async {
-  final locationService = ref.watch(locationServiceProvider);
-  try {
-    return await locationService.getPosition();
-  } catch (e) {
-    print("Error getting initial position: $e");
-    rethrow;
-  }
-});
-
 class LocationService {
   Future<Position> getPosition() async {
     // Check if location services are enabled

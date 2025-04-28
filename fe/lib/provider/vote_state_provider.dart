@@ -113,33 +113,25 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
     );
     
     try {
-      // 위치 정보 요청 시 타임아웃 설정
+      // 위치 정보 요청
+      final locationService = _read(locationServiceProvider);
       try {
-        print("위치 정보 요청 시작...");
-        _lastPosition = await _read(currentPositionProvider.future);
-        print("위치 정보 성공: ${_lastPosition?.latitude}, ${_lastPosition?.longitude}");
-      } catch (locationError) {
-        print("위치 정보 오류: $locationError");
-        // 위치 정보 가져오기 실패 시 사용자에게 자세한 오류 메시지 제공
-        String errorMessage = "위치 정보를 가져올 수 없습니다.";
-        
-        if (locationError is LocationServiceDisabledException) {
-          errorMessage = "위치 서비스가 비활성화되어 있습니다. 설정에서 위치 서비스를 켜주세요.";
-        } else if (locationError is LocationPermissionDeniedException) {
-          errorMessage = "위치 권한이 거부되었습니다. 앱 설정에서 위치 권한을 허용해 주세요.";
-        } else if (locationError is LocationPermissionPermanentlyDeniedException) {
-          errorMessage = "위치 권한이 영구적으로 거부되었습니다. 기기 설정에서 앱의 위치 권한을 수동으로 허용해 주세요.";
-        } else if (locationError is LocationRetrievalException) {
-          errorMessage = "위치 정보 검색 중 오류가 발생했습니다: ${locationError.toString()}";
-        }
-        
-        state = state.copyWith(
-          isLoadingInitial: false,
-          error: Exception(errorMessage),
-          stackTrace: StackTrace.current,
-          hasMore: false,
+        _lastPosition = await locationService.getPosition();
+      } catch (e) {
+        print("위치 정보 가져오기 실패: $e");
+        // 위치 정보가 없을 때 기본값 사용 (서울 시청 좌표)
+        _lastPosition = Position(
+          latitude: 37.5665,
+          longitude: 126.9780,
+          timestamp: DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0,
+          altitudeAccuracy: 0,
+          headingAccuracy: 0,
         );
-        return; // 위치를 얻을 수 없으면 API 호출하지 않고 종료
       }
 
       print("API 요청 시작: ${_lastPosition?.latitude}, ${_lastPosition?.longitude}, $newSort");
@@ -308,7 +300,7 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
       // 실제 API 호출
       final isScrapped = await _voteRepository.scrapRestaurant(restaurantId);
       
-      // API 응답을 기반으로 스크랩 상태 업데이트 (낙관적 업데이트와 API 응답이 다를 수 있음)
+      // API 응답을 기반으로 스크랩 상태 업데이트
       final finalList = List<VoteRestaurantState>.from(state.restaurants);
       if (index < finalList.length) {
         final updatedRestaurant = originalState.restaurant.copyWith(
@@ -320,6 +312,9 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
         );
         
         state = state.copyWith(restaurants: finalList);
+        
+        // 개별 식당 상태도 업데이트
+        _read(voteRestaurantProvider(restaurantId).notifier).updateRestaurant(updatedRestaurant);
       }
       
     } catch (e, stackTrace) {
@@ -335,6 +330,9 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
         );
         
         state = state.copyWith(restaurants: rollbackList, error: e, stackTrace: stackTrace);
+        
+        // 개별 식당 상태도 롤백
+        _read(voteRestaurantProvider(restaurantId).notifier).updateRestaurant(originalRestaurant);
       }
       // TODO: Show error Snackbar
     }
@@ -347,23 +345,58 @@ final votePageStateProvider = StateNotifierProvider<VotePageStateNotifier, VoteP
   return VotePageStateNotifier(voteRepository, ref.read);
 });
 
-final voteRestaurantProvider = StateNotifierProvider.family<VoteRestaurantNotifier, VoteRestaurant, String>((ref, restaurantId) {
-  return VoteRestaurantNotifier();
-});
+// 개별 식당 상태를 관리하는 StateNotifier
+class VoteRestaurantStateNotifier extends StateNotifier<VoteRestaurantState> {
+  final String restaurantId;
+  final Ref ref;
 
-class VoteRestaurantNotifier extends StateNotifier<VoteRestaurant> {
-  VoteRestaurantNotifier() : super(VoteRestaurant(
-    restaurantId: '',
-    name: '',
-  ));
+  VoteRestaurantStateNotifier(this.restaurantId, this.ref)
+      : super(VoteRestaurantState(
+          restaurant: VoteRestaurant(
+            restaurantId: restaurantId,
+            name: '',
+          ),
+        )) {
+    _init();
+  }
+
+  void _init() {
+    final restaurants = ref.read(votePageStateProvider).restaurants;
+    final restaurant = restaurants.firstWhere(
+      (r) => r.restaurant.restaurantId == restaurantId,
+      orElse: () => throw Exception('Restaurant not found: $restaurantId'),
+    );
+    
+    // 기존 상태의 스크랩 정보를 유지하면서 새로운 상태로 업데이트
+    state = state.copyWith(
+      restaurant: restaurant.restaurant.copyWith(
+        isScrapped: restaurant.restaurant.isScrapped ?? state.restaurant.isScrapped,
+      ),
+      userVote: restaurant.userVote,
+      isVoting: restaurant.isVoting,
+    );
+  }
 
   void updateRestaurant(VoteRestaurant restaurant) {
-    state = restaurant;
+    if (restaurant.restaurantId != restaurantId) return;
+    state = state.copyWith(
+      restaurant: restaurant.copyWith(
+        isScrapped: state.restaurant.isScrapped ?? restaurant.isScrapped,
+      ),
+    );
   }
 
   void toggleScrap() {
+    final restaurant = state.restaurant;
     state = state.copyWith(
-      isScrapped: !(state.isScrapped ?? false),
+      restaurant: restaurant.copyWith(
+        isScrapped: !(restaurant.isScrapped ?? false),
+      ),
     );
   }
-} 
+}
+
+// 개별 식당 상태를 관리하는 provider
+final voteRestaurantProvider = StateNotifierProvider.family<VoteRestaurantStateNotifier, VoteRestaurantState, String>((ref, restaurantId) {
+  return VoteRestaurantStateNotifier(restaurantId, ref);
+}); 
