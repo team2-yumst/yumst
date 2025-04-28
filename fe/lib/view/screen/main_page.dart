@@ -35,7 +35,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       if (index == 0 && _selectedIndex == 0) {
         ref.read(restaurantPaginationProvider.notifier).loadInitial();
       } else if (index == 1 && _selectedIndex == 1) {
-        // VotePage에서 더블 탭 시 데이터 새로고침
         ref.read(votePageStateProvider.notifier).refresh();
       }
       _lastTapTime = null;
@@ -43,15 +42,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     } else {
       // 싱글 탭 처리
       setState(() => _selectedIndex = index);
-      // 탭 변경 시 VotePage 관련 작업 수행
-      if (index == 1) {
-        // 약간의 지연 후 데이터 로드 시도 (탭 전환 완료 후)
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) {
-            ref.read(votePageStateProvider.notifier).refresh();
-          }
-        });
-      }
+      
+      // 탭 변경 시 데이터 로드
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        
+        if (index == 0) {
+          // 추천 페이지로 이동 시
+          ref.read(restaurantPaginationProvider.notifier).loadInitial();
+        } else if (index == 1) {
+          // 투표 페이지로 이동 시
+          ref.read(votePageStateProvider.notifier).refresh();
+        }
+      });
+
       _lastTapTime = currentTime;
       _lastTappedIndex = index;
     }

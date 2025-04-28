@@ -163,7 +163,7 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
       );
     } catch (e, stackTrace) {
       print("API 요청 오류: $e");
-      state = state.copyWith(
+      state = state.copyWith( 
         isLoadingInitial: false,
         error: e,
         stackTrace: stackTrace,
@@ -224,46 +224,51 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
     if (index == -1) return;
 
     final originalState = state.restaurants[index];
-    VoteType? optimisticVote = originalState.userVote;
-    if (optimisticVote == voteType) optimisticVote = null;
-    else optimisticVote = voteType;
-
-    // 상태 업데이트 (isLoading 포함)
-    var optimisticList = List<VoteRestaurantState>.from(state.restaurants);
-    optimisticList[index] = originalState.copyWith(isVoting: true, userVote: optimisticVote, forceNullUserVote: optimisticVote == null);
-    state = state.copyWith(restaurants: optimisticList, clearError: true);
+    final currentVote = originalState.userVote;
+    
+    // 이미 같은 투표를 한 경우 취소
+    final newVote = currentVote == voteType ? null : voteType;
+    
+    // 낙관적 UI 업데이트
+    var updatedList = List<VoteRestaurantState>.from(state.restaurants);
+    updatedList[index] = originalState.copyWith(
+      userVote: newVote,
+      isVoting: true,
+    );
+    
+    state = state.copyWith(restaurants: updatedList, clearError: true);
 
     try {
+      // API 호출 - voteType이 null이면 투표 취소 요청
       final response = await _voteRepository.voteRestaurant(
         restaurantId: restaurantId,
-        voteType: voteType,
+        voteType: newVote ?? voteType, // null이면 원래 voteType을 사용 (취소 요청)
       );
       
-      // 실제 모델의 copyWith 메소드 사용
+      // API 성공 후 최종 상태 업데이트
       final updatedRestaurant = originalState.restaurant.copyWith(
-         likeCount: (response['likes'] as num?)?.toInt() ?? 0,
-         dislikeCount: (response['dislikes'] as num?)?.toInt() ?? 0,
-         userVoteStatus: optimisticVote?.name, // 투표 상태 업데이트 (LIKE, DISLIKE, null)
+        likeCount: (response['likes'] as num?)?.toInt() ?? 0,
+        dislikeCount: (response['dislikes'] as num?)?.toInt() ?? 0,
+        userVoteStatus: newVote?.name,
       );
 
-      // API 성공 후 최종 상태 업데이트
       final finalList = List<VoteRestaurantState>.from(state.restaurants);
-      if (index < finalList.length) { // 리스트가 변경되었을 수 있으므로 인덱스 재확인
-          finalList[index] = originalState.copyWith(
-            restaurant: updatedRestaurant,
-            userVote: optimisticVote,
-            isVoting: false,
-            forceNullUserVote: optimisticVote == null
-          );
-         state = state.copyWith(restaurants: finalList);
+      if (index < finalList.length) {
+        finalList[index] = originalState.copyWith(
+          restaurant: updatedRestaurant,
+          userVote: newVote,
+          isVoting: false,
+          forceNullUserVote: newVote == null
+        );
+        state = state.copyWith(restaurants: finalList);
       }
 
     } catch (e, stackTrace) {
-      // API 실패 시 롤백 (로딩 상태만 해제)
+      // API 실패 시 롤백
       final rollbackList = List<VoteRestaurantState>.from(state.restaurants);
       if (index < rollbackList.length) {
-          rollbackList[index] = originalState.copyWith(isVoting: false);
-          state = state.copyWith(restaurants: rollbackList, error: e, stackTrace: stackTrace);
+        rollbackList[index] = originalState.copyWith(isVoting: false);
+        state = state.copyWith(restaurants: rollbackList, error: e, stackTrace: stackTrace);
       }
       // TODO: Show error Snackbar
     }

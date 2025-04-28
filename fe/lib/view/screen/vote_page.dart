@@ -152,8 +152,6 @@ class _VotePageState extends ConsumerState<VotePage> {
       ),
       child: Scrollbar(
         controller: _scrollController,
-        radius: const Radius.circular(8.0), // 스크롤바 모서리 둥글기
-        thumbVisibility: true, // 항상 스크롤바 표시
         child: RefreshIndicator(
           onRefresh: () => ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort),
           child: GridView.builder(
