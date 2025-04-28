@@ -5,6 +5,8 @@ import 'package:fe/model/vote_restaurant.dart';
 import 'package:fe/provider/vote_state_provider.dart'; // VoteType enum 가져오기
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 part 'vote_repository.g.dart';
 
@@ -18,8 +20,32 @@ VoteRepository voteRepository(VoteRepositoryRef ref) {
 class VoteRepository {
   final Dio dio;
   final SecureStorage storage;
+  late SharedPreferences _prefs;
 
-  VoteRepository({required this.dio, required this.storage});
+  VoteRepository({required this.dio, required this.storage}) {
+    SharedPreferences.getInstance().then((prefs) => _prefs = prefs);
+  }
+
+  Future<void> _savePendingVotes(List<Map<String, dynamic>> votes) async {
+    final pendingVotes = _prefs.getStringList('pending_votes') ?? [];
+    final newVotes = votes.map((vote) => jsonEncode(vote)).toList();
+    await _prefs.setStringList('pending_votes', [...pendingVotes, ...newVotes]);
+  }
+
+  Future<void> syncPendingVotes() async {
+    final pendingVotes = _prefs.getStringList('pending_votes') ?? [];
+    if (pendingVotes.isNotEmpty) {
+      try {
+        final votes = pendingVotes
+            .map((vote) => jsonDecode(vote) as Map<String, dynamic>)
+            .toList();
+        await batchVote(votes: votes);
+        await _prefs.remove('pending_votes');
+      } catch (e) {
+        print('Failed to sync pending votes: $e');
+      }
+    }
+  }
 
   Future<List<VoteRestaurant>> getVotableRestaurants({
     required double latitude,

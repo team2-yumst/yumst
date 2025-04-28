@@ -126,61 +126,172 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> with Si
     final dislikeCount = restaurant.dislikeCount ?? 0;
     final distance = restaurant.distance != null ? '${restaurant.distance!.round()}m' : '';
 
-    return GestureDetector(
-      onTap: _isDetailExpanded ? _toggleDetail : null,
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: 2,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // 배경 이미지
-            if (restaurant.thumbnailUrl?.isNotEmpty == true)
-              CachedNetworkImage(
-                imageUrl: restaurant.thumbnailUrl!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2)),
-                errorWidget: (context, url, error) =>
-                    const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
-              )
-            else
-              Container(
-                color: Colors.grey[300],
-                child: const Center(
-                    child: Icon(Icons.image_not_supported, color: Colors.grey)),
-              ),
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: _isDetailExpanded ? _toggleDetail : null,
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          elevation: 2,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 배경 이미지
+              if (restaurant.thumbnailUrl?.isNotEmpty == true)
+                CachedNetworkImage(
+                  imageUrl: restaurant.thumbnailUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2)),
+                  errorWidget: (context, url, error) =>
+                      const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
+                )
+              else
+                Container(
+                  color: Colors.grey[300],
+                  child: const Center(
+                      child: Icon(Icons.image_not_supported, color: Colors.grey)),
+                ),
 
-            // 배경 어둡게 처리 (펼쳤을 때)
-            if (_isDetailExpanded)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: _isDetailExpanded ? 0.3 : 0.0,
-                    child: Container(color: Colors.black),
+              // 배경 어둡게 처리 (펼쳤을 때)
+              if (_isDetailExpanded)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 300),
+                      opacity: _isDetailExpanded ? 0.3 : 0.0,
+                      child: Container(color: Colors.black),
+                    ),
                   ),
                 ),
-              ),
 
-            // 확장 정보 패널
-            if (_isDetailExpanded)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
+              // 확장 정보 패널
+              if (_isDetailExpanded)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.95),
+                            Colors.black.withOpacity(0.2)
+                          ],
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 식당 이름 + 접기 버튼
+                          SlideTransition(
+                            position: _titleSlideAnimation,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  restaurant.name,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: _toggleDetail,
+                                  child: const Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: Colors.white70,
+                                    size: 20,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // 추가 정보
+                          FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: SizeTransition(
+                              sizeFactor: _sizeAnimation,
+                              axisAlignment: -1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    distance,
+                                    style: const TextStyle(
+                                        color: Colors.white70, fontSize: 13),
+                                  ),
+                                  if (restaurant.category != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4, bottom: 8),
+                                      child: Text(
+                                        restaurant.category!,
+                                        style: const TextStyle(
+                                            color: Colors.white70, fontSize: 13),
+                                      ),
+                                    ),
+                                  Text(
+                                    "서울특별시 마포구 서교동 358-45",
+                                    style: const TextStyle(
+                                        color: Colors.white70, fontSize: 12),
+                                  ),
+                                  if (restaurant.businessHours != null)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Text(
+                                        restaurant.businessHours!,
+                                        style: const TextStyle(
+                                            color: Colors.white70, fontSize: 12),
+                                      ),
+                                    ),
+                                  if (restaurant.topFeatures?.isNotEmpty == true)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        restaurant.topFeatures!
+                                            .map((f) => '#$f')
+                                            .join(' '),
+                                        style: const TextStyle(
+                                            color: Colors.white70, fontSize: 12),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // 기본 하단 정보 (접혀있을 때)
+              if (!_isDetailExpanded)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
                         colors: [
-                          Colors.black.withOpacity(0.95),
-                          Colors.black.withOpacity(0.2)
+                          Colors.black.withOpacity(0.9),
+                          Colors.transparent
                         ],
                       ),
                     ),
@@ -188,238 +299,129 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> with Si
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // 식당 이름 + 접기 버튼
-                        SlideTransition(
-                          position: _titleSlideAnimation,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                restaurant.name,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(width: 4),
-                              GestureDetector(
-                                onTap: _toggleDetail,
-                                child: const Icon(
-                                  Icons.keyboard_arrow_down,
-                                  color: Colors.white70,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // 추가 정보
-                        FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: SizeTransition(
-                            sizeFactor: _sizeAnimation,
-                            axisAlignment: -1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  distance,
-                                  style: const TextStyle(
-                                      color: Colors.white70, fontSize: 13),
-                                ),
-                                if (restaurant.category != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4, bottom: 8),
-                                    child: Text(
-                                      restaurant.category!,
-                                      style: const TextStyle(
-                                          color: Colors.white70, fontSize: 13),
-                                    ),
-                                  ),
-                                Text(
-                                  "서울특별시 마포구 서교동 358-45",
-                                  style: const TextStyle(
-                                      color: Colors.white70, fontSize: 12),
-                                ),
-                                if (restaurant.businessHours != null)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
-                                    child: Text(
-                                      restaurant.businessHours!,
-                                      style: const TextStyle(
-                                          color: Colors.white70, fontSize: 12),
-                                    ),
-                                  ),
-                                if (restaurant.topFeatures?.isNotEmpty == true)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      restaurant.topFeatures!
-                                          .map((f) => '#$f')
-                                          .join(' '),
-                                      style: const TextStyle(
-                                          color: Colors.white70, fontSize: 12),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-            // 기본 하단 정보 (접혀있을 때)
-            if (!_isDetailExpanded)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.9),
-                        Colors.transparent
-                      ],
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 식당 이름
-                      Text(
-                        restaurant.name,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      // 거리
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2, bottom: 2),
-                        child: Text(
-                          distance,
+                        // 식당 이름
+                        Text(
+                          restaurant.name,
                           style: const TextStyle(
-                              color: Colors.white70, fontSize: 13),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      // 카테고리 + 상세 버튼
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            restaurant.category ?? '',
+                        // 거리
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2, bottom: 2),
+                          child: Text(
+                            distance,
                             style: const TextStyle(
                                 color: Colors.white70, fontSize: 13),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: _toggleDetail,
-                            child: const Icon(
-                              Icons.more_horiz,
-                              color: Colors.white,
-                              size: 20,
+                        ),
+                        // 카테고리 + 상세 버튼
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              restaurant.category ?? '',
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 13),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: _toggleDetail,
+                              child: const Icon(
+                                Icons.more_horiz,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // 투표 및 스크랩 버튼 (우측 정렬)
+              Positioned(
+                bottom: 45,
+                right: 0,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 좋아요 버튼
+                    IconButton(
+                      icon: Icon(
+                        widget.userVote == VoteType.LIKE
+                            ? Icons.thumb_up
+                            : Icons.thumb_up_outlined,
+                        color: Colors.white,
+                        size: 22,
                       ),
-                    ],
-                  ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => widget.onVote(VoteType.LIKE),
+                    ),
+                    Text(
+                      likeCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                    const SizedBox(height: 2),
+                    // 싫어요 버튼
+                    IconButton(
+                      icon: Icon(
+                        widget.userVote == VoteType.DISLIKE
+                            ? Icons.thumb_down
+                            : Icons.thumb_down_outlined,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => widget.onVote(VoteType.DISLIKE),
+                    ),
+                    Text(
+                      dislikeCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                    const SizedBox(height: 2),
+                    // 스크랩 버튼
+                    IconButton(
+                      icon: Icon(
+                        isScrapped
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: _toggleScrap,
+                    ),
+                  ],
                 ),
               ),
 
-            // 투표 및 스크랩 버튼 (우측 정렬)
-            Positioned(
-              bottom: 45,
-              right: 0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 좋아요 버튼
-                  IconButton(
-                    icon: Icon(
-                      widget.userVote == VoteType.LIKE
-                          ? Icons.thumb_up
-                          : Icons.thumb_up_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () => widget.onVote(VoteType.LIKE),
-                  ),
-                  Text(
-                    likeCount.toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                  const SizedBox(height: 2),
-                  // 싫어요 버튼
-                  IconButton(
-                    icon: Icon(
-                      widget.userVote == VoteType.DISLIKE
-                          ? Icons.thumb_down
-                          : Icons.thumb_down_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () => widget.onVote(VoteType.DISLIKE),
-                  ),
-                  Text(
-                    dislikeCount.toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                  const SizedBox(height: 2),
-                  // 스크랩 버튼
-                  IconButton(
-                    icon: Icon(
-                      isScrapped
-                          ? Icons.bookmark
-                          : Icons.bookmark_border,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: _toggleScrap,
-                  ),
-                ],
-              ),
-            ),
-
-            // 로딩 인디케이터
-            if (widget.isVoting)
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black.withOpacity(0.3),
-                  child: const Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
+              // 로딩 인디케이터
+              if (widget.isVoting)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.3),
+                    child: const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:fe/repository/vote_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart' hide LocationServiceDisabledException, LocationPermissionDeniedException, LocationPermissionPermanentlyDeniedException, LocationRetrievalException;
+import 'dart:async';
 
 // VoteType enum 정의
 enum VoteType { LIKE, DISLIKE }
@@ -51,6 +52,7 @@ class VotePageCombinedState {
   final bool isLoadingNextPage;   // 다음 페이지 로딩 중?
   final bool hasMore;             // 더 불러올 페이지가 있는가?
   final Object? error;            // 에러 객체
+  final String? errorMessage;     // 에러 메시지
   final StackTrace? stackTrace;   // 에러 스택 트레이스
   final String currentSort;       // 현재 정렬 기준
 
@@ -60,6 +62,7 @@ class VotePageCombinedState {
     this.isLoadingNextPage = false,
     this.hasMore = true,
     this.error,
+    this.errorMessage,
     this.stackTrace,
     this.currentSort = 'distance',
   });
@@ -70,6 +73,7 @@ class VotePageCombinedState {
     bool? isLoadingNextPage,
     bool? hasMore,
     Object? error,
+    String? errorMessage,
     StackTrace? stackTrace,
     String? currentSort,
     bool clearError = false, // 에러를 명시적으로 지울지 여부
@@ -80,9 +84,66 @@ class VotePageCombinedState {
       isLoadingNextPage: isLoadingNextPage ?? this.isLoadingNextPage,
       hasMore: hasMore ?? this.hasMore,
       error: clearError ? null : error ?? this.error,
+      errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
       stackTrace: clearError ? null : stackTrace ?? this.stackTrace,
       currentSort: currentSort ?? this.currentSort,
     );
+  }
+}
+
+// VoteQueue 클래스 수정
+class VoteQueue {
+  final List<Map<String, dynamic>> _queue = [];
+  Timer? _batchTimer;
+  final Duration _batchInterval = const Duration(seconds: 5);
+  final int _maxBatchSize = 20;
+  DateTime _lastRequestTime = DateTime.now();
+  int _requestCount = 0;
+  final Duration _rateLimitWindow = const Duration(minutes: 1);
+  final VoteRepository _repository;
+
+  VoteQueue(this._repository);
+
+  void addVote(String restaurantId, VoteType voteType) {
+    final now = DateTime.now();
+    if (now.difference(_lastRequestTime) < _rateLimitWindow) {
+      if (_requestCount >= 20) {
+        throw Exception('Too many requests');
+      }
+      _requestCount++;
+    } else {
+      _requestCount = 1;
+      _lastRequestTime = now;
+    }
+
+    _queue.add({
+      'restaurantId': restaurantId,
+      'voteType': voteType.name,
+    });
+
+    _startBatchTimer();
+  }
+
+  void _startBatchTimer() {
+    _batchTimer?.cancel();
+    _batchTimer = Timer(_batchInterval, _processBatch);
+  }
+
+  Future<void> _processBatch() async {
+    if (_queue.isEmpty) return;
+
+    final votesToProcess = _queue.sublist(0, _maxBatchSize);
+    _queue.removeRange(0, votesToProcess.length);
+
+    try {
+      await _repository.batchVote(votes: votesToProcess);
+    } catch (e) {
+      _queue.insertAll(0, votesToProcess);
+    }
+  }
+
+  void dispose() {
+    _batchTimer?.cancel();
   }
 }
 
@@ -90,6 +151,7 @@ class VotePageCombinedState {
 class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
   final VoteRepository _voteRepository;
   final dynamic _read;
+  late final VoteQueue _voteQueue;
   int _currentPage = 0;
   final int _pageSize = 10; // 페이지 당 아이템 수 (API와 일치시켜야 함)
   
@@ -97,8 +159,15 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
   Position? _lastPosition;
 
   VotePageStateNotifier(this._voteRepository, this._read)
-      : super(const VotePageCombinedState()) { // 초기 상태
+      : super(const VotePageCombinedState()) {
+    _voteQueue = VoteQueue(_voteRepository);
     _fetchInitialRestaurants();
+  }
+
+  @override
+  void dispose() {
+    _voteQueue.dispose();
+    super.dispose();
   }
 
   // 초기 데이터 또는 새로고침 시 호출
@@ -209,7 +278,6 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
 
   // 투표 처리 (내부 로직은 거의 동일, 상태 업데이트 방식만 변경)
   Future<void> handleVote(String restaurantId, VoteType voteType) async {
-    // 로딩 중이 아닐 때만 처리 (isLoadingInitial, isLoadingNextPage 확인)
     if (state.isLoadingInitial || state.isLoadingNextPage) return;
 
     final index = state.restaurants.indexWhere((rs) => rs.restaurant.restaurantId == restaurantId);
@@ -217,30 +285,28 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
 
     final originalState = state.restaurants[index];
     final currentVote = originalState.userVote;
-    
-    // 이미 같은 투표를 한 경우 취소
     final newVote = currentVote == voteType ? null : voteType;
-    
-    // 낙관적 UI 업데이트
+
+    // 즉시 UI 업데이트
     var updatedList = List<VoteRestaurantState>.from(state.restaurants);
     updatedList[index] = originalState.copyWith(
       userVote: newVote,
       isVoting: true,
     );
-    
     state = state.copyWith(restaurants: updatedList, clearError: true);
 
     try {
-      // API 호출 - voteType이 null이면 투표 취소 요청
-      final response = await _voteRepository.voteRestaurant(
-        restaurantId: restaurantId,
-        voteType: newVote ?? voteType, // null이면 원래 voteType을 사용 (취소 요청)
-      );
+      // 배치 큐에 추가
+      _voteQueue.addVote(restaurantId, newVote ?? voteType);
       
-      // API 성공 후 최종 상태 업데이트
+      // 낙관적 업데이트
       final updatedRestaurant = originalState.restaurant.copyWith(
-        likeCount: (response['likes'] as num?)?.toInt() ?? 0,
-        dislikeCount: (response['dislikes'] as num?)?.toInt() ?? 0,
+        likeCount: newVote == VoteType.LIKE 
+          ? (originalState.restaurant.likeCount ?? 0) + 1
+          : originalState.restaurant.likeCount,
+        dislikeCount: newVote == VoteType.DISLIKE
+          ? (originalState.restaurant.dislikeCount ?? 0) + 1
+          : originalState.restaurant.dislikeCount,
         userVoteStatus: newVote?.name,
       );
 
@@ -254,15 +320,19 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
         );
         state = state.copyWith(restaurants: finalList);
       }
-
-    } catch (e, stackTrace) {
-      // API 실패 시 롤백
+    } catch (e) {
+      // 에러 처리
       final rollbackList = List<VoteRestaurantState>.from(state.restaurants);
       if (index < rollbackList.length) {
         rollbackList[index] = originalState.copyWith(isVoting: false);
-        state = state.copyWith(restaurants: rollbackList, error: e, stackTrace: stackTrace);
+        state = state.copyWith(
+          restaurants: rollbackList,
+          error: e,
+          errorMessage: e.toString().contains('Too many requests')
+            ? '잠시 후 다시 시도해주세요'
+            : '투표 처리 중 오류가 발생했습니다: ${e.toString()}'
+        );
       }
-      // TODO: Show error Snackbar
     }
   }
 
