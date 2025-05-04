@@ -101,10 +101,11 @@ class VoteQueue {
   int _requestCount = 0;
   final Duration _rateLimitWindow = const Duration(minutes: 1);
   final VoteRepository _repository;
+  final Map<String, VoteType> _currentVotes = {}; // 현재 투표 상태 추적
 
   VoteQueue(this._repository);
 
-  void addVote(String restaurantId, VoteType voteType) {
+  void addVote(String restaurantId, VoteType? voteType) {
     final now = DateTime.now();
     if (now.difference(_lastRequestTime) < _rateLimitWindow) {
       if (_requestCount >= 20) {
@@ -116,12 +117,23 @@ class VoteQueue {
       _lastRequestTime = now;
     }
 
+    // 현재 투표 상태 업데이트
+    if (voteType == null) {
+      _currentVotes.remove(restaurantId);
+    } else {
+      _currentVotes[restaurantId] = voteType;
+    }
+
     _queue.add({
       'restaurantId': restaurantId,
-      'voteType': voteType.name,
+      'voteType': voteType?.name, // null이면 투표 취소
     });
 
     _startBatchTimer();
+  }
+
+  VoteType? getCurrentVote(String restaurantId) {
+    return _currentVotes[restaurantId];
   }
 
   void _startBatchTimer() {
@@ -138,7 +150,8 @@ class VoteQueue {
     try {
       await _repository.batchVote(votes: votesToProcess);
     } catch (e) {
-      _queue.insertAll(0, votesToProcess);
+      // 실패 시 큐에 다시 추가하지 않음 (이미 UI에 반영됨)
+      print('Failed to process batch votes: $e');
     }
   }
 
@@ -287,26 +300,44 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
     final currentVote = originalState.userVote;
     final newVote = currentVote == voteType ? null : voteType;
 
+    // 현재 투표 상태에 따라 카운트 조정
+    int newLikeCount = originalState.restaurant.likeCount ?? 0;
+    int newDislikeCount = originalState.restaurant.dislikeCount ?? 0;
+
+    // 이전 투표 취소
+    if (currentVote == VoteType.LIKE) {
+      newLikeCount--;
+    } else if (currentVote == VoteType.DISLIKE) {
+      newDislikeCount--;
+    }
+
+    // 새로운 투표 적용
+    if (newVote == VoteType.LIKE) {
+      newLikeCount++;
+    } else if (newVote == VoteType.DISLIKE) {
+      newDislikeCount++;
+    }
+
     // 즉시 UI 업데이트
     var updatedList = List<VoteRestaurantState>.from(state.restaurants);
     updatedList[index] = originalState.copyWith(
       userVote: newVote,
       isVoting: true,
+      restaurant: originalState.restaurant.copyWith(
+        likeCount: newLikeCount,
+        dislikeCount: newDislikeCount,
+      ),
     );
     state = state.copyWith(restaurants: updatedList, clearError: true);
 
     try {
       // 배치 큐에 추가
-      _voteQueue.addVote(restaurantId, newVote ?? voteType);
+      _voteQueue.addVote(restaurantId, newVote);
       
       // 낙관적 업데이트
       final updatedRestaurant = originalState.restaurant.copyWith(
-        likeCount: newVote == VoteType.LIKE 
-          ? (originalState.restaurant.likeCount ?? 0) + 1
-          : originalState.restaurant.likeCount,
-        dislikeCount: newVote == VoteType.DISLIKE
-          ? (originalState.restaurant.dislikeCount ?? 0) + 1
-          : originalState.restaurant.dislikeCount,
+        likeCount: newLikeCount,
+        dislikeCount: newDislikeCount,
         userVoteStatus: newVote?.name,
       );
 
