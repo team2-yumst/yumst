@@ -110,43 +110,56 @@ public class UserRestaurantVoteService {
         
         // 각 요청에 대해 투표 처리
         for (BatchVoteRequest.SingleVoteRequest request : requests) {
+            String restaurantId = request.getRestaurantId();
+            VoteType requestedVoteType = request.getVoteType();
+            String message;
+            
             try {
                 // 식당 존재 여부 확인
-                restaurantService.validateRestaurantExists(request.getRestaurantId());
+                restaurantService.validateRestaurantExists(restaurantId);
                 
                 // 투표 처리
-                Optional<UserRestaurantVote> existingVote = userRestaurantVoteRepository
-                        .findByUserIdAndRestaurantId(userId, request.getRestaurantId());
+                Optional<UserRestaurantVote> existingVoteOpt = userRestaurantVoteRepository
+                        .findByUserIdAndRestaurantId(userId, restaurantId);
 
-                String message;
-                if (existingVote.isPresent()) {
-                    UserRestaurantVote vote = existingVote.get();
-                    if (vote.getVoteType() == request.getVoteType()) {
-                        userRestaurantVoteRepository.delete(vote);
+                if (requestedVoteType == null) {
+                    // 요청된 타입이 null (투표 취소)
+                    if (existingVoteOpt.isPresent()) {
+                        userRestaurantVoteRepository.delete(existingVoteOpt.get());
                         message = "Vote removed";
                     } else {
-                        vote.updateVote(request.getVoteType());
-                        message = "Vote updated";
+                        message = "Vote already absent"; // 이미 투표가 없는 상태
                     }
                 } else {
-                    UserRestaurantVote newVote = UserRestaurantVote.builder()
-                            .userId(userId)
-                            .restaurantId(request.getRestaurantId())
-                            .voteType(request.getVoteType())
-                            .build();
-                    userRestaurantVoteRepository.save(newVote);
-                    message = "Vote added";
+                    // 요청된 타입이 null이 아님 (LIKE 또는 DISLIKE)
+                    if (existingVoteOpt.isPresent()) {
+                        UserRestaurantVote vote = existingVoteOpt.get();
+                        if (vote.getVoteType() == requestedVoteType) {
+                            message = "Vote unchanged"; // 이미 같은 타입으로 투표됨
+                        } else {
+                            vote.updateVote(requestedVoteType);
+                            message = "Vote updated";
+                        }
+                    } else {
+                        UserRestaurantVote newVote = UserRestaurantVote.builder()
+                                .userId(userId)
+                                .restaurantId(restaurantId)
+                                .voteType(requestedVoteType)
+                                .build();
+                        userRestaurantVoteRepository.save(newVote);
+                        message = "Vote added";
+                    }
                 }
                 
                 // 응답 생성
-                responses.add(createVoteResponse(message, request.getRestaurantId()));
+                responses.add(createVoteResponse(message, restaurantId));
             } catch (Exception e) {
                 // 개별 요청 실패는 전체 배치를 실패시키지 않음
                 // 대신 에러 메시지를 반환
                 VoteResponse errorResponse = VoteResponse.builder()
-                        .message("Error: " + e.getMessage())
-                        .restaurantId(request.getRestaurantId())
-                        .likes(0L)
+                        .message("Error processing vote: " + e.getMessage()) // 에러 메시지 개선
+                        .restaurantId(restaurantId)
+                        .likes(0L) // 에러 시 카운트는 0으로 반환
                         .dislikes(0L)
                         .build();
                 responses.add(errorResponse);

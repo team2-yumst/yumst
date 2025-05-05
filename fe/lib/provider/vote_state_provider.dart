@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart' hide LocationServiceDisabledException, LocationPermissionDeniedException, LocationPermissionPermanentlyDeniedException, LocationRetrievalException;
 import 'dart:async';
+import 'package:dio/dio.dart';
 
 // VoteType enum 정의
 enum VoteType { LIKE, DISLIKE }
@@ -101,7 +102,8 @@ class VoteQueue {
   int _requestCount = 0;
   final Duration _rateLimitWindow = const Duration(minutes: 1);
   final VoteRepository _repository;
-  final Map<String, VoteType> _currentVotes = {}; // 현재 투표 상태 추적
+  final Map<String, VoteType> _currentVotes = {};
+  bool _isProcessing = false;
 
   VoteQueue(this._repository);
 
@@ -124,12 +126,32 @@ class VoteQueue {
       _currentVotes[restaurantId] = voteType;
     }
 
-    _queue.add({
-      'restaurantId': restaurantId,
-      'voteType': voteType?.name, // null이면 투표 취소
-    });
+    // 큐에 이미 해당 레스토랑 ID에 대한 액션이 있는지 확인
+    final existingIndex = _queue.indexWhere((item) => item['restaurantId'] == restaurantId);
 
-    _startBatchTimer();
+    if (existingIndex != -1) {
+      // 기존 액션 업데이트
+      _queue[existingIndex] = {
+        'restaurantId': restaurantId,
+        'voteType': voteType?.name,
+      };
+    } else {
+      // 새로운 액션 추가
+      _queue.add({
+        'restaurantId': restaurantId,
+        'voteType': voteType?.name,
+      });
+    }
+
+    // 큐가 비어있지 않고 타이머가 없을 때만 타이머 시작
+    if (_queue.isNotEmpty && _batchTimer == null) {
+      _startBatchTimer();
+    }
+
+    // 큐가 최대 크기에 도달하면 즉시 처리
+    if (_queue.length >= _maxBatchSize) {
+      _processBatch();
+    }
   }
 
   VoteType? getCurrentVote(String restaurantId) {
@@ -138,25 +160,61 @@ class VoteQueue {
 
   void _startBatchTimer() {
     _batchTimer?.cancel();
-    _batchTimer = Timer(_batchInterval, _processBatch);
+    _batchTimer = Timer(_batchInterval, () {
+      _batchTimer = null;
+      _processBatch();
+    });
   }
 
   Future<void> _processBatch() async {
-    if (_queue.isEmpty) return;
+    if (_queue.isEmpty || _isProcessing) return;
 
-    final votesToProcess = _queue.sublist(0, _maxBatchSize);
-    _queue.removeRange(0, votesToProcess.length);
-
+    _isProcessing = true;
+    List<Map<String, dynamic>> votesToProcess = [];
     try {
-      await _repository.batchVote(votes: votesToProcess);
-    } catch (e) {
-      // 실패 시 큐에 다시 추가하지 않음 (이미 UI에 반영됨)
-      print('Failed to process batch votes: $e');
+      final batchSize = _queue.length < _maxBatchSize ? _queue.length : _maxBatchSize;
+      votesToProcess = _queue.sublist(0, batchSize);
+      _queue.removeRange(0, batchSize);
+
+      try {
+        print("Batch vote request data: $votesToProcess");
+        await _repository.batchVote(votes: votesToProcess);
+        print("Batch vote successful");
+      } on DioException catch (e) {
+        print('Failed to process batch votes (DioException): ${e.message}');
+        if (e.response?.statusCode != null &&
+            e.response!.statusCode! >= 400 &&
+            e.response!.statusCode! < 500) {
+          print('Client error (${e.response!.statusCode}). Discarding batch.');
+        } else {
+          print('Server error or other DioException. Re-queueing batch.');
+          _queue.insertAll(0, votesToProcess);
+        }
+      } catch (e) {
+        // DioException 외 다른 예외 처리 (e.g., Repository에서 rethrow된 경우)
+        print('Failed to process batch votes (Caught generic Exception): $e');
+        // 예외 메시지나 타입에서 4xx 에러 힌트 확인 (주의: 문자열 비교는 불안정할 수 있음)
+        final errorString = e.toString().toLowerCase();
+        if (errorString.contains('status code of 400') || 
+            errorString.contains('bad request') || 
+            (e is Exception && e.toString().contains('400'))) {
+          print('Inferred client error (4xx) from exception message. Discarding batch.');
+        } else {
+          print('Unknown error type or inferred server error. Re-queueing batch.');
+          _queue.insertAll(0, votesToProcess);
+        }
+      }
+    } finally {
+      _isProcessing = false;
+      if (_queue.isNotEmpty && _batchTimer == null) {
+        _startBatchTimer();
+      }
     }
   }
 
   void dispose() {
     _batchTimer?.cancel();
+    _batchTimer = null;
   }
 }
 
@@ -374,50 +432,48 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
   
   // 스크랩 기능
   Future<void> toggleScrap(String restaurantId) async {
-    // 로딩 중이 아닐 때만 처리
-    if (state.isLoadingInitial || state.isLoadingNextPage) return;
-
-    final index = state.restaurants.indexWhere((rs) => rs.restaurant.restaurantId == restaurantId);
+    final index = state.restaurants.indexWhere((r) => r.restaurant.restaurantId == restaurantId);
     if (index == -1) return;
 
     final originalState = state.restaurants[index];
-    
-    // 낙관적 UI 업데이트 (스크랩 상태 즉시 토글)
     final newIsScrapped = !(originalState.restaurant.isScrapped ?? false);
-    
-    // 상태 업데이트 (isLoading 포함)
-    var updatedList = List<VoteRestaurantState>.from(state.restaurants);
+
+    // UI 상태 먼저 업데이트
+    final optimisticList = List<VoteRestaurantState>.from(state.restaurants);
     final updatedRestaurant = originalState.restaurant.copyWith(
       isScrapped: newIsScrapped,
     );
-    
-    updatedList[index] = originalState.copyWith(
+
+    optimisticList[index] = originalState.copyWith(
       restaurant: updatedRestaurant,
     );
-    
-    state = state.copyWith(restaurants: updatedList, clearError: true);
+
+    state = state.copyWith(restaurants: optimisticList);
+
+    // 개별 식당 상태도 업데이트
+    _read(voteRestaurantProvider(restaurantId).notifier).updateRestaurant(updatedRestaurant);
 
     try {
       // 실제 API 호출
       final isScrapped = await _voteRepository.scrapRestaurant(restaurantId);
-      
+
       // API 응답을 기반으로 스크랩 상태 업데이트
       final finalList = List<VoteRestaurantState>.from(state.restaurants);
       if (index < finalList.length) {
         final updatedRestaurant = originalState.restaurant.copyWith(
           isScrapped: isScrapped,
         );
-        
+
         finalList[index] = originalState.copyWith(
           restaurant: updatedRestaurant,
         );
-        
+
         state = state.copyWith(restaurants: finalList);
-        
+
         // 개별 식당 상태도 업데이트
         _read(voteRestaurantProvider(restaurantId).notifier).updateRestaurant(updatedRestaurant);
       }
-      
+
     } catch (e, stackTrace) {
       // API 실패 시 롤백
       final rollbackList = List<VoteRestaurantState>.from(state.restaurants);
@@ -425,17 +481,21 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
         final originalRestaurant = originalState.restaurant.copyWith(
           isScrapped: !newIsScrapped, // 원래 상태로 되돌림
         );
-        
+
         rollbackList[index] = originalState.copyWith(
           restaurant: originalRestaurant,
         );
-        
-        state = state.copyWith(restaurants: rollbackList, error: e, stackTrace: stackTrace);
-        
+
+        state = state.copyWith(
+          restaurants: rollbackList, 
+          error: e, 
+          stackTrace: stackTrace,
+          errorMessage: '스크랩 상태 변경에 실패했습니다: ${e.toString()}'
+        );
+
         // 개별 식당 상태도 롤백
         _read(voteRestaurantProvider(restaurantId).notifier).updateRestaurant(originalRestaurant);
       }
-      // TODO: Show error Snackbar
     }
   }
 }
@@ -500,4 +560,9 @@ class VoteRestaurantStateNotifier extends StateNotifier<VoteRestaurantState> {
 // 개별 식당 상태를 관리하는 provider
 final voteRestaurantProvider = StateNotifierProvider.family<VoteRestaurantStateNotifier, VoteRestaurantState, String>((ref, restaurantId) {
   return VoteRestaurantStateNotifier(restaurantId, ref);
+});
+
+// 네비게이션 키 provider 추가
+final navigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
+  return GlobalKey<NavigatorState>();
 }); 

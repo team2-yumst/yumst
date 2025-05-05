@@ -23,7 +23,6 @@ public class BatchVoteRequest {
         @NotNull(message = "레스토랑 ID는 필수입니다.")
         private String restaurantId;
         
-        @NotNull(message = "투표 타입은 필수입니다.")
         private VoteType voteType;
     }
 } 
