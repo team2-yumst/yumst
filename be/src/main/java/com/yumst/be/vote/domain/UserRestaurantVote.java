@@ -43,3 +43,4 @@ public class UserRestaurantVote extends BaseTimeEntity {
         this.voteType = voteType;
     }
 }
+
