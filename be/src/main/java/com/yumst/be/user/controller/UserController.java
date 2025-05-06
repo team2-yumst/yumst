@@ -4,6 +4,7 @@ import com.yumst.be.user.dto.UserDto;
 import com.yumst.be.user.jwt.JwtProvider;
 import com.yumst.be.user.service.OAuthClient;
 import com.yumst.be.user.service.UserService;
+import com.yumst.be.user.vo.request.RequestAppleSignin;
 import com.yumst.be.user.vo.request.RequestFinalRegister;
 import com.yumst.be.user.vo.request.RequestToken;
 import com.yumst.be.user.vo.response.ResponseUser;
@@ -30,7 +31,7 @@ public class UserController {
 
         // google(resource server)로 요청
         // yumst db에 존재하면 반환, 없으면 추가
-        UserDto user = oAuthClient.loadUserByAccess(requestToken.getAccessToken());
+        UserDto user = oAuthClient.loadUserByGoogleAccess(requestToken.getAccessToken());
 
         // yumst server jwt 발급
         String accessToken = getAccessToken(user);
@@ -40,6 +41,18 @@ public class UserController {
         return ResponseEntity.status(OK)
                 .header("access", accessToken)
                 .body(responseUser);
+    }
+
+    @PostMapping("/login/apple")
+    public ResponseEntity<ResponseUser> appleLogin(@RequestBody RequestAppleSignin requestAppleSignin) {
+
+
+
+        String accessToken = getAccessToken(null);
+
+        return ResponseEntity.status(OK)
+                .header("access", accessToken)
+                .body(null);
     }
 
 

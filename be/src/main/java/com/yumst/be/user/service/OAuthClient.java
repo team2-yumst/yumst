@@ -7,7 +7,6 @@ import com.yumst.be.user.repository.UserRepository;
 import com.yumst.be.user.vo.request.RequestGoogleAccess;
 import com.yumst.be.user.vo.response.ResponseGoogleAccess;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,9 +31,8 @@ public class OAuthClient {
 
     private final UserRepository userRepository;
 
-    private final ModelMapper modelMapper;
 
-    public UserDto loadUserByAccess(String accessToken) {
+    public UserDto loadUserByGoogleAccess(String accessToken) {
 
         ResponseGoogleAccess body = requestToGoogle(accessToken);
 
