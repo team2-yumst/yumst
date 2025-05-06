@@ -67,7 +67,7 @@ jobs:
     - name: Docker build & push to prod
       run: |
         docker build -f Dockerfile -t gothax2/yumst-docker-repository .
-        docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/yumst-docker-repository
 
     ## deploy to production
     - name: Deploy to prod
@@ -80,7 +80,7 @@ jobs:
         envs: GITHUB_SHA
         script: |
           sudo docker rm -f $(docker ps -qa)
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/yumst-docker-repository
           sudo docker-compose up -d
           sudo docker image prune -f
 
