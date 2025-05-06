@@ -22,16 +22,16 @@
 ✔️소셜 로그인과 비회원으로 시작할 수 있어요<br/>
 ✔️비회원도 식당 추천과 스크랩 기능을 이용할 수 있지만, 로그아웃 시 모든 데이터가 삭제돼요<br/>
 <br/>
-<img width=300 src="https://github.com/user-attachments/assets/0f06836d-0958-4397-827b-9f103f26c8c3">
-<img width=300 src="https://github.com/user-attachments/assets/1fce6374-e3e8-4e81-9227-6890d81e9247">
-<img width=300 src="https://github.com/user-attachments/assets/e5023c7d-2a84-42c3-b829-003c6ff4ac3e">
+<img width=200 src="https://github.com/user-attachments/assets/0f06836d-0958-4397-827b-9f103f26c8c3">
+<img width=200 src="https://github.com/user-attachments/assets/1fce6374-e3e8-4e81-9227-6890d81e9247">
+<img width=200 src="https://github.com/user-attachments/assets/e5023c7d-2a84-42c3-b829-003c6ff4ac3e">
 <br/>
 <br/>
 ✔️선호하는 분위기, 식당, 카페를 각각 4개, 2개, 2개 선택해주세요<br/>
 <br/>
-<img width=300 src="https://github.com/user-attachments/assets/3719ebe2-cae6-46e9-bd4e-d561fadf6dbc">
-<img width=300 src="https://github.com/user-attachments/assets/2959b2bb-b1a5-408c-a23e-d5f35230384f">
-<img width=300 src="https://github.com/user-attachments/assets/019b27c8-5777-44e1-b9c7-33477b1cd728">
+<img width=200 src="https://github.com/user-attachments/assets/3719ebe2-cae6-46e9-bd4e-d561fadf6dbc">
+<img width=200 src="https://github.com/user-attachments/assets/2959b2bb-b1a5-408c-a23e-d5f35230384f">
+<img width=200 src="https://github.com/user-attachments/assets/019b27c8-5777-44e1-b9c7-33477b1cd728">
 </details>
 
 <details>
@@ -41,10 +41,10 @@
 ✔️식당의 상세 정보를 확인할 수 있어요<br/>
 ✔️마음에 드는 식당은 스크랩할 수 있어요<br/>
 <br/>
-<img width=300 src="https://github.com/user-attachments/assets/89159dd9-da91-46d9-bd48-173ada4c3219">
-<img width=300 src="https://github.com/user-attachments/assets/5bff0be3-78fc-4a82-8d86-2636c4986ea2"><br/>
-<img width=300 src="https://github.com/user-attachments/assets/d2f69f82-c462-48da-aab5-c3e3b8caa406">
-<img width=300 src="https://github.com/user-attachments/assets/1ecc9add-00fc-4b7f-9ce5-f3a30744ed11">
+<img width=200 src="https://github.com/user-attachments/assets/89159dd9-da91-46d9-bd48-173ada4c3219">
+<img width=200 src="https://github.com/user-attachments/assets/5bff0be3-78fc-4a82-8d86-2636c4986ea2"><br/>
+<img width=200 src="https://github.com/user-attachments/assets/d2f69f82-c462-48da-aab5-c3e3b8caa406">
+<img width=200 src="https://github.com/user-attachments/assets/1ecc9add-00fc-4b7f-9ce5-f3a30744ed11">
 <br/>
 </details>
 
@@ -53,8 +53,8 @@
 ✔️스크랩한 식당을 볼 수 있어요<br/>
 ✔️상단 메뉴바를 눌러 로그아웃 할 수 있어요<br/>
 <br/>
-<img width=300 src="https://github.com/user-attachments/assets/f1103cb3-d535-40e3-942a-b2600041236b">
-<img width=300 src="https://github.com/user-attachments/assets/8dbd653c-1dc9-44d1-ba8d-7e3cf0df331e">
+<img width=200 src="https://github.com/user-attachments/assets/f1103cb3-d535-40e3-942a-b2600041236b">
+<img width=200 src="https://github.com/user-attachments/assets/8dbd653c-1dc9-44d1-ba8d-7e3cf0df331e">
 <br/>
 </details>
 
@@ -88,9 +88,9 @@
 #### **AI**
 
 <div style="display: flex; align-items: center;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png" style="height: 50px; width: auto; margin-right: 50px;">
     <img src="https://blog.kakaocdn.net/dn/bgBkff/btrJWCoxfBY/s9KuFeLyGY1T1KNVn5QU31/img.png" style="height: 50px; width: auto; margin-right: 100px;">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ99FwgHxO3_rmNyLK6ytzNYVxlrynqrLn5Ow&s" style="height: 50px; width: auto; margin-right: 100px;">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmD38KsMgEwahtWc_Nfs5ZVktP9dBc36MUZA&s" style="height: 50px; width: auto; margin-right: 50px;">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHZd37oUzVXPHOsl-Ygg5hzYpZs7Djvk-vSw&s" style="height: 50px; width: auto; margin-right: 100px;">
 </div>
 
 #### **Infra**
