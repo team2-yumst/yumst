@@ -1,0 +1,64 @@
+spring:
+  profiles:
+    include: prod, jwt, oauth
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE}
+    username: ${POSTGRESQL_USERNAME}
+    password: ${POSTGRESQL_PASSWORD}
+
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: never
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT}
+            client-secret: ${GOOGLE_SECRET}
+            redirect-uri: ${BASE_URL}/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope:
+              - profile
+              - email
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+logging.level:
+#  org.hibernate.SQL: debug
+  org.springframework.web: debug
+  org.springframework.security: debug
+#  org.springframework.batch: debug
+#  com.yumst.be.crawl: debug
+
+jwt:
+  expiration:
+    access: ${ACCESS_EXPIRATION}
+    refresh: ${REFRESH_EXPIRATION}
+  secret: ${JWT_SECRET}
+
+etc:
+  base-url: ${BASE_URL}
+  front-url: ${FRONT_URL}
+  recommend-url: ${RECOMMEND_URL}
+  front-auth-success: ${FRONT_URL}/auth/success
+  google-profile-url: https://www.googleapis.com/userinfo/v2/me
+
+chrome:
+  driver:
+    path: ${CHROME_DRIVER_PATH}

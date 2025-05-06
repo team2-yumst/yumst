@@ -1,0 +1,51 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+/src/main/resources/**.csv
+/src/main/resources/관광식당.csv
+/src/main/resources/관광유흥음식점업.csv
+/src/main/resources/외국인전용유흥음식점업.csv
+/src/main/resources/일반음식점.csv
+/src/main/resources/휴게음식점.csv
+
+/src/main/resources/application-oauth.yml
+/src/main/resources/application-jwt.yml
+/src/main/resources/application-dev.yml
+/src/main/resources/application-prod.yml
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+/src/main/resources/data/**
