@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 part 'auth_repository.g.dart';
 
@@ -71,6 +72,47 @@ class AuthRepository {
     } catch (e) {
       print(e);
       throw Exception('Google 로그인에 실패했습니다.');
+    }
+  }
+
+  Future<User> signInWithApple() async {
+
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+          scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+          ],
+          webAuthenticationOptions: WebAuthenticationOptions(
+            clientId: 'YSZ4DR5598.yumst.com',
+            redirectUri: Uri.parse('https://dirt-cosmic-app.glitch.me/callbacks/sign_in_with_apple'),
+          ),
+      );
+
+      print(credential);
+
+      final response = await dio.post(
+        'http://localhost:8080/api/user/v1/login/apple',
+        data: {
+          'accessToken' : credential.authorizationCode,
+          'idToken' : credential.identityToken,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        addToStorage(response);
+        return User.fromJson(response.data);
+
+      } else {
+        if (kDebugMode) {
+          print(response.statusCode);
+          print(response.statusMessage);
+        }
+        throw Exception('Apple 로그인에 실패했습니다.');
+      }
+    } catch (e) {
+      print(e);
+      throw Exception('Apple 로그인에 실패했습니다.');
     }
   }
 
