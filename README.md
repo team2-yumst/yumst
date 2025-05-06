@@ -22,16 +22,19 @@
 ✔️소셜 로그인과 비회원으로 시작할 수 있어요<br/>
 ✔️비회원도 식당 추천과 스크랩 기능을 이용할 수 있지만, 로그아웃 시 모든 데이터가 삭제돼요<br/>
 <br/>
-<img width=200 src="https://github.com/user-attachments/assets/0f06836d-0958-4397-827b-9f103f26c8c3">
-<img width=200 src="https://github.com/user-attachments/assets/1fce6374-e3e8-4e81-9227-6890d81e9247">
-<img width=200 src="https://github.com/user-attachments/assets/e5023c7d-2a84-42c3-b829-003c6ff4ac3e">
-<br/>
+<p align="left">
+  <img width="200" src="https://github.com/user-attachments/assets/d6a8a556-ef12-42a2-8667-0d2bef168553">&nbsp;&nbsp;&nbsp;
+  <img width="200" src="https://github.com/user-attachments/assets/f6f9a436-a255-4ed0-86fe-155bf510bd1b">&nbsp;&nbsp;&nbsp;
+  <img width="200" src="https://github.com/user-attachments/assets/ba2810c4-caf8-4a7e-896d-30f347889457">
+</p>
 <br/>
 ✔️선호하는 분위기, 식당, 카페를 각각 4개, 2개, 2개 선택해주세요<br/>
 <br/>
-<img width=200 src="https://github.com/user-attachments/assets/3719ebe2-cae6-46e9-bd4e-d561fadf6dbc">
-<img width=200 src="https://github.com/user-attachments/assets/2959b2bb-b1a5-408c-a23e-d5f35230384f">
-<img width=200 src="https://github.com/user-attachments/assets/019b27c8-5777-44e1-b9c7-33477b1cd728">
+<p align="left">
+  <img width=200 src="https://github.com/user-attachments/assets/b32eb02f-70f2-4795-a402-2074077e148b">&nbsp;&nbsp;&nbsp;
+  <img width=200 src="https://github.com/user-attachments/assets/00286f7d-8351-4e96-8be1-d17d236dd41b">&nbsp;&nbsp;&nbsp;
+  <img width=200 src="https://github.com/user-attachments/assets/8a062d31-a5a2-4085-b8fb-90f65f7f2f2f">
+</p>
 </details>
 
 <details>
@@ -41,20 +44,24 @@
 ✔️식당의 상세 정보를 확인할 수 있어요<br/>
 ✔️마음에 드는 식당은 스크랩할 수 있어요<br/>
 <br/>
-<img width=200 src="https://github.com/user-attachments/assets/89159dd9-da91-46d9-bd48-173ada4c3219">
-<img width=200 src="https://github.com/user-attachments/assets/5bff0be3-78fc-4a82-8d86-2636c4986ea2"><br/>
-<img width=200 src="https://github.com/user-attachments/assets/d2f69f82-c462-48da-aab5-c3e3b8caa406">
-<img width=200 src="https://github.com/user-attachments/assets/1ecc9add-00fc-4b7f-9ce5-f3a30744ed11">
+<p align="left">
+  <img width=200 src="https://github.com/user-attachments/assets/bf8a7140-265c-4b15-8e71-9da2dd951552">&nbsp;&nbsp;&nbsp;
+  <img width=200 src="https://github.com/user-attachments/assets/95377fe3-9782-4a8c-bb40-9b4c43d1a943">&nbsp;&nbsp;&nbsp;
+</p>
 <br/>
 </details>
 
 <details>
-<summary>마이 페이지</summary><br/>
+<summary>투표 페이지 & 마이 페이지</summary><br/>
+✔️내 주변 식당들에 투표할 수 있어요<br/>
+✔️주변 식당들의 투표 순위를 볼 수 있어요<br/>
 ✔️스크랩한 식당을 볼 수 있어요<br/>
 ✔️상단 메뉴바를 눌러 로그아웃 할 수 있어요<br/>
 <br/>
-<img width=200 src="https://github.com/user-attachments/assets/f1103cb3-d535-40e3-942a-b2600041236b">
-<img width=200 src="https://github.com/user-attachments/assets/8dbd653c-1dc9-44d1-ba8d-7e3cf0df331e">
+<p align="left">
+<img width=200 src="https://github.com/user-attachments/assets/573e9ca4-81ae-410c-8688-93d96d54e3f1">&nbsp;&nbsp;&nbsp;
+<img width=200 src="https://github.com/user-attachments/assets/9940ad08-5ae1-469d-b871-7e8debbaa200">&nbsp;&nbsp;&nbsp;
+<img width=200 src="https://github.com/user-attachments/assets/520c563e-0e86-43eb-ac8a-fef4d0bab982">
 <br/>
 </details>
 
