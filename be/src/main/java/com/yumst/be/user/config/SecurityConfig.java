@@ -40,10 +40,10 @@ public class SecurityConfig {
 
 
     private static final String[] WHITE_LIST = {
-            "/**",
             "/auth/success",
             "/login",
-            "/api/user/v1",
+            "/api/user/v1/login/google",
+            "/api/user/v1/login/guest",
     };
 
     @Bean
