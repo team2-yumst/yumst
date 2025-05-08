@@ -6,6 +6,10 @@ plugins {
 	id 'jacoco'
 }
 
+ext {
+	springCloudVersion = "2024.0.1"
+}
+
 jacoco {
 	toolVersion = "0.8.11"
 }
@@ -83,6 +87,7 @@ dependencies {
 
 	// util
 	implementation 'org.modelmapper:modelmapper:3.1.1'
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
 	// crawl
 	implementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
@@ -90,7 +95,7 @@ dependencies {
 	// production 환경에서 삭제
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
 	runtimeOnly 'com.h2database:h2'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
 
 }
 
@@ -101,5 +106,11 @@ tasks.named('test') {
 jacocoTestReport {
 	reports {
 		xml.required = true
+	}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
 	}
 }

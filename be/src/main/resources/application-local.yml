@@ -14,3 +14,8 @@ REDIS_HOST: localhost
 REDIS_PORT: 6379
 
 CHROME_DRIVER_PATH: "C:\\Users\\Leo\\chromedriver-win64\\chromedriver.exe"
+
+APPLE_BUNDLE_ID: com.my.bundle
+APPLE_CLIENT_SECRET_FILE: /home/ubuntu/my_key_name.p8
+APPLE_KEY_ID: EX_KEY
+APPLE_TEAM_ID: EX_ID
