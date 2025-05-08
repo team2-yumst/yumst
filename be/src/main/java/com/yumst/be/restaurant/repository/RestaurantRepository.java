@@ -24,16 +24,18 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))" +
         "       ) as dist, " +
         "       COALESCE(bool_or(us.restaurant_id IS NOT NULL), false) as is_scrapped, " +
-        "       COALESCE(SUM(CASE WHEN v.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
-        "       COALESCE(SUM(CASE WHEN v.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
+        "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
+        "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
+        "       v_user.vote_type as user_vote_status, " +
         "       ROW_NUMBER() OVER (PARTITION BY r.name ORDER BY ST_Distance(" +
         "           geography(ST_SetSRID(ST_MakePoint(CAST(r.longitude AS float), CAST(r.latitude AS float)), 4326)), " +
-        "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))" +
+        "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))\n" +
         "       ) as row_num " +
         "   FROM " +
         "       restaurant r " +
         "       LEFT JOIN user_restaurant_scrap us ON r.restaurant_id = us.restaurant_id AND us.user_id = :userId " +
-        "       LEFT JOIN user_restaurant_vote v ON r.restaurant_id = v.restaurant_id " +
+        "       LEFT JOIN user_restaurant_vote v_all ON r.restaurant_id = v_all.restaurant_id " +
+        "       LEFT JOIN user_restaurant_vote v_user ON r.restaurant_id = v_user.restaurant_id AND v_user.user_id = :userId " +
         "   WHERE " +
         "       r.crawl_complete = true AND " +
         "       ST_DWithin(" +
@@ -41,9 +43,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)), " +
         "           :radius * 1000" +
         "       ) " +
-        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude" +
+        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude, v_user.vote_type" +
         ") " +
-        "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count " +
+        "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count, user_vote_status " +
         "FROM RankedRestaurants " +
         "WHERE row_num = 1 " +
         "ORDER BY dist ASC",
@@ -74,16 +76,18 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))" +
         "       ) as dist, " +
         "       COALESCE(bool_or(us.restaurant_id IS NOT NULL), false) as is_scrapped, " +
-        "       COALESCE(SUM(CASE WHEN v.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
-        "       COALESCE(SUM(CASE WHEN v.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
+        "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
+        "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
+        "       v_user.vote_type as user_vote_status, " +
         "       ROW_NUMBER() OVER (PARTITION BY r.name ORDER BY ST_Distance(" +
         "           geography(ST_SetSRID(ST_MakePoint(CAST(r.longitude AS float), CAST(r.latitude AS float)), 4326)), " +
-        "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))" +
+        "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))\n" +
         "       ) as row_num " +
         "   FROM " +
         "       restaurant r " +
         "       LEFT JOIN user_restaurant_scrap us ON r.restaurant_id = us.restaurant_id AND us.user_id = :userId " +
-        "       LEFT JOIN user_restaurant_vote v ON r.restaurant_id = v.restaurant_id " +
+        "       LEFT JOIN user_restaurant_vote v_all ON r.restaurant_id = v_all.restaurant_id " +
+        "       LEFT JOIN user_restaurant_vote v_user ON r.restaurant_id = v_user.restaurant_id AND v_user.user_id = :userId " +
         "   WHERE " +
         "       r.crawl_complete = true AND " +
         "       ST_DWithin(" +
@@ -91,9 +95,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)), " +
         "           :radius * 1000" +
         "       ) " +
-        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude" +
+        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude, v_user.vote_type" +
         ") " +
-        "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count " +
+        "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count, user_vote_status " +
         "FROM RankedRestaurants " +
         "WHERE row_num = 1 " +
         "ORDER BY like_count DESC, dist ASC",
@@ -124,16 +128,18 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))" +
         "       ) as dist, " +
         "       COALESCE(bool_or(us.restaurant_id IS NOT NULL), false) as is_scrapped, " +
-        "       COALESCE(SUM(CASE WHEN v.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
-        "       COALESCE(SUM(CASE WHEN v.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
+        "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
+        "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
+        "       v_user.vote_type as user_vote_status, " +
         "       ROW_NUMBER() OVER (PARTITION BY r.name ORDER BY ST_Distance(" +
         "           geography(ST_SetSRID(ST_MakePoint(CAST(r.longitude AS float), CAST(r.latitude AS float)), 4326)), " +
-        "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))" +
+        "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))\n" +
         "       ) as row_num " +
         "   FROM " +
         "       restaurant r " +
         "       LEFT JOIN user_restaurant_scrap us ON r.restaurant_id = us.restaurant_id AND us.user_id = :userId " +
-        "       LEFT JOIN user_restaurant_vote v ON r.restaurant_id = v.restaurant_id " +
+        "       LEFT JOIN user_restaurant_vote v_all ON r.restaurant_id = v_all.restaurant_id " +
+        "       LEFT JOIN user_restaurant_vote v_user ON r.restaurant_id = v_user.restaurant_id AND v_user.user_id = :userId " +
         "   WHERE " +
         "       r.crawl_complete = true AND " +
         "       ST_DWithin(" +
@@ -141,9 +147,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)), " +
         "           :radius * 1000" +
         "       ) " +
-        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude" +
+        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude, v_user.vote_type" +
         ") " +
-        "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count " +
+        "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count, user_vote_status " +
         "FROM RankedRestaurants " +
         "WHERE row_num = 1 " +
         "ORDER BY dislike_count DESC, dist ASC",
@@ -172,4 +178,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
                     "LIMIT 10"
     )
     List<Restaurant> findTop10RestaurantsByCrawlCompleteTrueOrderByNaverInformation();
+
+    Restaurant findFirstByOpenDataInformation_BusinessNameContainingAndOpenDataInformation_FullAddressContaining(String businessName, String fullAddress);
 }

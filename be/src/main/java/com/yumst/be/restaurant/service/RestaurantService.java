@@ -58,12 +58,16 @@ public class RestaurantService {
         Restaurant restaurant = findRestaurantById(restaurantId);
         List<String> top2Features = findTop2Features(restaurant);
         boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());
+        String userVoteStatus = userRestaurantVoteRepository.findByUserIdAndRestaurantId(userId, restaurant.getRestaurantId())
+            .map(vote -> vote.getVoteType().name())
+            .orElse(null);
 
         return ResponseRestaurant.from(
                 restaurant,
                 top2Features,
                 scrapped,
-                distance
+                distance,
+                userVoteStatus
         );
     }
 
@@ -89,11 +93,15 @@ public class RestaurantService {
     private ResponseRestaurant getResponseRestaurant(String userId, Restaurant restaurant) {
         List<String> top2Features = findTop2Features(restaurant);
         boolean scrapped = userRestaurantScrapRepository.existsByUserIdAndRestaurantId(userId, restaurant.getRestaurantId());
+        String userVoteStatus = userRestaurantVoteRepository.findByUserIdAndRestaurantId(userId, restaurant.getRestaurantId())
+            .map(vote -> vote.getVoteType().name())
+            .orElse(null);
 
         return ResponseRestaurant.createWithNoDistance(
                 restaurant,
                 top2Features,
-                scrapped
+                scrapped,
+                userVoteStatus
         );
     }
 
@@ -154,7 +162,8 @@ public class RestaurantService {
                     (Boolean) result[5], // isScrapped
                     ((Number) result[6]).longValue(), // likeCount
                     ((Number) result[7]).longValue(), // dislikeCount
-                    featureMap.getOrDefault((String) result[0], new ArrayList<>()) // features
+                    featureMap.getOrDefault((String) result[0], new ArrayList<>()), // features
+                    (String) result[8] // userVoteStatus 추가
                 ))
                 .toList();
     }

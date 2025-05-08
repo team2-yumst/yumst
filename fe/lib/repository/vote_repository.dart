@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:fe/data/secure_storage.dart';
 import 'package:fe/data/token_interceptor.dart'; // Assuming Dio setup is similar
 import 'package:fe/model/vote_restaurant.dart';
-import 'package:fe/provider/vote_state_provider.dart'; // VoteType enum 가져오기
+import 'package:fe/model/vote_types.dart'; // VoteType과 VoteQueueItem을 가져오기
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +16,8 @@ VoteRepository voteRepository(VoteRepositoryRef ref) {
   final storage = ref.watch(secureStorageProvider);
   return VoteRepository(dio: dio, storage: storage);
 }
+
+// VoteQueueItem 클래스는 이제 vote_types.dart에서 import
 
 class VoteRepository {
   final Dio dio;
@@ -39,7 +41,19 @@ class VoteRepository {
         final votes = pendingVotes
             .map((vote) => jsonDecode(vote) as Map<String, dynamic>)
             .toList();
-        await batchVote(votes: votes);
+        
+        // Map<String, dynamic>을 VoteQueueItem으로 변환
+        final voteQueueItems = votes.map((vote) => VoteQueueItem(
+          vote['restaurantId'] as String,
+          vote['voteType'] != null 
+              ? VoteType.values.firstWhere(
+                  (v) => v.name == vote['voteType'],
+                  orElse: () => throw Exception('Invalid vote type: ${vote['voteType']}')
+                )
+              : null
+        )).toList();
+        
+        await batchVote(voteQueueItems);
         await _prefs.remove('pending_votes');
       } catch (e) {
         print('Failed to sync pending votes: $e');
@@ -130,21 +144,25 @@ class VoteRepository {
     }
   }
 
-  // 배치 투표 API 호출 메소드 추가
-  Future<List<Map<String, dynamic>>> batchVote({
-    required List<Map<String, dynamic>> votes, // [{restaurantId: String, voteType: String}]
-  }) async {
+  // 배치 투표 API 호출 메소드 수정
+  Future<List<Map<String, dynamic>>> batchVote(List<VoteQueueItem> votes) async {
     try {
       final userId = await storage.readUserId();
       if (userId == null) {
         throw Exception('User ID not found');
       }
 
+      // VoteQueueItem 목록을 API 요청에 맞는 형식으로 변환
+      final voteData = votes.map((item) => {
+        'restaurantId': item.restaurantId,
+        'voteType': item.voteType?.name, // null이면 null로 전송 (투표 취소)
+      }).toList();
+
       final response = await dio.post(
         'http://localhost:8080/api/vote/v1/batch',
         options: Options(headers: {'userId': userId}),
         data: {
-          'votes': votes, // 배치 투표 요청 형식에 맞게 전달
+          'votes': voteData,
         },
       );
 
@@ -165,7 +183,7 @@ class VoteRepository {
     }
   }
 
-  // 스크랩 토글 메소드 추가
+  // 스크랩 토글 메소드 (기존)
   Future<bool> scrapRestaurant(String restaurantId) async {
     try {
       final userId = await storage.readUserId();
@@ -193,6 +211,41 @@ class VoteRepository {
     } catch (e) {
       print('Error scrapping: $e');
       throw Exception('Failed to toggle scrap.');
+    }
+  }
+  
+  // 명시적 스크랩 상태 설정 메소드 (새로 추가)
+  Future<bool> toggleScrap(String restaurantId, bool isScraped) async {
+    try {
+      final userId = await storage.readUserId();
+      if (userId == null) {
+        throw Exception('User ID not found');
+      }
+
+      // PUT 대신 PATCH 메소드 사용 (서버 API에 맞게 수정)
+      final response = await dio.patch(
+        'http://localhost:8080/api/user/v1/scrap/$restaurantId',
+        options: Options(headers: {'userId': userId}),
+        data: {
+          'scrapped': isScraped
+        },
+      );
+
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        // 스크랩 상태 반환 (true: 스크랩됨, false: 스크랩 해제됨)
+        final scrapped = response.data['scrapped'] as bool? ?? false;
+        return scrapped;
+      } else {
+        throw Exception('Failed to set scrap: Status code ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      print('DioException setting scrap: ${e.message}');
+      print('Error response: ${e.response?.data}');
+      final errorMessage = e.response?.data?['message'] ?? e.message;
+      throw Exception('Failed to set scrap: $errorMessage');
+    } catch (e) {
+      print('Error setting scrap: $e');
+      throw Exception('Failed to set scrap.');
     }
   }
 } 

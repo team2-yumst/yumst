@@ -37,8 +37,19 @@ class VoteRestaurant {
     this.userVoteStatus,
   });
 
-  factory VoteRestaurant.fromJson(Map<String, dynamic> json) =>
-      _$VoteRestaurantFromJson(json);
+  factory VoteRestaurant.fromJson(Map<String, dynamic> json) {
+    // JSON이 null인 경우 방어 코드
+    if (json == null) return VoteRestaurant(restaurantId: '', name: '');
+    
+    // 직접 변환하여 명시적 타입 처리 (필드가 누락되었거나 잘못된 타입인 경우 대비)
+    final Map<String, dynamic> parsedJson = {...json};
+    
+    // isScrapped 필드 처리 (null인 경우 false로 설정)
+    final isScrapped = parsedJson['isScrapped'] is bool ? parsedJson['isScrapped'] : false;
+    parsedJson['isScrapped'] = isScrapped;
+    
+    return _$VoteRestaurantFromJson(parsedJson);
+  }
 
   Map<String, dynamic> toJson() => _$VoteRestaurantToJson(this);
 

@@ -24,17 +24,20 @@ public record ResponseRestaurant(
         boolean isScrapped,
         Long likeCount,
         Long dislikeCount,
-        Double distance
+        Double distance,
+        String userVoteStatus
 ) {
 
-    public static ResponseRestaurant from(Restaurant restaurant, List<String> top2Features, boolean isScrapped, double distance) {
+    public static ResponseRestaurant from(Restaurant restaurant, List<String> top2Features, boolean isScrapped, double distance, String userVoteStatus) {
         return baseBuilder(restaurant, top2Features, isScrapped)
                 .distance(distance)
+                .userVoteStatus(userVoteStatus)
                 .build();
     }
 
-    public static ResponseRestaurant createWithNoDistance(Restaurant restaurant, List<String> top2Features, boolean isScrapped) {
+    public static ResponseRestaurant createWithNoDistance(Restaurant restaurant, List<String> top2Features, boolean isScrapped, String userVoteStatus) {
         return baseBuilder(restaurant, top2Features, isScrapped)
+                .userVoteStatus(userVoteStatus)
                 .build();
     }
 
@@ -63,7 +66,8 @@ public record ResponseRestaurant(
             Boolean isScrapped,
             Long likeCount,
             Long dislikeCount,
-            List<String> features
+            List<String> features,
+            String userVoteStatus
     ) {
         return new ResponseRestaurant(
             restaurantId,
@@ -80,12 +84,13 @@ public record ResponseRestaurant(
             isScrapped,
             likeCount,
             dislikeCount,
-            distance
+            distance,
+            userVoteStatus
         );
     }
 
     @Builder
-    public ResponseRestaurant(String restaurantId, String name, String category, String latitude, String longitude, String thumbnailUrl, String fullAddress, String roadNameFullAddress, String phoneNumber, String todayOpening, List<String> top2Features, boolean isScrapped, Long likeCount, Long dislikeCount, Double distance) {
+    public ResponseRestaurant(String restaurantId, String name, String category, String latitude, String longitude, String thumbnailUrl, String fullAddress, String roadNameFullAddress, String phoneNumber, String todayOpening, List<String> top2Features, boolean isScrapped, Long likeCount, Long dislikeCount, Double distance, String userVoteStatus) {
         this.restaurantId = restaurantId;
         this.name = name;
         this.category = category;
@@ -101,5 +106,6 @@ public record ResponseRestaurant(
         this.likeCount = likeCount;
         this.dislikeCount = dislikeCount;
         this.distance = distance;
+        this.userVoteStatus = userVoteStatus;
     }
 }
