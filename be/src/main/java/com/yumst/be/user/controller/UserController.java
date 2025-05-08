@@ -1,9 +1,14 @@
 package com.yumst.be.user.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.yumst.be.user.dto.PrincipalUserDetails;
 import com.yumst.be.user.dto.UserDto;
+import com.yumst.be.user.exception.AuthException;
 import com.yumst.be.user.jwt.JwtProvider;
+import com.yumst.be.user.service.AppleAuthService;
 import com.yumst.be.user.service.OAuthClient;
 import com.yumst.be.user.service.UserService;
+import com.yumst.be.user.vo.request.RequestAppleAuth;
 import com.yumst.be.user.vo.request.RequestFinalRegister;
 import com.yumst.be.user.vo.request.RequestToken;
 import com.yumst.be.user.vo.response.ResponseUser;
@@ -11,8 +16,13 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+import static com.yumst.be.user.exception.UserErrorCode.NOT_ALLOWED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
@@ -22,6 +32,7 @@ public class UserController {
 
     private final ModelMapper modelMapper;
     private final UserService userService;
+    private final AppleAuthService appleAuthService;
     private final OAuthClient oAuthClient;
     private final JwtProvider jwtProvider;
 
@@ -30,11 +41,24 @@ public class UserController {
 
         // google(resource server)로 요청
         // yumst db에 존재하면 반환, 없으면 추가
-        UserDto user = oAuthClient.loadUserByAccess(requestToken.getAccessToken());
+        UserDto user = oAuthClient.loadUserByGoogleAccess(requestToken.getAccessToken());
 
         // yumst server jwt 발급
         String accessToken = getAccessToken(user);
 
+        ResponseUser responseUser = modelMapper.map(user, ResponseUser.class);
+
+        return ResponseEntity.status(OK)
+                .header("access", accessToken)
+                .body(responseUser);
+    }
+
+    @PostMapping("/login/apple")
+    public ResponseEntity<ResponseUser> appleLogin(@RequestBody RequestAppleAuth requestAppleAuth) throws NoSuchAlgorithmException, InvalidKeySpecException, JsonProcessingException {
+
+        UserDto user = appleAuthService.loadUser(requestAppleAuth);
+
+        String accessToken = getAccessToken(user);
         ResponseUser responseUser = modelMapper.map(user, ResponseUser.class);
 
         return ResponseEntity.status(OK)
@@ -93,7 +117,13 @@ public class UserController {
 
 
     @DeleteMapping()
-    public ResponseEntity<ResponseUser> deleteUser (@RequestHeader String userId) {
+    public ResponseEntity<ResponseUser> deleteUser (
+            @RequestHeader String userId,
+            @AuthenticationPrincipal PrincipalUserDetails currentUser) {
+
+        if (!currentUser.getUserEntity().getUserId().equals(userId)) {
+            throw new AuthException(NOT_ALLOWED);
+        }
 
         UserDto userDto = userService.deleteUser(userId);
         ResponseUser responseUser = modelMapper.map(userDto, ResponseUser.class);
