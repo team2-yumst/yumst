@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
@@ -17,6 +19,8 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "users")
 @NoArgsConstructor(access = PROTECTED)
 @Getter
+@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 public class UserEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)
@@ -61,6 +65,17 @@ public class UserEntity extends BaseTimeEntity {
         this.name = name;
         this.email = email;
         this.imageUrl = imageUrl;
+    }
+
+    public static UserEntity createAppleUser(String email, String name, String userId) {
+        UserEntity build = UserEntity.builder()
+                .email(email)
+                .name(name)
+                .imageUrl("https://img.icons8.com/fluency-systems-filled/96/guest-male.png")
+                .build();
+        build.userId = userId;
+
+        return build;
     }
 
     public UserEntity registerGuest() {

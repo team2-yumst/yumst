@@ -56,8 +56,10 @@ public class UserService {
     @Transactional
     public UserDto deleteUser(String userId) {
 
-        UserEntity user = userRepository.deleteByUserId(userId)
+        UserEntity user = userRepository.findByUserId(userId)
                                         .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
+
+        userRepository.delete(user);
 
         return UserDto.from(user);
     }
