@@ -6,7 +6,7 @@ import com.yumst.be.restaurant.repository.RestaurantRepository;
 import com.yumst.be.user.domain.UserEntity;
 import com.yumst.be.user.domain.UserPreference;
 import com.yumst.be.vote.domain.UserRestaurantVote;
-import com.yumst.be.vote.domain.VoteType;
+import com.yumst.be.vote.dto.VoteType;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemProcessor;
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 
 @Configuration
 @RequiredArgsConstructor
@@ -138,7 +139,7 @@ public class SurveyConfig {
                             return null;
                         })
                         .filter(Objects::nonNull)
-                        .toList();
+                        .collect(Collectors.toList());
 
 
                 return SurveyCompositeData.builder()
