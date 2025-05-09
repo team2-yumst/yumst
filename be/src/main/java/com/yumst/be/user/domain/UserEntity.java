@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
@@ -17,6 +19,8 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "users")
 @NoArgsConstructor(access = PROTECTED)
 @Getter
+@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 public class UserEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = IDENTITY)
@@ -28,7 +32,7 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(unique = false, nullable = false, length = 50)
     private String email;
 
     @Column(length = 1024)
@@ -47,6 +51,9 @@ public class UserEntity extends BaseTimeEntity {
     @ColumnDefault("false")
     private boolean isEnabled;
 
+    @Column(nullable = true, length = 100)
+    private String appleRefreshToken;
+
     @Embedded
     private UserTerms userTerms;
 
@@ -61,6 +68,18 @@ public class UserEntity extends BaseTimeEntity {
         this.name = name;
         this.email = email;
         this.imageUrl = imageUrl;
+    }
+
+    public static UserEntity createAppleUser(String email, String name, String userId, String appleRefreshToken) {
+        UserEntity user = UserEntity.builder()
+                .email(email)
+                .name(name)
+                .imageUrl("https://img.icons8.com/fluency-systems-filled/96/guest-male.png")
+                .build();
+        user.userId = userId;
+        user.appleRefreshToken = appleRefreshToken;
+
+        return user;
     }
 
     public UserEntity registerGuest() {

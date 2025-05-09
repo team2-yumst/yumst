@@ -21,7 +21,7 @@ class GoogleLoginButton extends ConsumerWidget {
         final buttonWidth = constraints.maxWidth * 0.9; // 90% of parent width
         final buttonHeight = buttonWidth * 0.148; // Maintain proportional height
         final logoSize = buttonHeight * 0.54; // Proportional logo size
-        final textSize = buttonHeight * 0.375; // Proportional text size
+        final textSize = buttonHeight * 0.4; // Proportional text size
 
         return Center(
           child: InkWell(
@@ -47,7 +47,7 @@ class GoogleLoginButton extends ConsumerWidget {
               }
             },
             child: Container(
-              width: buttonWidth,
+              // width: buttonWidth,
               height: buttonHeight,
               decoration: ShapeDecoration(
                 color: Colors.white,
@@ -73,7 +73,7 @@ class GoogleLoginButton extends ConsumerWidget {
                   SizedBox(width: buttonWidth * 0.03), // Responsive spacing
                   // Text
                   Text(
-                    'Google로 시작하기',
+                    'Sign in with Google',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: textSize,
