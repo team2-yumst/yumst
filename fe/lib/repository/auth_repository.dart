@@ -90,14 +90,27 @@ class AuthRepository {
           ),
       );
 
-      print(credential);
+
+      final Map<String, dynamic> payload = {
+        'state'            : credential.state,
+        'authorizationCode': credential.authorizationCode,
+        'idToken'          : credential.identityToken,
+        'user' : {
+          'email'   : credential.email,
+          'name'    : {
+            'firstName': credential.givenName,
+            'lastName' : credential.familyName,
+          },
+        },
+      };
 
       final response = await dio.post(
         '/api/user/v1/login/apple',
-        data: {
-          'accessToken' : credential.authorizationCode,
-          'idToken' : credential.identityToken,
-        },
+        data: payload,
+        options: Options(
+          contentType: Headers.jsonContentType,
+          responseType: ResponseType.json,
+        ),
       );
 
       if (response.statusCode == 200) {
