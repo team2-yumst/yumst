@@ -32,7 +32,7 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(unique = false, nullable = false, length = 50)
     private String email;
 
     @Column(length = 1024)
@@ -51,6 +51,9 @@ public class UserEntity extends BaseTimeEntity {
     @ColumnDefault("false")
     private boolean isEnabled;
 
+    @Column(nullable = true, length = 100)
+    private String appleRefreshToken;
+
     @Embedded
     private UserTerms userTerms;
 
@@ -67,15 +70,16 @@ public class UserEntity extends BaseTimeEntity {
         this.imageUrl = imageUrl;
     }
 
-    public static UserEntity createAppleUser(String email, String name, String userId) {
-        UserEntity build = UserEntity.builder()
+    public static UserEntity createAppleUser(String email, String name, String userId, String appleRefreshToken) {
+        UserEntity user = UserEntity.builder()
                 .email(email)
                 .name(name)
                 .imageUrl("https://img.icons8.com/fluency-systems-filled/96/guest-male.png")
                 .build();
-        build.userId = userId;
+        user.userId = userId;
+        user.appleRefreshToken = appleRefreshToken;
 
-        return build;
+        return user;
     }
 
     public UserEntity registerGuest() {
