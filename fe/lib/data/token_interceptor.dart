@@ -1,5 +1,6 @@
 import 'package:fe/data/secure_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:dio/dio.dart';
@@ -11,6 +12,10 @@ Dio dio(Ref ref) {
   final dio = Dio();
   final storage = ref.watch(secureStorageProvider);
 
+  final apiUrl = dotenv.get("API_URL");
+  dio.options = BaseOptions(
+    baseUrl: apiUrl,
+  );
   dio.interceptors.add(TokenInterceptor(
     ref: ref,
     storage: storage,

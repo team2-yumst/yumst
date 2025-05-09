@@ -54,10 +54,10 @@ class GuestLoginButton extends ConsumerWidget {
               );
             },
             child: Container(
-              width: buttonWidth,
+              // width: buttonWidth,
               height: buttonHeight,
               decoration: ShapeDecoration(
-                color: Colors.white30,
+                color: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),

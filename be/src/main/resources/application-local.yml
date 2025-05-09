@@ -6,8 +6,7 @@ POSTGRESQL_PORT: 5432
 POSTGRESQL_DATABASE: yumst
 
 BASE_URL: http://localhost:8080
-#FRONT_URL: http://localhost:8080
-#FRONT_URL: http://localhost:3000
+FRONT_URL: http://localhost:8080
 RECOMMEND_URL: http://localhost:8000
 
 REDIS_HOST: localhost

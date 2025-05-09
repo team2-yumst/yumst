@@ -277,7 +277,7 @@ class _ReelsStyleCardState extends ConsumerState<ReelsStyleCard>
                                       : const Icon(
                                     Icons.directions_car_outlined, // 테두리만 있는 차량 아이콘
                                     key: ValueKey('car_outlined'),
-                                    color: Colors.white70,
+                                    color: Colors.white,
                                   ),
                                 ),
                                 onPressed: () {
