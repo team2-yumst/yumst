@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,15 @@ public class PrincipalUserDetails implements OAuth2User, UserDetails {
     private final UserEntity userEntity;
     private final Map<String, Object> attributes;
 
+    public PrincipalUserDetails(UserEntity userEntity) {
+        this.userEntity = userEntity;
+        this.attributes = new HashMap<>();
+    }
+
+    public PrincipalUserDetails(UserEntity userEntity, Map<String, Object> attributes) {
+        this.userEntity = userEntity;
+        this.attributes = attributes;
+    }
 
     @Override
     public String getUsername() {

@@ -1,6 +1,9 @@
 package com.yumst.be.user.jwt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumst.be.redis.service.RefreshTokenRedisService;
+import com.yumst.be.user.dto.PrincipalUserDetails;
 import com.yumst.be.user.exception.AuthException;
 import com.yumst.be.user.exception.TokenException;
 import io.jsonwebtoken.Claims;
@@ -16,13 +19,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,7 +51,7 @@ public class JwtProvider {
     private SecretKey secretKey;
 
     private final RefreshTokenRedisService refreshTokenRedisService;
-
+    private final UserDetailsService userDetailsService;
 
     @PostConstruct
     protected void initSecretKey() {
@@ -74,6 +81,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .subject(userId)
                 .claim("category", category)
+                .claim("email", authentication.getName())
                 .claim("authorities", authorities)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
@@ -105,7 +113,7 @@ public class JwtProvider {
                 .collect(Collectors.toList());
 
         // security User
-        User principal = new User(claims.getSubject(), "", authorities);
+        PrincipalUserDetails principal = (PrincipalUserDetails) userDetailsService.loadUserByUsername(claims.get("email", String.class));
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
@@ -128,6 +136,27 @@ public class JwtProvider {
     // Subject - userId : userId 반환
     public String getSubject(String token) {
         return parseClaims(token).getSubject();
+    }
+
+
+    // apple jwt 구현
+    public Map<String, String> parseHeaders(String token) throws JsonProcessingException {
+        String header = token.split("\\.")[0];
+        return new ObjectMapper().readValue(decodeHeader(header), Map.class);
+    }
+
+    private String decodeHeader(String token) {
+        return new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
+    }
+
+    public Claims getTokenClaimsWithPubKey(String token, PublicKey publicKey) {
+        try {
+            return Jwts.parser().verifyWith(publicKey).build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (MalformedJwtException | ExpiredJwtException e) {
+            throw new TokenException(INVALID_TOKEN);
+        }
     }
 
 }

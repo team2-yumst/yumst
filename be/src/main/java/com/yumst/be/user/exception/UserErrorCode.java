@@ -15,7 +15,9 @@ public enum UserErrorCode implements ErrorCode {
     ILLEGAL_REGISTRATION_ID(HttpStatus.BAD_REQUEST, "허용되지 않는 소셜로그인입니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "유효하지 않은 서명입니다."),
-    REFRESH_EXPIRED(HttpStatus.UNAUTHORIZED, "로그인이 만료되었습니다. 다시 로그인해 주세요.");
+    REFRESH_EXPIRED(HttpStatus.UNAUTHORIZED, "로그인이 만료되었습니다. 다시 로그인해 주세요."),
+    NOT_ALLOWED(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    FAILED_REQUEST(HttpStatus.INTERNAL_SERVER_ERROR, "서버 요청에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

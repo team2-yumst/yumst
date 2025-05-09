@@ -40,11 +40,13 @@ public class SecurityConfig {
 
 
     private static final String[] WHITE_LIST = {
-            "/**",
-            "/auth/success",
-            "/login",
-            "/api/user/v1",
-    };
+            "/swagger-ui/**",
+            "/swagger-resources/**",
+            "/v3/api-docs/**",
+            "/api/user/v1/login/google",
+            "/api/user/v1/login/apple",
+            "api/user/v1/login/guest",
+};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

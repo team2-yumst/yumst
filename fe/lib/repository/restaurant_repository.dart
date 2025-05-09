@@ -27,7 +27,7 @@ class RestaurantRepository {
     print(position.longitude.toString());
 
 
-    final response = await dio.get("http://localhost:8080/api/recommendation/v0");
+    final response = await dio.get("/api/recommendation/v0");
 
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data;
@@ -44,8 +44,8 @@ class RestaurantRepository {
       }) async {
     final response = await dio.get(
       transportMode == 'walk'
-          ? "http://localhost:8080/api/recommendation/v1/walk"
-          : "http://localhost:8080/api/recommendation/v1/car",
+          ? "/api/recommendation/v1/walk"
+          : "/api/recommendation/v1/car",
       queryParameters: {
         'latitude': position.latitude,
         'longitude': position.longitude,
@@ -63,7 +63,7 @@ class RestaurantRepository {
 
   Future scrapRestaurant(Restaurant restaurant) async {
     final response = await dio.patch(
-        "http://localhost:8080/api/user/v1/scrap/${restaurant.restaurantId}"
+        "/api/user/v1/scrap/${restaurant.restaurantId}"
     );
     if (response.statusCode == 200) {
       restaurant.isScrapped = response.data['scrapped'];
