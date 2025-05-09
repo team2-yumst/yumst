@@ -94,6 +94,9 @@ dependencies {
 	// crawl
 	implementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
 
+	// monitor
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 	// production 환경에서 삭제
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
 	runtimeOnly 'com.h2database:h2'
