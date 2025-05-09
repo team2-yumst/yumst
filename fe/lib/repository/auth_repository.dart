@@ -4,6 +4,7 @@ import 'package:fe/data/secure_storage.dart';
 import 'package:fe/data/token_interceptor.dart';
 import 'package:fe/model/user.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -31,7 +32,7 @@ class AuthRepository {
 
 
   Future<User> getUser() async {
-    final response = await dio.get('http://localhost:8080/api/user/v1');
+    final response = await dio.get('/api/user/v1');
 
     if (response.statusCode == 200) {
       return User.fromJson(response.data);
@@ -51,7 +52,7 @@ class AuthRepository {
       final GoogleSignInAuthentication googleAuth = await user.authentication;
 
       final response = await dio.post(
-        'http://localhost:8080/api/user/v1/login/google',
+        '/api/user/v1/login/google',
         data: {
           'accessToken' : googleAuth.accessToken,
           'idToken' : googleAuth.idToken,
@@ -84,15 +85,15 @@ class AuthRepository {
           AppleIDAuthorizationScopes.fullName,
           ],
           webAuthenticationOptions: WebAuthenticationOptions(
-            clientId: 'YSZ4DR5598.yumst.com',
-            redirectUri: Uri.parse('https://dirt-cosmic-app.glitch.me/callbacks/sign_in_with_apple'),
+            clientId: dotenv.get("APPLE_CLIENT_ID"),
+            redirectUri: Uri.parse('/callbacks/sign_in_with_apple'),
           ),
       );
 
       print(credential);
 
       final response = await dio.post(
-        'http://localhost:8080/api/user/v1/login/apple',
+        '/api/user/v1/login/apple',
         data: {
           'accessToken' : credential.authorizationCode,
           'idToken' : credential.identityToken,
@@ -119,7 +120,7 @@ class AuthRepository {
   Future<bool> signInWithGuest() async {
     try {
       final response = await dio.post(
-        'http://localhost:8080/api/user/v1/login/guest',
+        '/api/user/v1/login/guest',
       );
 
       if (response.statusCode == 200) {
@@ -171,7 +172,7 @@ class AuthRepository {
       };
 
       final response = await dio.post(
-        "http://localhost:8080/api/user/v1/register/survey",
+        "/api/user/v1/register/survey",
         data: requestData,
       );
 
@@ -183,7 +184,7 @@ class AuthRepository {
   }
 
   sendLogout() async {
-    await dio.post('http://localhost:8080/api/user/v1/logout');
+    await dio.post('/api/user/v1/logout');
     deleteStorageInfo();
   }
 
@@ -191,7 +192,7 @@ class AuthRepository {
   Future<bool> agreeTerms() async {
     try {
       final response = await dio.post(
-          'http://localhost:8080/api/user/v1/register/agree'
+          '/api/user/v1/register/agree'
       );
       if (response.statusCode == 200) {
         return true;
