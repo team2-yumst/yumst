@@ -13,4 +13,3 @@ REDIS_HOST: localhost
 REDIS_PORT: 6379
 
 CHROME_DRIVER_PATH: "C:\\Users\\Leo\\chromedriver-win64\\chromedriver.exe"
-

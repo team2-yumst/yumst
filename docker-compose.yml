@@ -1,0 +1,8 @@
+version: '3'
+services:
+  yumst_be:
+    image: gothax2/yumst:latest
+    container_name: yumst_be
+    restart: always
+    ports:
+      - 8080:8080
