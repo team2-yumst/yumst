@@ -28,22 +28,6 @@ class RecommendationPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-def getRestaurantDistance(db_url):
-    engine = create_engine(db_url)
-    restaurant_query = '''
-        SELECT
-            restaurant_id,
-            latitude,
-            longitude,
-            earth_distance(ll_to_earth(:user_lat, :user_long), ll_to_earth(latitude, longitude)) AS distance_m
-        FROM restaurant
-        ORDER BY distance_m
-    '''
-    rest_distance_df = pd.read_sql_query(restaurant_query, engine)
-
-    return rest_distance_df
-
-
 '''
 추천 API view
 '''
