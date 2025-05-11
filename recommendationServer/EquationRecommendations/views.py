@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
 from django.http import JsonResponse
 
-from recommendations.GetSimilarity import SimilarityCalc
+from EquationRecommendations.GetSimilarity import SimilarityCalc
 
 ''''
 PostgreSQL 연결 설정
@@ -47,7 +47,6 @@ def restaurant_recommendation_walk(request):
 
         similarityCalc = SimilarityCalc(user_id, user_lat, user_long, db_url, isWalk=True)
         recommend_table = similarityCalc.getRecommedScore()
-        print(recommend_table)
         if isinstance(recommend_table, JsonResponse):
             return recommend_table
 
