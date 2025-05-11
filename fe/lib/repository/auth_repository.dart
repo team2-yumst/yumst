@@ -3,9 +3,11 @@ import 'package:fe/data/secure_storage.dart';
 import 'package:fe/data/token_interceptor.dart';
 import 'package:fe/model/user.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 part 'auth_repository.g.dart';
 
@@ -29,7 +31,7 @@ class AuthRepository {
 
 
   Future<User> getUser() async {
-    final response = await dio.get('http://localhost:8080/api/user/v1');
+    final response = await dio.get('/api/user/v1');
 
     if (response.statusCode == 200) {
       return User.fromJson(response.data);
@@ -49,7 +51,7 @@ class AuthRepository {
       final GoogleSignInAuthentication googleAuth = await user.authentication;
 
       final response = await dio.post(
-        'http://localhost:8080/api/user/v1/login/google',
+        '/api/user/v1/login/google',
         data: {
           'accessToken' : googleAuth.accessToken,
           'idToken' : googleAuth.idToken,
@@ -73,10 +75,64 @@ class AuthRepository {
     }
   }
 
+  Future<User> signInWithApple() async {
+
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+          scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+          ],
+          webAuthenticationOptions: WebAuthenticationOptions(
+            clientId: dotenv.get("APPLE_CLIENT_ID"),
+            redirectUri: Uri.parse('/callbacks/sign_in_with_apple'),
+          ),
+      );
+
+
+      final Map<String, dynamic> payload = {
+        'state'            : credential.state,
+        'authorizationCode': credential.authorizationCode,
+        'idToken'          : credential.identityToken,
+        'user' : {
+          'email'   : credential.email,
+          'name'    : {
+            'firstName': credential.givenName,
+            'lastName' : credential.familyName,
+          },
+        },
+      };
+
+      final response = await dio.post(
+        '/api/user/v1/login/apple',
+        data: payload,
+        options: Options(
+          contentType: Headers.jsonContentType,
+          responseType: ResponseType.json,
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        addToStorage(response);
+        return User.fromJson(response.data);
+
+      } else {
+        if (kDebugMode) {
+          print(response.statusCode);
+          print(response.statusMessage);
+        }
+        throw Exception('Apple 로그인에 실패했습니다.');
+      }
+    } catch (e) {
+      print(e);
+      throw Exception('Apple 로그인에 실패했습니다.');
+    }
+  }
+
   Future<bool> signInWithGuest() async {
     try {
       final response = await dio.post(
-        'http://localhost:8080/api/user/v1/login/guest',
+        '/api/user/v1/login/guest',
       );
 
       if (response.statusCode == 200) {
@@ -128,7 +184,7 @@ class AuthRepository {
       };
 
       final response = await dio.post(
-        "http://localhost:8080/api/user/v1/register/survey",
+        "/api/user/v1/register/survey",
         data: requestData,
       );
 
@@ -140,7 +196,7 @@ class AuthRepository {
   }
 
   sendLogout() async {
-    await dio.post('http://localhost:8080/api/user/v1/logout');
+    await dio.post('/api/user/v1/logout');
     deleteStorageInfo();
   }
 
@@ -153,7 +209,7 @@ class AuthRepository {
   Future<bool> agreeTerms() async {
     try {
       final response = await dio.post(
-          'http://localhost:8080/api/user/v1/register/agree'
+          '/api/user/v1/register/agree'
       );
       if (response.statusCode == 200) {
         return true;

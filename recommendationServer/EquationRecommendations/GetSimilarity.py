@@ -57,8 +57,6 @@ class SimilarityCalc:
             # preference 값에 +1
             if preference in user_table.columns:  # preference가 user_table에 존재하는 컬럼인지 확인
                 user_table.loc[user_id, preference] += 1
-            else:
-                print(f"Preference '{preference}' does not exist in columns")
 
         return user_table
 
@@ -167,7 +165,7 @@ class SimilarityCalc:
         if user_features.shape[0]==0:
             return JsonResponse({
                 "status": "404 Not Found",
-                "message": f"Empty Restaurant Feature"
+                "message": f"Empty User Feature"
             }, status=404)
 
         min_distance = restaurant_table['distance'].min()

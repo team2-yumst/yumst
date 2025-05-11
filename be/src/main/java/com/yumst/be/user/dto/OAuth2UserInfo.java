@@ -39,7 +39,6 @@ public class OAuth2UserInfo {
     }
 
     private static OAuth2UserInfo ofApple(Map<String, Object> attributes) {
-        // TODO: APPLE OAUTH 구현
         throw new AuthException(ILLEGAL_REGISTRATION_ID);
     }
 

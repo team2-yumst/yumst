@@ -11,7 +11,6 @@ import com.yumst.be.user.repository.UserPreferenceRepository;
 import com.yumst.be.user.repository.UserRepository;
 import com.yumst.be.user.repository.UserRestaurantScrapRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +25,11 @@ import static com.yumst.be.user.exception.UserErrorCode.USER_NOT_FOUND;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
     private final UserRestaurantScrapRepository userRestaurantScrapRepository;
     private final RestaurantService restaurantService;
     private final UserPreferenceRepository userPreferenceRepository;
     private final RefreshTokenRedisService refreshTokenRedisService;
+    private final AppleAuthService appleAuthService;
 
 
     @Transactional
@@ -62,8 +61,14 @@ public class UserService {
     @Transactional
     public UserDto deleteUser(String userId) {
 
-        UserEntity user = userRepository.deleteByUserId(userId)
+        UserEntity user = userRepository.findByUserId(userId)
                                         .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
+
+        // apple일 경우 추가 로직
+        if (user.getAppleRefreshToken() != null) {
+            appleAuthService.revokeToken(user.getAppleRefreshToken());
+        }
+        userRepository.delete(user);
 
         return UserDto.from(user);
     }

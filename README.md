@@ -22,16 +22,19 @@
 ✔️소셜 로그인과 비회원으로 시작할 수 있어요<br/>
 ✔️비회원도 식당 추천과 스크랩 기능을 이용할 수 있지만, 로그아웃 시 모든 데이터가 삭제돼요<br/>
 <br/>
-<img width=300 src="https://github.com/user-attachments/assets/0f06836d-0958-4397-827b-9f103f26c8c3">
-<img width=300 src="https://github.com/user-attachments/assets/1fce6374-e3e8-4e81-9227-6890d81e9247">
-<img width=300 src="https://github.com/user-attachments/assets/e5023c7d-2a84-42c3-b829-003c6ff4ac3e">
-<br/>
+<p align="left">
+  <img width="200" src="https://github.com/user-attachments/assets/d6a8a556-ef12-42a2-8667-0d2bef168553">&nbsp;&nbsp;&nbsp;
+  <img width="200" src="https://github.com/user-attachments/assets/f6f9a436-a255-4ed0-86fe-155bf510bd1b">&nbsp;&nbsp;&nbsp;
+  <img width="200" src="https://github.com/user-attachments/assets/ba2810c4-caf8-4a7e-896d-30f347889457">
+</p>
 <br/>
 ✔️선호하는 분위기, 식당, 카페를 각각 4개, 2개, 2개 선택해주세요<br/>
 <br/>
-<img width=300 src="https://github.com/user-attachments/assets/3719ebe2-cae6-46e9-bd4e-d561fadf6dbc">
-<img width=300 src="https://github.com/user-attachments/assets/2959b2bb-b1a5-408c-a23e-d5f35230384f">
-<img width=300 src="https://github.com/user-attachments/assets/019b27c8-5777-44e1-b9c7-33477b1cd728">
+<p align="left">
+  <img width=200 src="https://github.com/user-attachments/assets/b32eb02f-70f2-4795-a402-2074077e148b">&nbsp;&nbsp;&nbsp;
+  <img width=200 src="https://github.com/user-attachments/assets/00286f7d-8351-4e96-8be1-d17d236dd41b">&nbsp;&nbsp;&nbsp;
+  <img width=200 src="https://github.com/user-attachments/assets/8a062d31-a5a2-4085-b8fb-90f65f7f2f2f">
+</p>
 </details>
 
 <details>
@@ -41,60 +44,88 @@
 ✔️식당의 상세 정보를 확인할 수 있어요<br/>
 ✔️마음에 드는 식당은 스크랩할 수 있어요<br/>
 <br/>
-<img width=300 src="https://github.com/user-attachments/assets/89159dd9-da91-46d9-bd48-173ada4c3219">
-<img width=300 src="https://github.com/user-attachments/assets/5bff0be3-78fc-4a82-8d86-2636c4986ea2"><br/>
-<img width=300 src="https://github.com/user-attachments/assets/d2f69f82-c462-48da-aab5-c3e3b8caa406">
-<img width=300 src="https://github.com/user-attachments/assets/1ecc9add-00fc-4b7f-9ce5-f3a30744ed11">
+<p align="left">
+  <img width=200 src="https://github.com/user-attachments/assets/bf8a7140-265c-4b15-8e71-9da2dd951552">&nbsp;&nbsp;&nbsp;
+  <img width=200 src="https://github.com/user-attachments/assets/95377fe3-9782-4a8c-bb40-9b4c43d1a943">&nbsp;&nbsp;&nbsp;
+</p>
 <br/>
 </details>
 
 <details>
-<summary>마이 페이지</summary><br/>
+<summary>투표 페이지 & 마이 페이지</summary><br/>
+✔️내 주변 식당들에 투표할 수 있어요<br/>
+✔️주변 식당들의 투표 순위를 볼 수 있어요<br/>
 ✔️스크랩한 식당을 볼 수 있어요<br/>
 ✔️상단 메뉴바를 눌러 로그아웃 할 수 있어요<br/>
 <br/>
-<img width=300 src="https://github.com/user-attachments/assets/f1103cb3-d535-40e3-942a-b2600041236b">
-<img width=300 src="https://github.com/user-attachments/assets/8dbd653c-1dc9-44d1-ba8d-7e3cf0df331e">
+<p align="left">
+<img width=200 src="https://github.com/user-attachments/assets/573e9ca4-81ae-410c-8688-93d96d54e3f1">&nbsp;&nbsp;&nbsp;
+<img width=200 src="https://github.com/user-attachments/assets/9940ad08-5ae1-469d-b871-7e8debbaa200">&nbsp;&nbsp;&nbsp;
+<img width=200 src="https://github.com/user-attachments/assets/520c563e-0e86-43eb-ac8a-fef4d0bab982">
 <br/>
 </details>
 
 ## 🖥️ **기술 스택**
 
-#### **Front-end**
-
-<div align=left>
-  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUhvq3SubY2t6SlriONEaI9IbGGpgbMamFjg&s" style="height: 50px; width: auto; margin-right: 10px;">
-  <img src="https://castingn-images.s3.ap-northeast-2.amazonaws.com/kkultip/img/ios-android_20200923151249.png?1600841568632" style="height: 50px; width: auto; margin-right: 10px;">
+<!-- Front-end -->
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <span style="font-size: 14px; font-weight: bold;">Front-end</span>
+</div>
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <img src="https://cdn-images-1.medium.com/max/1200/1*5-aoK8IBmXve5whBQM90GA.png" style="height: 40px; width: auto;">
+  <img src="https://i.namu.wiki/i/OIAZAPbvdTG4Ig1c_lP0YIChDdJ6Tz2VmSzcVZ_uWr-cKNB4hBLj-bcFtfeJP0U091hyW0whbnp_1MBgpzIB8Q.webp" style="height: 40px; width: auto;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Android_Studio_Logo_2024.svg/1200px-Android_Studio_Logo_2024.svg.png" style="height: 40px; width: auto;">
 </div>
 
-#### **Back-end**
-
-<div style="display: flex; align-items: center;">
-    <img src="https://images.velog.io/images/malgum/post/979fb612-584b-4942-a634-1e38e591fa12/%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C.png" style="height: 50px; width: auto; margin-right: 10px;">
-    <img src="https://velog.velcdn.com/images/wonseok97/post/98178b04-4ac9-45f5-b2d7-6dbaed4afd5f/image.png" style="height: 50px; width: auto; margin-right: 10px;">
-    <img src="https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fc31WwG%2FbtsIRXUtTNk%2FAI5ZhrCM7iVdbTogmSuxbk%2Fimg.png" style="height: 50px; width: auto;">
-    <img src="https://blog.kakaocdn.net/dn/cqbtEQ/btrZISJO4rM/psTAeZ2SeJr4mw2z80gt00/img.png" style="height: 50px; width: auto; margin-right: 10px;">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2HVXJcFDu-8rWyaTNGMcsdMUFeY__7mIdMg&s" style="height: 50px; width: auto; margin-right: 10px;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/800px-Postgresql_elephant.svg.png" style="height: 50px; width: auto; margin-right: 10px;">
-    <img src="https://joojae.com/content/images/2024/04/Django-Logo.png" style="height: 50px; width: auto; margin-right: 10px;">
+<!-- Back-end -->
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <span style="font-size: 14px; font-weight: bold;">Back-end</span>
+</div>
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <img src="https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdagiIl%2FbtsdRhmZh8L%2FfueJb3KSKCL1h0JPOJk5e1%2Fimg.jpg" style="height: 40px;">
+  <img src="https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fc31WwG%2FbtsIRXUtTNk%2FAI5ZhrCM7iVdbTogmSuxbk%2Fimg.png" style="height: 40px;">
+  <img src="https://blog.kakaocdn.net/dn/b5sGlw/btrSI8ZXQDq/NZqsZppkXksKj8BjJEHdhK/img.png" style="height: 40px;">
+  <img src="https://blog.kakaocdn.net/dn/cqbtEQ/btrZISJO4rM/psTAeZ2SeJr4mw2z80gt00/img.png" style="height: 40px;">
 </div>
 
-#### **DevOps**
-<div align=left> 
-  <img src="https://images.velog.io/images/hustle-dev/post/17ccef8c-bc22-4a5a-af4b-f032d26c8daf/github_Action.png" style="height: 50px; width: auto; margin-right: 10px;">
-  <img src="https://www.ibm.com/content/dam/adobe-cms/instana/media_logo/AWS-EC2.component.complex-narrative-xl.ts=1724154691498.png/content/adobe-cms/kr/ko/products/instana/supported-technologies/aws-ec2-monitoring/_jcr_content/root/table_of_contents/body/content_section_styled/content-section-body/complex_narrative/logoimage" style="height: 50px; width: auto; margin-right: 10px;">
-  <img src="https://blog.kakaocdn.net/dn/3kXWY/btqwHpVzV7y/4OxJuUUw1tA6q0VoNzw371/img.png" style="height: 50px; width: auto; margin-right: 10px;">
-  <img src="https://blog.kakaocdn.net/dn/W9oMh/btsIHda4h3i/AuF0FIDuTkEVBMVwrRajnk/img.png" style="height: 50px; width: auto; margin-right: 10px;">
-  <img src="https://media.licdn.com/dms/image/v2/D4D12AQHzE1oIZYll5w/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1674467662411?e=2147483647&v=beta&t=6dsE7vTaaIqIR_o85370U0ciROXIA57waolS3WkF93o" style="height: 50px; width: auto; margin-right: 10px;">
+<!-- Database & AI -->
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <span style="font-size: 14px; font-weight: bold;">Database & AI</span>
+</div>
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/800px-Postgresql_elephant.svg.png" style="height: 40px;">
+  <img src="https://blog.kakaocdn.net/dn/wiIgT/btsEeKdyGRb/sW24peLd6jycCzAJa9f2k0/img.png" style="height: 40px;">
+  <img src="https://blog.kakaocdn.net/dn/bgBkff/btrJWCoxfBY/s9KuFeLyGY1T1KNVn5QU31/img.png" style="height: 40px;">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHZd37oUzVXPHOsl-Ygg5hzYpZs7Djvk-vSw&s" style="height: 40px;">
 </div>
 
-#### **Collaboration Tools**
-
-<div style="display: flex; align-items: center;">
-    <img height="50" alt="image" src="https://github.com/user-attachments/assets/ae71b2e4-efae-401c-9e20-a8ebefd08ea4" />
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzr4AyRTaBj2Id7q6HE09XztDCMewICTfXMA&s" style="height: 50px; width: auto; margin-right: 10px;">
-    <img src="https://1000logos.net/wp-content/uploads/2023/10/Miro-Logo.jpg" style="height: 50px; width: auto; margin-right: 10px;">
+<!-- Infra -->
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <span style="font-size: 14px; font-weight: bold;">Infra</span>
+</div><div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <img src="https://images.velog.io/images/ec532/post/bc893d61-4eaa-4f8f-9b2c-e2d2143506a4/aws_ec2.svg" style="height: 40px;">
+  <img src="https://blog.kakaocdn.net/dn/3kXWY/btqwHpVzV7y/4OxJuUUw1tA6q0VoNzw371/img.png" style="height: 40px;">
+  <img src="https://cdn.worldvectorlogo.com/logos/aws-elastic-load-balancing.svg" style="height: 40px;">
+  <img src="https://q00.github.io/img/ElasticacheIcon.png" style="height: 50px;">
 </div>
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <img src="https://static.cdnlogo.com/logos/a/66/aws-rds.svg" style="height: 40px;">&nbsp;&nbsp;
+  <img src="https://blog.kakaocdn.net/dn/W9oMh/btsIHda4h3i/AuF0FIDuTkEVBMVwrRajnk/img.png" style="height: 40px;">
+  <img src="https://images.velog.io/images/hustle-dev/post/17ccef8c-bc22-4a5a-af4b-f032d26c8daf/github_Action.png" style="height: 40px;">
+  <img src="https://velog.velcdn.com/images/yyytir777/post/af2e62f9-7698-4702-9ffd-bd1f9f6f81ed/image.png" style="height: 35px;">
+</div>
+
+<!-- Collaboration Tools -->
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+  <span style="font-size: 14px; font-weight: bold;">Collaboration Tools</span>
+</div>
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">&nbsp;
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/GitHub_Invertocat_Logo.svg/250px-GitHub_Invertocat_Logo.svg.png" style="height: 35px;">&nbsp;
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Notion-logo.svg/800px-Notion-logo.svg.png" style="height: 35px;">&nbsp;&nbsp;
+  <img src="https://i.namu.wiki/i/cAYebt8RyZGac7cdIFcRTJoLftLkBbmXEk0hqRx8V0koKfyQRfxleyZEvOQN_iQ6lrhf44NIA5btYUpb13P8jw.svg" style="height: 35px;">&nbsp;&nbsp;
+  <img src="https://avatars.slack-edge.com/2019-03-07/570928183895_30458630978ac1eccde9_512.png" style="height: 35px;">
+</div>
+
 
 ### [📝 API 명세서](https://www.notion.so/a01cd4bb393e487db687b6237a6e5e4d?v=627365d713b8427c993024e2628cbd5e)
 
