@@ -7,7 +7,7 @@ import com.yumst.be.vote.domain.UserRestaurantVote;
 import com.yumst.be.vote.dto.BatchVoteRequest;
 import com.yumst.be.vote.dto.RestaurantRequest;
 import com.yumst.be.vote.dto.VoteResponse;
-import com.yumst.be.vote.dto.VoteType;
+import com.yumst.be.vote.domain.VoteType;
 import com.yumst.be.vote.exception.VoteErrorCode;
 import com.yumst.be.vote.exception.VoteException;
 import com.yumst.be.vote.repository.UserRestaurantVoteRepository;

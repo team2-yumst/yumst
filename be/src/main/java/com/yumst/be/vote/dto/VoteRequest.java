@@ -2,6 +2,7 @@ package com.yumst.be.vote.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import com.yumst.be.vote.domain.VoteType;
 
 @Getter
 public class VoteRequest {

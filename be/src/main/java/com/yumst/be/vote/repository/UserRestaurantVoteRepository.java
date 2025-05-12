@@ -1,7 +1,7 @@
 package com.yumst.be.vote.repository;
 
 import com.yumst.be.vote.domain.UserRestaurantVote;
-import com.yumst.be.vote.dto.VoteType;
+import com.yumst.be.vote.domain.VoteType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

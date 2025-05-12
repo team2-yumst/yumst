@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.yumst.be.vote.domain.VoteType;
+
 @Getter
 @NoArgsConstructor
 public class BatchVoteRequest {

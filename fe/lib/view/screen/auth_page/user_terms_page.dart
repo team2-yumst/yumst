@@ -1,5 +1,6 @@
 import 'package:fe/view/screen/auth_page/survey_first_page.dart';
 import 'package:fe/view/screen/auth_page/terms_detail_page.dart';
+import 'package:fe/view/screen/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -47,7 +48,7 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
 
   Future<void> _handleAgreement() async {
     final authRepo = ref.read(authRepositoryProvider);
-    final success = await authRepo.agreeTerms();
+    final success = await authRepo.agreeToTerms();
 
     if (success && mounted) {
       Navigator.pushReplacement(

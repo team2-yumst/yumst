@@ -1,7 +1,7 @@
 package com.yumst.be.vote.domain;
 
 import com.yumst.be.global.entity.BaseTimeEntity;
-import com.yumst.be.vote.dto.VoteType;
+import com.yumst.be.vote.domain.VoteType;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

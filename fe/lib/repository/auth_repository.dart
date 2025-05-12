@@ -203,13 +203,7 @@ class AuthRepository {
   Future<bool> agreeToTerms() async {
     try {
       final response = await dio.post(
-        "http://localhost:8080/api/user/v1/register/agree",
-      );
-
-  Future<bool> agreeTerms() async {
-    try {
-      final response = await dio.post(
-          '/api/user/v1/register/agree'
+        '/api/user/v1/register/agree'
       );
       if (response.statusCode == 200) {
         return true;
@@ -220,6 +214,4 @@ class AuthRepository {
       return false;
     }
   }
-
-
 }
