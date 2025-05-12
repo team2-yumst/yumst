@@ -26,7 +26,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "       COALESCE(bool_or(us.restaurant_id IS NOT NULL), false) as is_scrapped, " +
         "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
         "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
-        "       v_user.vote_type as user_vote_status, " +
+        "       MAX(v_user.vote_type) as user_vote_status, " +
         "       ROW_NUMBER() OVER (PARTITION BY r.name ORDER BY ST_Distance(" +
         "           geography(ST_SetSRID(ST_MakePoint(CAST(r.longitude AS float), CAST(r.latitude AS float)), 4326)), " +
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))\n" +
@@ -43,7 +43,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)), " +
         "           :radius * 1000" +
         "       ) " +
-        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude, v_user.vote_type" +
+        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude" +
         ") " +
         "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count, user_vote_status " +
         "FROM RankedRestaurants " +
@@ -78,7 +78,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "       COALESCE(bool_or(us.restaurant_id IS NOT NULL), false) as is_scrapped, " +
         "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
         "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
-        "       v_user.vote_type as user_vote_status, " +
+        "       MAX(v_user.vote_type) as user_vote_status, " +
         "       ROW_NUMBER() OVER (PARTITION BY r.name ORDER BY ST_Distance(" +
         "           geography(ST_SetSRID(ST_MakePoint(CAST(r.longitude AS float), CAST(r.latitude AS float)), 4326)), " +
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))\n" +
@@ -95,7 +95,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)), " +
         "           :radius * 1000" +
         "       ) " +
-        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude, v_user.vote_type" +
+        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude" +
         ") " +
         "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count, user_vote_status " +
         "FROM RankedRestaurants " +
@@ -130,7 +130,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "       COALESCE(bool_or(us.restaurant_id IS NOT NULL), false) as is_scrapped, " +
         "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'LIKE' THEN 1 ELSE 0 END), 0) as like_count, " +
         "       COALESCE(SUM(CASE WHEN v_all.vote_type = 'DISLIKE' THEN 1 ELSE 0 END), 0) as dislike_count, " +
-        "       v_user.vote_type as user_vote_status, " +
+        "       MAX(v_user.vote_type) as user_vote_status, " +
         "       ROW_NUMBER() OVER (PARTITION BY r.name ORDER BY ST_Distance(" +
         "           geography(ST_SetSRID(ST_MakePoint(CAST(r.longitude AS float), CAST(r.latitude AS float)), 4326)), " +
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)))\n" +
@@ -147,7 +147,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         "           geography(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)), " +
         "           :radius * 1000" +
         "       ) " +
-        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude, v_user.vote_type" +
+        "   GROUP BY r.restaurant_id, r.name, r.category, r.thumbnail_url, r.longitude, r.latitude" +
         ") " +
         "SELECT restaurant_id, name, category, thumbnail_url, dist, is_scrapped, like_count, dislike_count, user_vote_status " +
         "FROM RankedRestaurants " +

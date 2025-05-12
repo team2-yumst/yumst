@@ -29,7 +29,7 @@ class _VotePageState extends ConsumerState<VotePage> {
     
     // 페이지 진입 시 명시적으로 데이터 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort);
+      ref.read(votePageStateProvider.notifier).changeSort(_selectedSort);
     });
   }
 
@@ -46,7 +46,7 @@ class _VotePageState extends ConsumerState<VotePage> {
     final double triggerThreshold = maxScroll * 0.8;
 
     if (currentScroll >= triggerThreshold) {
-      ref.read(votePageStateProvider.notifier).fetchNextPage();
+      ref.read(votePageStateProvider.notifier).loadNextPage();
     }
   }
 
@@ -75,7 +75,7 @@ class _VotePageState extends ConsumerState<VotePage> {
                         setState(() {
                           _selectedSort = newValue;
                         });
-                        ref.read(votePageStateProvider.notifier).refresh(sort: newValue);
+                        ref.read(votePageStateProvider.notifier).changeSort(newValue);
                       }
                     },
                     items: _sortOptions.entries
@@ -128,7 +128,7 @@ class _VotePageState extends ConsumerState<VotePage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: () => ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort),
+                onPressed: () => ref.read(votePageStateProvider.notifier).refresh(),
                 icon: const Icon(Icons.refresh),
                 label: const Text('다시 시도'),
                 style: ElevatedButton.styleFrom(
@@ -154,7 +154,7 @@ class _VotePageState extends ConsumerState<VotePage> {
       child: Scrollbar(
         controller: _scrollController,
         child: RefreshIndicator(
-          onRefresh: () => ref.read(votePageStateProvider.notifier).refresh(sort: _selectedSort),
+          onRefresh: () => ref.read(votePageStateProvider.notifier).refresh(),
           child: GridView.builder(
             controller: _scrollController,
             padding: const EdgeInsets.all(4),
@@ -181,7 +181,7 @@ class _VotePageState extends ConsumerState<VotePage> {
                          Text("다음 페이지 로딩 실패", style: TextStyle(color: Colors.red)),
                          SizedBox(height: 4),
                          // 여기서 '다시 시도' 버튼을 추가할 수도 있습니다.
-                         // ElevatedButton(onPressed: () => ref.read(votePageStateProvider.notifier).fetchNextPage(), child: Text('다음 페이지 재시도'))
+                         // ElevatedButton(onPressed: () => ref.read(votePageStateProvider.notifier).loadNextPage(), child: Text('다음 페이지 재시도'))
                       ],
                     )
                   ));
@@ -194,10 +194,15 @@ class _VotePageState extends ConsumerState<VotePage> {
                 restaurant: restaurantState.restaurant,
                 userVote: restaurantState.userVote,
                 isVoting: restaurantState.isVoting,
-                onVote: (voteType) {
-                  ref.read(votePageStateProvider.notifier).handleVote(
-                    restaurantState.restaurant.restaurantId,
+                onVotePressed: (restaurant, voteType) {
+                  ref.read(votePageStateProvider.notifier).vote(
+                    restaurant.restaurantId,
                     voteType,
+                  );
+                },
+                onScrapPressed: (restaurant) async {
+                  return await ref.read(votePageStateProvider.notifier).toggleScrap(
+                    restaurantId: restaurant.restaurantId,
                   );
                 },
               );

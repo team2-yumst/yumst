@@ -6,7 +6,7 @@ part of 'token_interceptor.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dioHash() => r'2ff592ca6b3df8d117672984b9282af9f7267db3';
+String _$dioHash() => r'6cb2b0516b136198488faab933336266206e2003';
 
 /// See also [dio].
 @ProviderFor(dio)

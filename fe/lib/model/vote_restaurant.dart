@@ -18,7 +18,7 @@ class VoteRestaurant {
   final double? distance;
   @JsonKey(name: 'scrapped')
   final bool? isScrapped;
-  @JsonKey(name: 'voteStatus')
+  @JsonKey(name: 'userVoteStatus')
   final String? userVoteStatus; // 추가: 사용자의 투표 상태 (LIKE, DISLIKE, null)
 
   VoteRestaurant({
@@ -47,6 +47,11 @@ class VoteRestaurant {
     // isScrapped 필드 처리 (null인 경우 false로 설정)
     final isScrapped = parsedJson['isScrapped'] is bool ? parsedJson['isScrapped'] : false;
     parsedJson['isScrapped'] = isScrapped;
+    
+    // userVoteStatus 필드 명시적 처리 (서버에서 직접 참조)
+    final userVoteStatus = json['userVoteStatus'] as String?;
+    print("[FROMJSON] Raw userVoteStatus: $userVoteStatus (타입: ${userVoteStatus?.runtimeType})"); // 디버그용
+    parsedJson['userVoteStatus'] = userVoteStatus;
     
     return _$VoteRestaurantFromJson(parsedJson);
   }

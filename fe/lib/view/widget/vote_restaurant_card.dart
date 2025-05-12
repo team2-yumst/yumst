@@ -11,14 +11,16 @@ class VoteRestaurantCard extends ConsumerStatefulWidget {
   final VoteRestaurant restaurant;
   final VoteType? userVote;
   final bool isVoting;
-  final Function(VoteType) onVote;
+  final Function(VoteRestaurant, VoteType?) onVotePressed;
+  final Function(VoteRestaurant)? onScrapPressed;
 
   const VoteRestaurantCard({
     super.key,
     required this.restaurant,
     required this.userVote,
     required this.isVoting,
-    required this.onVote,
+    required this.onVotePressed,
+    this.onScrapPressed,
   });
 
   @override
@@ -108,6 +110,51 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> {
     } finally {
       // 작업 완료 후 로딩 상태 해제
       if (mounted) {
+        setState(() {
+          _isLoadingScrap = false;
+        });
+      }
+    }
+  }
+
+  // 투표 버튼 클릭 이벤트 핸들러
+  void _handleVoteButtonPress(VoteType voteType) {
+    if (widget.onVotePressed != null) {
+      // 현재 투표 상태와 같은 버튼을 누르면 '취소'로 처리
+      final VoteType? newVoteType = widget.userVote == voteType ? null : voteType;
+      widget.onVotePressed(widget.restaurant, newVoteType);
+    }
+  }
+
+  // 스크랩 버튼 클릭 이벤트 핸들러
+  void _handleScrapButtonPress() async {
+    if (_isLoadingScrap) return; // 중복 클릭 방지
+    
+    setState(() {
+      _isLoadingScrap = true;
+    });
+    
+    try {
+      if (widget.onScrapPressed != null) {
+        // 스크랩 토글 결과를 받아서 로컬 상태 업데이트
+        final newScrapStatus = await widget.onScrapPressed!(widget.restaurant);
+        
+        // 외부에서 상태가 업데이트되므로 여기서는 별도로 setState 호출 불필요
+        // 대신 로컬 상태를 동기화해서 UI가 즉시 반응하도록 함
+        if (mounted) {
+          setState(() {
+            _localIsScrapped = newScrapStatus;
+            _isLoadingScrap = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('스크랩 처리 중 오류: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('스크랩 처리 중 오류가 발생했습니다.'))
+        );
+        
         setState(() {
           _isLoadingScrap = false;
         });
@@ -219,7 +266,7 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> {
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  onPressed: () => widget.onVote(VoteType.LIKE),
+                  onPressed: () => _handleVoteButtonPress(VoteType.LIKE),
                 ),
                 Text(
                   likeCount.toString(),
@@ -237,7 +284,7 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> {
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  onPressed: () => widget.onVote(VoteType.DISLIKE),
+                  onPressed: () => _handleVoteButtonPress(VoteType.DISLIKE),
                 ),
                 Text(
                   dislikeCount.toString(),
@@ -259,7 +306,7 @@ class _VoteRestaurantCardState extends ConsumerState<VoteRestaurantCard> {
                         ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  onPressed: _toggleScrap, // _toggleScrap 함수 호출
+                  onPressed: _handleScrapButtonPress, // _handleScrapButtonPress 함수 호출
                 ),
               ],
             ),
