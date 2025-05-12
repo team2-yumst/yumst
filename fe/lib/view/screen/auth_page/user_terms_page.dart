@@ -1,6 +1,5 @@
 import 'package:fe/view/screen/auth_page/survey_first_page.dart';
 import 'package:fe/view/screen/auth_page/terms_detail_page.dart';
-import 'package:fe/view/screen/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,7 +18,6 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
   bool _serviceAgreed = false;
   bool _privacyAgreed = false;
   bool _locationAgreed = false;
-  bool _isSubmitting = false;
 
   void _updateAllAgreed() {
     setState(() {
@@ -48,7 +46,7 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
 
   Future<void> _handleAgreement() async {
     final authRepo = ref.read(authRepositoryProvider);
-    final success = await authRepo.agreeToTerms();
+    final success = await authRepo.agreeTerms();
 
     if (success && mounted) {
       Navigator.pushReplacement(
@@ -178,66 +176,6 @@ class _UserTermsPageState extends ConsumerState<UserTermsPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _submitAgreement() async {
-    setState(() {
-      _isSubmitting = true; // 로딩 시작
-    });
-
-    try {
-      final authRepository = ref.read(authRepositoryProvider);
-      // 1. 약관 동의 API 호출
-      final agreeSuccess = await authRepository.agreeToTerms();
-
-      if (agreeSuccess) {
-        // 2. 약관 동의 성공 시, 최신 사용자 정보 조회
-        try {
-          final user = await authRepository.getUser();
-
-          // 3. 설문조사 완료 여부에 따라 분기
-          if (user.finishedSurvey == false) {
-            // 설문 미완료 시 -> SurveyFirst 페이지로 이동
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const SurveyFirst()),
-              (route) => false,
-            );
-          } else {
-            // 설문 완료 시 -> MainScreen으로 이동
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const MainScreen()),
-              (route) => false,
-            );
-          }
-        } catch (e) {
-          // 사용자 정보 조회 실패 시 에러 메시지
-          print("Error fetching user after agreeing terms: $e");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('사용자 정보를 가져오는데 실패했습니다.')),
-          );
-        }
-
-      } else {
-        // 약관 동의 API 실패 시 에러 메시지 표시
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('약관 동의 처리 중 오류가 발생했습니다.')),
-        );
-      }
-    } catch (e) {
-      // 기타 예외 발생 시 에러 메시지 표시
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text('오류가 발생했습니다: $e')),
-       );
-    } finally {
-      // 로딩 상태 해제
-      if(mounted) {
-         setState(() {
-           _isSubmitting = false;
-         });
-      }
-    }
   }
 
   Widget _buildTermRow({
