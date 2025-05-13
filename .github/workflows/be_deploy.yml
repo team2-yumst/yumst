@@ -82,7 +82,7 @@ jobs:
           cd /home/ubuntu/yumst
           git pull
           sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p '${{ secrets.DOCKER_PASSWORD }}'
-          sudo docker rm -f $(docker ps -qa)
+          sudo docker rm -f $(sudo docker ps -qa)
           sudo docker pull gothax2/yumst:latest
           sudo docker-compose up -d
           sudo docker image prune -f

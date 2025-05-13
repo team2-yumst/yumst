@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -32,11 +31,11 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring()
-                .requestMatchers("/error", "/favicon.ico");
-    }
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        return web -> web.ignoring()
+//                .requestMatchers("/error", "/favicon.ico");
+//    }
 
 
     private static final String[] WHITE_LIST = {
@@ -45,7 +44,8 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/api/user/v1/login/google",
             "/api/user/v1/login/apple",
-            "api/user/v1/login/guest",
+            "/api/user/v1/login/guest",
+            "/actuator/health",
 };
 
     @Bean
@@ -65,12 +65,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // oauth
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
-                        .successHandler(oAuth2SuccessHandler)
-                        .failureHandler(oAuth2FailureHandler)
-                )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
+//                        .successHandler(oAuth2SuccessHandler)
+//                        .failureHandler(oAuth2FailureHandler)
+//                )
 
                 // 필터 추가
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
