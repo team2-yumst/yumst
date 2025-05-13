@@ -2,11 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:fe/data/secure_storage.dart';
 import 'package:fe/data/token_interceptor.dart'; // Assuming Dio setup is similar
 import 'package:fe/model/vote_restaurant.dart';
-import 'package:fe/model/vote_types.dart'; // VoteType과 VoteQueueItem을 가져오기
+import 'package:fe/model/vote_types.dart'; // VoteType만 가져오기
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 part 'vote_repository.g.dart';
 
@@ -17,49 +15,11 @@ VoteRepository voteRepository(VoteRepositoryRef ref) {
   return VoteRepository(dio: dio, storage: storage);
 }
 
-// VoteQueueItem 클래스는 이제 vote_types.dart에서 import
-
 class VoteRepository {
   final Dio dio;
   final SecureStorage storage;
-  late SharedPreferences _prefs;
 
-  VoteRepository({required this.dio, required this.storage}) {
-    SharedPreferences.getInstance().then((prefs) => _prefs = prefs);
-  }
-
-  Future<void> _savePendingVotes(List<Map<String, dynamic>> votes) async {
-    final pendingVotes = _prefs.getStringList('pending_votes') ?? [];
-    final newVotes = votes.map((vote) => jsonEncode(vote)).toList();
-    await _prefs.setStringList('pending_votes', [...pendingVotes, ...newVotes]);
-  }
-
-  Future<void> syncPendingVotes() async {
-    final pendingVotes = _prefs.getStringList('pending_votes') ?? [];
-    if (pendingVotes.isNotEmpty) {
-      try {
-        final votes = pendingVotes
-            .map((vote) => jsonDecode(vote) as Map<String, dynamic>)
-            .toList();
-        
-        // Map<String, dynamic>을 VoteQueueItem으로 변환
-        final voteQueueItems = votes.map((vote) => VoteQueueItem(
-          vote['restaurantId'] as String,
-          vote['voteType'] != null 
-              ? VoteType.values.firstWhere(
-                  (v) => v.name == vote['voteType'],
-                  orElse: () => throw Exception('Invalid vote type: ${vote['voteType']}')
-                )
-              : null
-        )).toList();
-        
-        await batchVote(voteQueueItems);
-        await _prefs.remove('pending_votes');
-      } catch (e) {
-        print('Failed to sync pending votes: $e');
-      }
-    }
-  }
+  VoteRepository({required this.dio, required this.storage});
 
   Future<List<VoteRestaurant>> getVotableRestaurants({
     required double latitude,
@@ -106,10 +66,10 @@ class VoteRepository {
     }
   }
 
-  // 투표 API 호출 메소드 수정
+  // 투표 API 호출 메소드
   Future<Map<String, dynamic>> voteRestaurant({
     required String restaurantId,
-    required VoteType voteType, // 좋아요(LIKE) 또는 싫어요(DISLIKE)
+    required VoteType? voteType, // 좋아요(LIKE), 싫어요(DISLIKE) 또는 null(투표 취소)
   }) async {
     try {
       final userId = await storage.readUserId();
@@ -117,12 +77,12 @@ class VoteRepository {
         throw Exception('User ID not found');
       }
 
-      // POST에서 PATCH로 변경하고 URL 경로 수정
+      // PATCH 메서드로 투표 요청
       final response = await dio.patch(
         'http://localhost:8080/api/vote/v1/restaurants/$restaurantId',
         options: Options(headers: {'userId': userId}),
         data: {
-          'voteType': voteType.name, // Enum 이름을 문자열로 변환 (LIKE, DISLIKE)
+          'voteType': voteType?.name, // Enum 이름을 문자열로 변환 (LIKE, DISLIKE) 또는 null
         },
       );
 
@@ -144,91 +104,18 @@ class VoteRepository {
     }
   }
 
-  // 배치 투표 API 호출 메소드 수정
-  Future<List<Map<String, dynamic>>> batchVote(List<VoteQueueItem> votes) async {
+  // 스크랩 토글 메소드
+  Future<bool> toggleScrap(String restaurantId) async {
     try {
       final userId = await storage.readUserId();
       if (userId == null) {
         throw Exception('User ID not found');
       }
 
-      // VoteQueueItem 목록을 API 요청에 맞는 형식으로 변환
-      final voteData = votes.map((item) => {
-        'restaurantId': item.restaurantId,
-        'voteType': item.voteType?.name, // null이면 null로 전송 (투표 취소)
-      }).toList();
-
-      final response = await dio.post(
-        'http://localhost:8080/api/vote/v1/batch',
-        options: Options(headers: {'userId': userId}),
-        data: {
-          'votes': voteData,
-        },
-      );
-
-      if (response.statusCode == 200 && response.data is List) {
-        // 성공 시 응답 데이터 반환
-        return (response.data as List).cast<Map<String, dynamic>>();
-      } else {
-        throw Exception('Failed to batch vote: Status code ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      print('DioException batch voting: ${e.message}');
-      print('Error response: ${e.response?.data}');
-      final errorMessage = e.response?.data?['message'] ?? e.message;
-      throw Exception('Failed to batch vote: $errorMessage');
-    } catch (e) {
-      print('Error batch voting: $e');
-      throw Exception('Failed to batch vote.');
-    }
-  }
-
-  // 스크랩 토글 메소드 (기존)
-  Future<bool> scrapRestaurant(String restaurantId) async {
-    try {
-      final userId = await storage.readUserId();
-      if (userId == null) {
-        throw Exception('User ID not found');
-      }
-
+      // PATCH 메소드 사용
       final response = await dio.patch(
         'http://localhost:8080/api/user/v1/scrap/$restaurantId',
         options: Options(headers: {'userId': userId}),
-      );
-
-      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
-        // 스크랩 상태 반환 (true: 스크랩됨, false: 스크랩 해제됨)
-        final scrapped = response.data['scrapped'] as bool? ?? false;
-        return scrapped;
-      } else {
-        throw Exception('Failed to toggle scrap: Status code ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      print('DioException scrapping: ${e.message}');
-      print('Error response: ${e.response?.data}');
-      final errorMessage = e.response?.data?['message'] ?? e.message;
-      throw Exception('Failed to toggle scrap: $errorMessage');
-    } catch (e) {
-      print('Error scrapping: $e');
-      throw Exception('Failed to toggle scrap.');
-    }
-  }
-  
-  // 명시적 스크랩 상태 설정 메소드 (새로 추가)
-  Future<bool> toggleScrap(String restaurantId, bool isScraped) async {
-    try {
-      final userId = await storage.readUserId();
-      if (userId == null) {
-        throw Exception('User ID not found');
-      }
-
-      // PUT 대신 PATCH 메소드 사용 (서버 API에 맞게 수정)
-      final response = await dio.patch(
-        'http://localhost:8080/api/user/v1/scrap/$restaurantId',
-        options: Options(headers: {'userId': userId}),
-        data: {
-          'scrapped': isScraped
-        },
       );
 
       if (response.statusCode == 200 && response.data is Map<String, dynamic>) {

@@ -194,6 +194,7 @@ class _VotePageState extends ConsumerState<VotePage> {
                 restaurant: restaurantState.restaurant,
                 userVote: restaurantState.userVote,
                 isVoting: restaurantState.isVoting,
+                isScraped: restaurantState.isScraped,
                 onVotePressed: (restaurant, voteType) {
                   ref.read(votePageStateProvider.notifier).vote(
                     restaurant.restaurantId,

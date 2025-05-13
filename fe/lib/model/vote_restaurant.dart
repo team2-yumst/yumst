@@ -44,13 +44,19 @@ class VoteRestaurant {
     // 직접 변환하여 명시적 타입 처리 (필드가 누락되었거나 잘못된 타입인 경우 대비)
     final Map<String, dynamic> parsedJson = {...json};
     
-    // isScrapped 필드 처리 (null인 경우 false로 설정)
-    final isScrapped = parsedJson['isScrapped'] is bool ? parsedJson['isScrapped'] : false;
-    parsedJson['isScrapped'] = isScrapped;
+    // isScrapped 필드 처리 (서버에서 'isScrapped'로 오는 경우와 'scrapped'로 오는 경우 모두 처리)
+    bool? isScrapped;
+    if (parsedJson.containsKey('isScrapped')) {
+      isScrapped = parsedJson['isScrapped'] is bool ? parsedJson['isScrapped'] : false;
+    } else if (parsedJson.containsKey('scrapped')) {
+      isScrapped = parsedJson['scrapped'] is bool ? parsedJson['scrapped'] : false;
+    } else {
+      isScrapped = false;
+    }
+    parsedJson['scrapped'] = isScrapped;
     
     // userVoteStatus 필드 명시적 처리 (서버에서 직접 참조)
     final userVoteStatus = json['userVoteStatus'] as String?;
-    print("[FROMJSON] Raw userVoteStatus: $userVoteStatus (타입: ${userVoteStatus?.runtimeType})"); // 디버그용
     parsedJson['userVoteStatus'] = userVoteStatus;
     
     return _$VoteRestaurantFromJson(parsedJson);

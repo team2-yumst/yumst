@@ -45,8 +45,8 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/api/user/v1/login/google",
             "/api/user/v1/login/apple",
-            "api/user/v1/login/guest",
-};
+            "/api/user/v1/login/guest",
+    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

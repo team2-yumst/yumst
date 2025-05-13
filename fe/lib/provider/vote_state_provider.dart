@@ -1,8 +1,5 @@
 import 'package:fe/data/location_service.dart';
-import 'package:fe/managers/scrap_manager.dart';
-import 'package:fe/managers/vote_manager.dart';
 import 'package:fe/model/vote_restaurant.dart';
-import 'package:fe/provider/managers_provider.dart';
 import 'package:fe/repository/vote_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,31 +14,33 @@ class VoteRestaurantState {
   final VoteRestaurant restaurant;
   final VoteType? userVote;
   final bool isVoting;
+  final bool isScraped; // 스크랩 상태를 별도 필드로 관리
 
   VoteRestaurantState({
     required this.restaurant,
     this.userVote,
     this.isVoting = false,
+    required this.isScraped, // 초기화 필요
   });
 
   VoteRestaurantState copyWith({
     VoteRestaurant? restaurant,
     VoteType? userVote,
     bool? isVoting,
+    bool? isScraped, // 스크랩 상태 복사 추가
     bool forceNullUserVote = false,
   }) {
     return VoteRestaurantState(
       restaurant: restaurant ?? this.restaurant,
       userVote: forceNullUserVote ? null : (userVote ?? this.userVote),
       isVoting: isVoting ?? this.isVoting,
+      isScraped: isScraped ?? this.isScraped, // 스크랩 상태 복사
     );
   }
 
   // 임시 초기 데이터 변환 (실제 VoteRestaurant 모델 업데이트 필요)
   factory VoteRestaurantState.fromRestaurant(VoteRestaurant restaurant) {
-    // Debug: Log the incoming userVoteStatus from the API for this restaurant
-    print("[DEBUG] Restaurant: ${restaurant.name}, API userVoteStatus: '${restaurant.userVoteStatus}', JSON Key: 'userVoteStatus'");
-
+    // API에서 받은 userVoteStatus 파싱
     VoteType? initialVote;
     String? voteStatusFromApi = restaurant.userVoteStatus?.trim().toUpperCase();
 
@@ -50,27 +49,22 @@ class VoteRestaurantState {
     } else if (voteStatusFromApi == 'DISLIKE') {
       initialVote = VoteType.DISLIKE;
     }
-    // 그 외의 경우 (null, 빈 문자열, 인식할 수 없는 값) initialVote는 null로 유지됩니다.
-
-    // Debug: Log the parsed initialVote for this restaurant
-    print("[DEBUG] Restaurant: ${restaurant.name}, Parsed initialVote: $initialVote (API 값: '$voteStatusFromApi')");
 
     VoteRestaurant updatedRestaurant = restaurant.copyWith(
-      isScrapped: restaurant.isScrapped ?? false,
-      // userVoteStatus도 유지되도록 명시적으로 설정
       userVoteStatus: restaurant.userVoteStatus
     );
 
     return VoteRestaurantState(
       restaurant: updatedRestaurant,
       userVote: initialVote,       
-      isVoting: false              
+      isVoting: false,
+      isScraped: restaurant.isScrapped ?? false, // 스크랩 상태 초기화
     );
   }
 }
 
-// 1-1. 페이지네이션 포함된 새로운 상태 클래스
-@immutable // 불변 객체 권장
+// 페이지네이션 포함된 상태 클래스
+@immutable
 class VotePageCombinedState {
   final List<VoteRestaurantState> restaurants;
   final bool isLoadingInitial;    // 초기 로딩 중?
@@ -116,95 +110,26 @@ class VotePageCombinedState {
   }
 }
 
-// VoteQueue 클래스 수정
-class VoteQueue {
-  final VoteRepository _voteRepository; // API 통신을 위한 repository
-  final List<VoteQueueItem> _queue = []; // 큐 구현
-  final Map<String, VoteType?> _currentVotes = {}; // 식당별 현재 투표 상태 추적
-  
-  VoteQueue(this._voteRepository);
-
-  // 큐에 투표 항목 추가
-  void addVote(String restaurantId, VoteType? voteType) {
-    _queue.add(VoteQueueItem(restaurantId, voteType));
-    // 현재 상태 맵에도 저장
-    _currentVotes[restaurantId] = voteType;
-  }
-  
-  // 현재 식당의 투표 상태 반환 (새로고침 시 사용)
-  VoteType? getCurrentVote(String restaurantId) {
-    return _currentVotes[restaurantId];
-  }
-
-  // 큐 및 현재 상태 맵 초기화 (앱 재시작 시 호출)
-  void reset() {
-    _queue.clear();
-    _currentVotes.clear();
-    print("VoteQueue: 큐와 상태 맵 초기화됨");
-  }
-
-  // 서버에 배치 요청 보내는 메소드
-  Future<void> processBatch() async {
-    if (_queue.isEmpty) return;
-    
-    // 큐 아이템 복사 후 클리어 (API 호출 중 추가되는 항목은 다음 배치에 처리)
-    final batch = [..._queue];
-    _queue.clear();
-    
-    try {
-      // 배치 요청 실행
-      await _voteRepository.batchVote(batch);
-    } catch (e) {
-      // 오류시 큐 복원
-      print("투표 요청 처리 실패: $e");
-      _queue.insertAll(0, batch);
-    }
-  }
-  
-  // 리소스 정리
-  void dispose() {
-    _queue.clear();
-    _currentVotes.clear();
-  }
-}
-
-// 2. StateNotifier 리팩토링 (VotePageCombinedState 사용)
+// StateNotifier 리팩토링
 class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
   final dynamic _read;
   final VoteRepository _voteRepository;
-  final LocationService? _locationService; // optional로 변경
-  late final VoteQueue _voteQueue;
-  final VoteManager _voteManager;
-  final ScrapManager _scrapManager;
+  final LocationService? _locationService;
   int _currentPage = 0;
-  final int _pageSize = 10; // 페이지 당 아이템 수 (API와 일치시켜야 함)
+  final int _pageSize = 10; // 페이지 당 아이템 수
   
-  // 위치 정보를 저장할 변수 추가
+  // 위치 정보를 저장할 변수
   Position? _lastPosition;
 
   VotePageStateNotifier({
     required VoteRepository voteRepository,
     required dynamic read,
-    LocationService? locationService, // optional로 변경
-    VoteQueue? voteQueue, // null 허용
-    required VoteManager voteManager,
-    required ScrapManager scrapManager,
+    LocationService? locationService,
   }) : _voteRepository = voteRepository, 
        _read = read, 
        _locationService = locationService,
-       _voteManager = voteManager,
-       _scrapManager = scrapManager,
        super(const VotePageCombinedState()) {
-    _voteQueue = voteQueue ?? VoteQueue(voteRepository);
-    // VoteQueue를 초기화하고 앱 시작 시 명시적으로 리셋
-    _voteQueue.reset();
     _fetchInitialRestaurants();
-  }
-
-  @override
-  void dispose() {
-    _voteQueue.dispose();
-    super.dispose();
   }
 
   // 초기 데이터 또는 새로고침 시 호출
@@ -236,85 +161,10 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
       
       _currentPage = 0; // 페이지 카운터 리셋
       
-      // 이전 로딩된 상태 정보를 Map으로 변환 (restaurant ID로 빠른 조회)
-      final existingStatesMap = {
-        for (var item in state.restaurants)
-          item.restaurant.restaurantId: item
-      };
-      
       // API 응답을 VoteRestaurantState 목록으로 변환
       final initialRestaurantStates = restaurants.map((r) {
-        // 1. 서버에서 받은 VoteRestaurant 객체로 초기 상태 생성
-        VoteRestaurantState currentItemState = VoteRestaurantState.fromRestaurant(r);
-        
-        // 2. 이미 큐에 있는 항목이라면 큐의 투표 상태를 우선 적용 (아직 처리되지 않은 투표 처리)
-        // 서버 응답에서 해석된 투표 상태 - fromRestaurant에서 파싱됨
-        final VoteType? serverInterpretedVote = currentItemState.userVote;
-        
-        // 로컬 저장소에서 투표 상태 확인
-        final VoteType? localVoteStatus = _voteManager.getVoteState(r.restaurantId);
-        
-        // 로컬 저장소의 투표 상태가 있으면 우선 적용
-        if (localVoteStatus != null) {
-          currentItemState = currentItemState.copyWith(
-            userVote: localVoteStatus
-          );
-          
-          // 투표 카운트 조정 (서버 값과 로컬 값이 다를 경우)
-          if (serverInterpretedVote != localVoteStatus) {
-            currentItemState = currentItemState.copyWith(
-              restaurant: adjustVoteCounts(
-                currentItemState.restaurant,
-                serverInterpretedVote,
-                localVoteStatus
-              )
-            );
-          }
-        }
-        
-        // VoteQueue에 보류 중인 투표가 있다면 적용
-        if (_voteQueue._currentVotes.containsKey(r.restaurantId)) {
-          final VoteType? pendingVote = _voteQueue.getCurrentVote(r.restaurantId);
-          
-          // 현재 적용된 투표와 큐의 보류 투표가 다를 경우 상태 업데이트
-          final VoteType? currentVote = localVoteStatus ?? serverInterpretedVote;
-          if (currentVote != pendingVote) {
-             currentItemState = currentItemState.copyWith(
-               userVote: pendingVote, // 큐의 보류 투표로 UI 상태 변경
-               forceNullUserVote: pendingVote == null, // 취소 액션이면 null로 설정
-               restaurant: adjustVoteCounts(
-                   currentItemState.restaurant,
-                   currentVote,
-                   pendingVote
-               )
-             );
-          }
-        }
-
-        // 3. 스크랩 상태 및 isVoting 같은 다른 UI 관련 상태 병합
-        final existingStateFromPreviousLoad = existingStatesMap[r.restaurantId];
-        
-        // 스크랩 상태 결정 우선순위: API 응답 > 로컬 저장소 > 이전 상태 > 기본값
-        bool finalIsScrapped = r.isScrapped ?? // API 응답 우선
-                               _scrapManager.getScrapState(r.restaurantId) ?? // 그 다음 로컬 스크랩 매니저
-                               existingStateFromPreviousLoad?.restaurant.isScrapped ?? // 이전 리스트에 있던 상태
-                               false; // 기본값
-
-        bool finalIsVoting = existingStateFromPreviousLoad?.isVoting ?? false; // 이전 로딩 상태 유지 (예: 정렬 변경 시)
-
-        currentItemState = currentItemState.copyWith(
-          isVoting: finalIsVoting,
-          restaurant: currentItemState.restaurant.copyWith(
-            isScrapped: finalIsScrapped
-          ),
-        );
-        
-        // isScrapped가 최종적으로 null이 아니도록 보장
-        if (currentItemState.restaurant.isScrapped == null) {
-           currentItemState = currentItemState.copyWith(restaurant: currentItemState.restaurant.copyWith(isScrapped: false));
-        }
-
-        return currentItemState;
+        // 서버에서 받은 VoteRestaurant 객체로 초기 상태 생성
+        return VoteRestaurantState.fromRestaurant(r);
       }).toList();
       
       // 상태 업데이트
@@ -334,7 +184,7 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
     }
   }
 
-  // 투표 상태 변경에 따른 좋아요/싫어요 개수 조정 메소드 추가
+  // 투표 상태 변경에 따른 좋아요/싫어요 개수 조정 메소드
   VoteRestaurant adjustVoteCounts(
     VoteRestaurant restaurant, 
     VoteType? oldVote, 
@@ -385,15 +235,12 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
     
     state = state.copyWith(restaurants: updatedRestaurants);
     
-    // 로컬 투표 상태 저장
-    await _voteManager.setVoteState(restaurantId, newVoteType);
-    
     try {
-      // 큐에 투표 요청 추가
-      _voteQueue.addVote(restaurantId, newVoteType);
-      
-      // 투표 큐 처리 (API 전송)
-      await _voteQueue.processBatch();
+      // 서버에 직접 투표 요청
+      await _voteRepository.voteRestaurant(
+        restaurantId: restaurantId,
+        voteType: newVoteType
+      );
       
       // 투표 상태를 "로딩 아님"으로 업데이트
       final finalRestaurants = List<VoteRestaurantState>.from(state.restaurants);
@@ -415,6 +262,14 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
       if (rollbackIndex != -1) {
         rollbackRestaurants[rollbackIndex] = rollbackRestaurants[rollbackIndex].copyWith(
           isVoting: false,
+          // 원래 투표 상태로 롤백
+          userVote: currentVote,
+          forceNullUserVote: currentVote == null,
+          restaurant: adjustVoteCounts(
+            rollbackRestaurants[rollbackIndex].restaurant,
+            newVoteType,
+            currentVote
+          ),
         );
         
         state = state.copyWith(restaurants: rollbackRestaurants);
@@ -428,39 +283,38 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
     if (index == -1) return false;
 
     final restaurant = state.restaurants[index].restaurant;
-    final currentScrapStatus = restaurant.isScrapped ?? false;
+    final currentScrapStatus = state.restaurants[index].isScraped;
     final newScrapStatus = !currentScrapStatus;
     
     // 낙관적 UI 업데이트
-    _updateRestaurantField(index, 'isScrapped', newScrapStatus);
-
-    // 로컬 스크랩 상태 저장
-    await _scrapManager.setScrapState(restaurantId, newScrapStatus);
+    final updatedRestaurants = List<VoteRestaurantState>.from(state.restaurants);
+    updatedRestaurants[index] = updatedRestaurants[index].copyWith(
+      isScraped: newScrapStatus,
+      restaurant: restaurant.copyWith(
+        isScrapped: newScrapStatus
+      ),
+    );
+    
+    state = state.copyWith(restaurants: updatedRestaurants);
 
     try {
       // API 호출
-      final res = await _voteRepository.toggleScrap(restaurantId, newScrapStatus);
+      final res = await _voteRepository.toggleScrap(restaurantId);
       print("스크랩 토글 응답: $res");
       return res;
     } catch (e) {
       // API 호출 실패 시 UI 롤백
-      _updateRestaurantField(index, 'isScrapped', currentScrapStatus);
-      await _scrapManager.setScrapState(restaurantId, currentScrapStatus); // 로컬 상태도 롤백
+      final rollbackRestaurants = List<VoteRestaurantState>.from(state.restaurants);
+      rollbackRestaurants[index] = rollbackRestaurants[index].copyWith(
+        isScraped: currentScrapStatus,
+        restaurant: rollbackRestaurants[index].restaurant.copyWith(
+          isScrapped: currentScrapStatus
+        ),
+      );
+      
+      state = state.copyWith(restaurants: rollbackRestaurants);
       print("스크랩 토글 실패: $e");
       throw e;
-    }
-  }
-
-  void _updateRestaurantField(int index, String field, dynamic value) {
-    if (index >= 0 && index < state.restaurants.length) {
-      final updatedRestaurant = state.restaurants[index].restaurant.copyWith(
-        isScrapped: field == 'isScrapped' ? value : state.restaurants[index].restaurant.isScrapped,
-      );
-      final updatedList = List<VoteRestaurantState>.from(state.restaurants);
-      updatedList[index] = state.restaurants[index].copyWith(
-        restaurant: updatedRestaurant,
-      );
-      state = state.copyWith(restaurants: updatedList);
     }
   }
   
@@ -510,33 +364,7 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
       
       // 새 레스토랑 상태 객체 생성
       final newRestaurantStates = uniqueNewRestaurants.map((r) {
-        VoteRestaurantState initialState = VoteRestaurantState.fromRestaurant(r);
-        
-        // 로컬 저장소에서 투표 상태 확인
-        final VoteType? localVoteStatus = _voteManager.getVoteState(r.restaurantId);
-        
-        if (localVoteStatus != null) {
-          initialState = initialState.copyWith(
-            userVote: localVoteStatus,
-            restaurant: adjustVoteCounts(
-              initialState.restaurant,
-              initialState.userVote, // 서버 투표 상태
-              localVoteStatus        // 로컬 투표 상태
-            )
-          );
-        }
-        
-        // 스크랩 상태 확인
-        final bool? localScrapStatus = _scrapManager.getScrapState(r.restaurantId);
-        if (localScrapStatus != null) {
-          initialState = initialState.copyWith(
-            restaurant: initialState.restaurant.copyWith(
-              isScrapped: localScrapStatus
-            )
-          );
-        }
-        
-        return initialState;
+        return VoteRestaurantState.fromRestaurant(r);
       }).toList();
       
       // 기존 목록에 새 레스토랑 추가
@@ -558,82 +386,19 @@ class VotePageStateNotifier extends StateNotifier<VotePageCombinedState> {
   }
 }
 
-// 3. StateNotifierProvider 수정 (상태 타입 변경)
+// StateNotifierProvider
 final votePageStateProvider = StateNotifierProvider<VotePageStateNotifier, VotePageCombinedState>((ref) {
   final voteRepository = ref.watch(voteRepositoryProvider);
   final locationService = ref.watch(locationServiceProvider);
-  final voteQueue = VoteQueue(voteRepository);
-  final scrapManager = ref.watch(scrapManagerProvider); 
-  final voteManager = ref.watch(voteManagerProvider);
   
   return VotePageStateNotifier(
     voteRepository: voteRepository,
     read: ref.read,
     locationService: locationService,
-    voteQueue: voteQueue,
-    scrapManager: scrapManager,
-    voteManager: voteManager
   );
 });
 
-// 개별 식당 상태를 관리하는 StateNotifier
-class VoteRestaurantStateNotifier extends StateNotifier<VoteRestaurantState> {
-  final String restaurantId;
-  final Ref ref;
-
-  VoteRestaurantStateNotifier(this.restaurantId, this.ref)
-      : super(VoteRestaurantState(
-          restaurant: VoteRestaurant(
-            restaurantId: restaurantId,
-            name: '',
-          ),
-        )) {
-    _init();
-  }
-
-  void _init() {
-    final restaurants = ref.read(votePageStateProvider).restaurants;
-    final restaurant = restaurants.firstWhere(
-      (r) => r.restaurant.restaurantId == restaurantId,
-      orElse: () => throw Exception('Restaurant not found: $restaurantId'),
-    );
-    
-    // 기존 상태의 스크랩 정보를 유지하면서 새로운 상태로 업데이트
-    state = state.copyWith(
-      restaurant: restaurant.restaurant.copyWith(
-        isScrapped: restaurant.restaurant.isScrapped ?? state.restaurant.isScrapped,
-      ),
-      userVote: restaurant.userVote,
-      isVoting: restaurant.isVoting,
-    );
-  }
-
-  void updateRestaurant(VoteRestaurant restaurant) {
-    if (restaurant.restaurantId != restaurantId) return;
-    state = state.copyWith(
-      restaurant: restaurant.copyWith(
-        isScrapped: state.restaurant.isScrapped ?? restaurant.isScrapped,
-      ),
-    );
-  }
-
-  void vote(VoteType? voteType) {
-    final notifier = ref.read(votePageStateProvider.notifier);
-    notifier.vote(restaurantId, voteType);
-  }
-
-  Future<bool> toggleScrap() async {
-    final notifier = ref.read(votePageStateProvider.notifier);
-    return notifier.toggleScrap(restaurantId: restaurantId);
-  }
-}
-
-// 개별 식당 상태를 관리하는 provider
-final voteRestaurantProvider = StateNotifierProvider.family<VoteRestaurantStateNotifier, VoteRestaurantState, String>((ref, restaurantId) {
-  return VoteRestaurantStateNotifier(restaurantId, ref);
-});
-
-// 네비게이션 키 provider 추가
+// 네비게이션 키 provider
 final navigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
   return GlobalKey<NavigatorState>();
 }); 
