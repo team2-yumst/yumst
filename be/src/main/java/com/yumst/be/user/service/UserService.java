@@ -52,6 +52,12 @@ public class UserService {
         return userDto;
     }
 
+    @Transactional(readOnly = true)
+    public void validateUserExists(String userId) {
+        userRepository.findByUserId(userId)
+                      .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
+    }
+
     @Transactional
     public UserDto deleteUser(String userId) {
 
