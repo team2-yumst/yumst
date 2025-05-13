@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: local, jwt, oauth
+    include: prod, jwt, oauth
 
   datasource:
     url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE}
