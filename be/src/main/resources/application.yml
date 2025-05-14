@@ -60,9 +60,6 @@ spring:
       port: ${REDIS_PORT}
       ssl:
         enabled: true
-      cluster:
-        nodes: ${REDIS_HOST}:${REDIS_PORT}
-        max-redirects: 3
 
 management:
   server:
@@ -73,7 +70,7 @@ management:
         include: health
   endpoint:
     health:
-      show-details: when_authorized
+      show-details: always
 
 
 logging.level:
