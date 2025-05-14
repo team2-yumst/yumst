@@ -1,10 +1,7 @@
 package com.yumst.be.user.config;
 
-import com.yumst.be.user.handler.OAuth2FailureHandler;
-import com.yumst.be.user.handler.OAuth2SuccessHandler;
 import com.yumst.be.user.jwt.JwtAuthFilter;
 import com.yumst.be.user.jwt.JwtExceptionFilter;
-import com.yumst.be.user.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,13 +22,8 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOauth2UserService;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final OAuth2FailureHandler oAuth2FailureHandler;
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
-
-
 
     private static final String[] WHITE_LIST = {
             "/swagger-ui/**",
