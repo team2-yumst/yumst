@@ -1,9 +1,11 @@
 import 'package:fe/view/screen/my_page.dart';
 import 'package:fe/view/screen/recommendation_page.dart';
+import 'package:fe/view/screen/vote_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/restaurant_paginator.dart';
+import '../../provider/vote_state_provider.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -19,7 +21,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   static final List<Widget> _pages = [
     RecommendationPage(),
-    Center(child: Text('투표 기능은 준비중입니다')),
+    VotePage(),
     MyPageScreen(),
   ];
 
@@ -32,12 +34,28 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       // 더블 탭 처리
       if (index == 0 && _selectedIndex == 0) {
         ref.read(restaurantPaginationProvider.notifier).loadInitial();
+      } else if (index == 1 && _selectedIndex == 1) {
+        ref.read(votePageStateProvider.notifier).refresh();
       }
       _lastTapTime = null;
       _lastTappedIndex = null;
     } else {
       // 싱글 탭 처리
       setState(() => _selectedIndex = index);
+      
+      // 탭 변경 시 데이터 로드
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        
+        if (index == 0) {
+          // 추천 페이지로 이동 시
+          ref.read(restaurantPaginationProvider.notifier).loadInitial();
+        } else if (index == 1) {
+          // 투표 페이지로 이동 시
+          ref.read(votePageStateProvider.notifier).refresh();
+        }
+      });
+
       _lastTapTime = currentTime;
       _lastTappedIndex = index;
     }

@@ -1,6 +1,7 @@
 package com.yumst.be.vote.domain;
 
 import com.yumst.be.global.entity.BaseTimeEntity;
+import com.yumst.be.vote.domain.VoteType;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,9 @@ public class UserRestaurantVote extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "vote_type", nullable = false)
     private VoteType voteType;
+    
+    @Version
+    private Long version;
 
     @Builder
     public UserRestaurantVote(String userId, String restaurantId, VoteType voteType) {
@@ -35,4 +39,8 @@ public class UserRestaurantVote extends BaseTimeEntity {
         this.voteType = voteType;
     }
 
+    public void updateVote(VoteType voteType) {
+        this.voteType = voteType;
+    }
 }
+

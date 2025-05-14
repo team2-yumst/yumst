@@ -8,9 +8,9 @@ import '../../model/restaurant.dart';
 import '../widget/reels_style_card.dart';
 
 final restaurantsFutureProvider = FutureProvider<List<Restaurant>>((ref) async {
-  final repository = ref.watch(restaurantRepositoryProvider);
   final locationService = ref.watch(locationServiceProvider);
   final position = await locationService.getPosition();
+  final repository = ref.watch(restaurantRepositoryProvider);
   return repository.getRestaurantsV0(position);
 });
 
