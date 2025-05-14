@@ -60,6 +60,9 @@ spring:
       port: ${REDIS_PORT}
       ssl:
         enabled: true
+      cluster:
+        nodes: ${REDIS_HOST}:${REDIS_PORT}
+        max-redirects: 3
 
 management:
   server:
