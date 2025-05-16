@@ -83,6 +83,7 @@ def restaurant_recommendation_ai(request):
         top_restaurants = [
             {
                 'restaurant_id': row['restaurant_id'],
+                'distance': row['distance_km'],
                 'recommend_score': row['score']
             } for _, row in recommend_table_sorted.iterrows()
         ]
