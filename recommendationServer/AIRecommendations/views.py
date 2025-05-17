@@ -79,10 +79,11 @@ def restaurant_recommendation_ai(request):
             return JsonResponse({"status": "204 No Content", "message": "No nearby recommended restaurants found."}, status=204)
 
         # 4. 결과 정리 및 응답
-        recommend_table_sorted = recommend_table.sort_values(by='score', ascending=False)
+        recommend_table_sorted = recommend_table
         top_restaurants = [
             {
                 'restaurant_id': row['restaurant_id'],
+                'distance': row['distance_km'],
                 'recommend_score': row['score']
             } for _, row in recommend_table_sorted.iterrows()
         ]

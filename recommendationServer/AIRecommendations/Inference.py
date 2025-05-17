@@ -42,6 +42,6 @@ def recommend_within_radius(user_id, user_df, rest_df, proto_cf, engine, user_la
     filtered_df = merged_df[merged_df["distance_km"] <= radius_km]
 
     # --- 결과 반환 ---
-    result_df = filtered_df[["restaurant_id", "score"]].sort_values(by="score", ascending=False).reset_index(drop=True)
+    result_df = filtered_df[["restaurant_id", "score", "distance_km"]].sort_values(by="score", ascending=False).reset_index(drop=True)
     return result_df
 
