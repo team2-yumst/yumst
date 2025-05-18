@@ -73,10 +73,10 @@ management:
       show-details: when_authorized
 
 
-logging.level:
+#logging.level:
 #  org.hibernate.SQL: debug
-  org.springframework.web: debug
-  org.springframework.security: debug
+#  org.springframework.web: debug
+#  org.springframework.security: debug
 #  org.springframework.batch: debug
 #  com.yumst.be.crawl: debug
 
@@ -88,9 +88,9 @@ jwt:
 
 etc:
   base-url: ${BASE_URL}
-  front-url: ${FRONT_URL}
+#  front-url: ${FRONT_URL}
   recommend-url: ${RECOMMEND_URL}
-  front-auth-success: ${FRONT_URL}/auth/success
+#  front-auth-success: ${FRONT_URL}/auth/success
   google-profile-url: https://www.googleapis.com/userinfo/v2/me
   apple:
     client-id: ${APPLE_BUNDLE_ID}

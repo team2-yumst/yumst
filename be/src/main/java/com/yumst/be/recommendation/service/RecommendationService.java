@@ -30,10 +30,17 @@ public class RecommendationService {
     private String recommendationUrl;
 
 
+    public List<ResponseRestaurant> getAiRecommendation(String userId, RequestRecommend requestRecommend) {
+        ResponseEntity<ResponseRecommend> response =
+                listFromRecommendServer(userId, requestRecommend, "ai", "v2");
+
+        return restaurantService.getResponseRestaurantFromRecommend(response.getBody().results(), userId);
+    }
+
     public List<ResponseRestaurant> getWalkRecommendationFromRecommendServer(String userId, RequestRecommend requestRecommend) {
 
         ResponseEntity<ResponseRecommend> response =
-                listFromRecommendServer(userId, requestRecommend, "walk");
+                listFromRecommendServer(userId, requestRecommend, "walk", "v1");
 
         return restaurantService.getResponseRestaurantFromRecommend(response.getBody().results(), userId);
     }
@@ -42,18 +49,18 @@ public class RecommendationService {
 
     public List<ResponseRestaurant> getCarRecommendationFromRecommendServer(String userId, RequestRecommend requestRecommend) {
         ResponseEntity<ResponseRecommend> response =
-                listFromRecommendServer(userId, requestRecommend, "vehicle");
+                listFromRecommendServer(userId, requestRecommend, "vehicle", "v1");
 
         return restaurantService.getResponseRestaurantFromRecommend(response.getBody().results(), userId);
     }
 
-    private ResponseEntity<ResponseRecommend> listFromRecommendServer(String userId, RequestRecommend requestRecommend, String walkOrCar) {
+    private ResponseEntity<ResponseRecommend> listFromRecommendServer(String userId, RequestRecommend requestRecommend, String option, String version) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("userId", userId);
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         String url = UriComponentsBuilder.fromUriString(recommendationUrl)
-                .path("/api/recommendation/v1/" + walkOrCar)
+                .path("/api/recommendation/" + version + "/" + option)
                 .queryParam("latitude", requestRecommend.latitude())
                 .queryParam("longitude", requestRecommend.longitude())
                 .queryParam("page", requestRecommend.page())
