@@ -5,10 +5,12 @@ from django.http import JsonResponse
 
 from EquationRecommendations.GetSimilarity import SimilarityCalc
 
+from decouple import config
+
 ''''
 PostgreSQL 연결 설정
 '''
-db_url = "postgresql+psycopg://postgres:1234@localhost:5432/yumst"
+db_url = config('PSYCOPG_DB_URL')
 
 '''
 페이지네이션 설정

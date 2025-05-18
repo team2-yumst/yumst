@@ -11,16 +11,13 @@ from rest_framework.permissions import AllowAny
 from sqlalchemy import create_engine
 import pandas as pd
 
-import time
-import os
-import psutil
 
-
+from decouple import config
 
 # DB URL
-db_url = "postgresql+psycopg://postgres:1234@localhost:5432/yumst_db"
-'''
+db_url = config('PSYCOPG_DB_URL')
 
+'''
 페이지네이션 설정
 '''
 class RecommendationPagination(PageNumberPagination):
@@ -83,7 +80,7 @@ def restaurant_recommendation_ai(request):
         top_restaurants = [
             {
                 'restaurant_id': row['restaurant_id'],
-                'distance': row['distance_km'],
+                'distance': row['distance_km']*1000,  # Convert km to m
                 'recommend_score': row['score']
             } for _, row in recommend_table_sorted.iterrows()
         ]

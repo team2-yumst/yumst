@@ -7,9 +7,10 @@ import torch
 import random
 import os
 
-# DB URL
-db_url = "postgresql+psycopg://postgres:1234@localhost:5432/yumst_db"
+from decouple import config
 
+# DB URL
+db_url = config('PSYCOPG_DB_URL')
 
 '''
 Produce Dataframes
