@@ -1,0 +1,29 @@
+version: '3'
+services:
+  yumst_recommend:
+    image: gothax2/yumst-recommend:latest
+    container_name: yumst_recommend
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - 8000:8000
+    networks:
+      - yumst_recommend_network
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - yumst_recommend
+    networks:
+      - yumst_recommend_network
+
+networks:
+  yumst_recommend_network:
+    driver: bridge
