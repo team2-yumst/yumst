@@ -8,6 +8,13 @@ services:
     restart: always
     ports:
       - 8000:8000
+    volumes:
+      - static_volume:/static
+    command: >
+      sh -c "
+        python3 manage.py collectstatic --noinput &&
+        gunicorn -w 4 -b 0.0.0.0:8000 yumsRec.wsgi:application
+      "
     networks:
       - yumst_recommend_network
   
@@ -18,11 +25,15 @@ services:
     ports:
       - 80:80
     volumes:
+      - static_volume:/static
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - yumst_recommend
     networks:
       - yumst_recommend_network
+
+volumes:
+  static_volume:
 
 networks:
   yumst_recommend_network:
