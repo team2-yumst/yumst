@@ -70,15 +70,13 @@ class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaur
       _hasMore = true;
       _isLoadingNextPage = false;
 
-      final transportMode = ref.read(transportationModeProvider);
       final locationService = ref.read(locationServiceProvider);
       _currentPosition = await locationService.getPosition();
 
       final repository = ref.read(restaurantRepositoryProvider);
-      final restaurants = await repository.getRecommendations(
+      final restaurants = await repository.getRecommendationsV2(
         _currentPosition!,
         _currentPage,
-        transportMode: transportMode, // 이동 수단 파라미터 추가
       );
 
       _hasMore = restaurants.isNotEmpty;
@@ -88,22 +86,21 @@ class RestaurantPaginationNotifier extends StateNotifier<AsyncValue<List<Restaur
     }
   }
 
-  // 이동 수단 변경 시 초기화 메서드
-  Future<void> switchTransportMode(String newMode) async {
-    ref.read(transportationModeProvider.notifier).state = newMode;
-    await loadInitial();
-  }
+  // // 이동 수단 변경 시 초기화 메서드
+  //  Future<void> switchTransportMode(String newMode) async {
+  //   ref.read(transportationModeProvider.notifier).state = newMode;
+  //   await loadInitial();
+  // }
 
   Future<void> loadNextPage() async {
     if (!_hasMore || _currentPosition == null || _isLoadingNextPage) return;
 
     _isLoadingNextPage = true;
     _currentPage++;
-    final transportMode = ref.read(transportationModeProvider);
 
     try {
       final repository = ref.read(restaurantRepositoryProvider);
-      final newRestaurants = await repository.getRecommendations(_currentPosition!, _currentPage, transportMode: transportMode);
+      final newRestaurants = await repository.getRecommendationsV2(_currentPosition!, _currentPage);
       _hasMore = newRestaurants.isNotEmpty;
       state = AsyncValue.data([...state.value ?? [], ...newRestaurants]);
     } catch (e, st) {

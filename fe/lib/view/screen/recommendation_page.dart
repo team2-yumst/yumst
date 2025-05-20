@@ -4,15 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:card_swiper/card_swiper.dart';
 import '../../data/restaurant_paginator.dart';
-import '../../model/restaurant.dart';
 import '../widget/reels_style_card.dart';
 
-final restaurantsFutureProvider = FutureProvider<List<Restaurant>>((ref) async {
-  final repository = ref.watch(restaurantRepositoryProvider);
-  final locationService = ref.watch(locationServiceProvider);
-  final position = await locationService.getPosition();
-  return repository.getRestaurantsV0(position);
-});
 
 class RecommendationPage extends ConsumerStatefulWidget {
   const RecommendationPage({super.key});

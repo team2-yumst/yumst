@@ -37,7 +37,7 @@ class RestaurantRepository {
     }
   }
 
-  Future<List<Restaurant>> getRecommendations(
+  Future<List<Restaurant>> getRecommendationsV1(
       Position position,
       int page, {
         required String transportMode,
@@ -60,6 +60,28 @@ class RestaurantRepository {
       throw Exception("식당 정보를 불러오는데 실패했습니다.");
     }
   }
+
+  Future<List<Restaurant>> getRecommendationsV2(
+      Position position,
+      int page
+      ) async {
+    final response = await dio.get(
+      "/api/recommendation/v2/ai",
+      queryParameters: {
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'page': page,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data;
+      return data.map((json) => Restaurant.fromJson(json)).toList();
+    } else {
+      throw Exception("식당 정보를 불러오는데 실패했습니다.");
+    }
+  }
+
 
   Future scrapRestaurant(Restaurant restaurant) async {
     final response = await dio.patch(

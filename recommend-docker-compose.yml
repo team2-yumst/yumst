@@ -1,0 +1,40 @@
+version: '3'
+services:
+  yumst_recommend:
+    image: gothax2/yumst-recommend:latest
+    container_name: yumst_recommend
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - static_volume:/static
+    command: >
+      sh -c "
+        python3 manage.py collectstatic --noinput &&
+        gunicorn -w 4 -b 0.0.0.0:8000 yumsRec.wsgi:application
+      "
+    networks:
+      - yumst_recommend_network
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - static_volume:/static
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - yumst_recommend
+    networks:
+      - yumst_recommend_network
+
+volumes:
+  static_volume:
+
+networks:
+  yumst_recommend_network:
+    driver: bridge
