@@ -59,7 +59,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     // TODO: production 환경에서 설정 변경
     public UrlBasedCorsConfigurationSource apiCorsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
