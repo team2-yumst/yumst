@@ -5,6 +5,7 @@ import com.yumst.be.user.vo.response.ResponseAppleToken;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -28,6 +29,7 @@ import static com.yumst.be.user.exception.UserErrorCode.FAILED_REQUEST;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AppleKeyGenerator {
 
     // APPLE_KEY_ID
@@ -49,12 +51,18 @@ public class AppleKeyGenerator {
 
         RestClient restClient = RestClient.create();
 
-        ResponseAppleToken appleTokenResponse = restClient.post()
-                .uri("https://appleid.apple.com/auth/token")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(body)
-                .retrieve()
-                .body(ResponseAppleToken.class);
+        ResponseAppleToken appleTokenResponse = null;
+        try {
+            appleTokenResponse = restClient.post()
+                    .uri("https://appleid.apple.com/auth/token")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(body)
+                    .retrieve()
+                    .body(ResponseAppleToken.class);
+        } catch (Exception e) {
+            log.error("Failed to get apple refresh token: {}", e.getMessage());
+            throw new AuthException(FAILED_REQUEST, e.getMessage());
+        }
 
         return Objects.requireNonNull(appleTokenResponse).getRefresh_token();
     }
@@ -93,7 +101,8 @@ public class AppleKeyGenerator {
             PrivateKeyInfo object = (PrivateKeyInfo)pemParser.readObject();
             return converter.getPrivateKey(object);
         } catch (IOException e) {
-            throw new AuthException(FAILED_REQUEST);
+            log.error("Failed to get apple private key: {}", e.getMessage());
+            throw new AuthException(FAILED_REQUEST, e.getMessage());
         }
     }
 
