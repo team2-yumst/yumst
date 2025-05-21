@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,12 +95,25 @@ public class AppleKeyGenerator {
 
     // apple private key
     private PrivateKey getPrivateKey() {
-        try {
-            Reader pemReader = new StringReader(privateKey.replace("\\n", "\n"));
-            PEMParser pemParser = new PEMParser(pemReader);
+        try (Reader pemReader = new StringReader(privateKey.replace("\\n", "\n"));
+             PEMParser pemParser = new PEMParser(pemReader)) {
+
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-            PrivateKeyInfo object = (PrivateKeyInfo)pemParser.readObject();
-            return converter.getPrivateKey(object);
+            Object pemObject = pemParser.readObject();
+
+            if (pemObject == null) {
+                throw new AuthException(FAILED_REQUEST, "Invalid PEM format: No object found");
+            }
+
+            if (pemObject instanceof PrivateKeyInfo) {
+                return converter.getPrivateKey((PrivateKeyInfo) pemObject);
+            } else if (pemObject instanceof PEMKeyPair) {
+                PEMKeyPair pemKeyPair = (PEMKeyPair) pemObject;
+                return converter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+            } else {
+                throw new AuthException(FAILED_REQUEST, "Unsupported key type: " + pemObject.getClass().getSimpleName());
+            }
+
         } catch (IOException e) {
             log.error("Failed to get apple private key: {}", e.getMessage());
             throw new AuthException(FAILED_REQUEST, e.getMessage());
