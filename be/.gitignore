@@ -49,3 +49,5 @@ out/
 .vscode/
 
 /src/main/resources/data/**
+
+.env

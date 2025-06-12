@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: prod, jwt, oauth
+    include: local, jwt, oauth
 
   datasource:
     url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE}
@@ -26,8 +26,8 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT}
-            client-secret: ${GOOGLE_SECRET}
+            client-id: ${GOOGLE_CLIENT:default-client-id}
+            client-secret: ${GOOGLE_SECRET:default-client-secret}
             redirect-uri: ${BASE_URL}/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope:
@@ -35,8 +35,8 @@ spring:
               - email
 
           apple:
-            client-id: ${APPLE_BUNDLE_ID}
-            client-secret: ${APPLE_CLIENT_SECRET_FILE}
+            client-id: ${APPLE_BUNDLE_ID:default-bundle-id}
+            client-secret: ${APPLE_CLIENT_SECRET_FILE:default-client-secret-file}
             redirect-uri: ${BASE_URL}/login/oauth2/code/apple
             authorization-grant-type: authorization_code
             client-authentication-method: POST
@@ -82,9 +82,9 @@ management:
 
 jwt:
   expiration:
-    access: ${ACCESS_EXPIRATION}
-    refresh: ${REFRESH_EXPIRATION}
-  secret: ${JWT_SECRET}
+    access: ${ACCESS_EXPIRATION:1_800_000}
+    refresh: ${REFRESH_EXPIRATION:2_592_000_000}
+  secret: ${JWT_SECRET:test1234tes1tte2st1234test1te!stte7stt@#e4sttes5ttest2testtest1234123415215161231}
 
 etc:
   base-url: ${BASE_URL}
@@ -93,10 +93,10 @@ etc:
 #  front-auth-success: ${FRONT_URL}/auth/success
   google-profile-url: https://www.googleapis.com/userinfo/v2/me
   apple:
-    client-id: ${APPLE_BUNDLE_ID}
-    client-secret: ${APPLE_CLIENT_SECRET_FILE}
-    key-id: ${APPLE_KEY_ID}
-    team-id: ${APPLE_TEAM_ID}
+    client-id: ${APPLE_BUNDLE_ID:default-bundle-id}
+    client-secret: ${APPLE_CLIENT_SECRET_FILE:default-client-secret-file}
+    key-id: ${APPLE_KEY_ID:default-key-id}
+    team-id: ${APPLE_TEAM_ID:default-team-id}
     redirect-uri: ${BASE_URL}/login/oauth2/code/apple
 
 chrome:
